@@ -1,0 +1,2890 @@
+{
+  "users": [
+    {
+      "id": "usr_superadmin",
+      "name": "Alex Vance",
+      "email": "admin@soft4u.top",
+      "passwordHash": "admin123",
+      "role": "ADMIN",
+      "phone": "+92 300 1111111",
+      "whatsapp": "+923001111111",
+      "telegram": "@alexvance_pk",
+      "status": "active",
+      "createdAt": "2026-01-10T10:00:00Z",
+      "updatedAt": "2026-01-10T10:00:00Z"
+    },
+    {
+      "id": "usr_prod_mgr",
+      "name": "Morgan Chen",
+      "email": "products@soft4u.top",
+      "passwordHash": "manager123",
+      "role": "ADMIN",
+      "status": "active",
+      "createdAt": "2026-01-15T11:00:00Z",
+      "updatedAt": "2026-01-15T11:00:00Z"
+    },
+    {
+      "id": "usr_order_mgr",
+      "name": "Devon Miller",
+      "email": "orders@soft4u.top",
+      "passwordHash": "manager123",
+      "role": "ADMIN",
+      "status": "active",
+      "createdAt": "2026-01-16T12:00:00Z",
+      "updatedAt": "2026-01-16T12:00:00Z"
+    },
+    {
+      "id": "usr_support",
+      "name": "Samira Patel",
+      "email": "support@soft4u.top",
+      "passwordHash": "agent123",
+      "role": "ADMIN",
+      "status": "active",
+      "createdAt": "2026-01-18T09:00:00Z",
+      "updatedAt": "2026-01-18T09:00:00Z"
+    },
+    {
+      "id": "usr_customer_demo",
+      "name": "Demo Customer",
+      "email": "customer@example.com",
+      "passwordHash": "customer123",
+      "role": "CUSTOMER",
+      "phone": "+92 300 0000000",
+      "whatsapp": "+923000000000",
+      "status": "active",
+      "createdAt": "2026-02-01T14:30:00Z",
+      "updatedAt": "2026-02-01T14:30:00Z"
+    }
+  ],
+  "categories": [
+    {
+      "id": "cat_streaming",
+      "name": "Movies & Streaming",
+      "slug": "streaming-media",
+      "description": "Netflix, Prime Video, Disney+ and HBO Max plans for movies, dramas and series.",
+      "image": "/brands/netflix.svg",
+      "icon": "Tv",
+      "status": "active",
+      "displayOrder": 1,
+      "featured": true,
+      "seoTitle": "Buy Netflix, Prime Video & Streaming Subscriptions in Pakistan",
+      "seoDescription": "Streaming subscriptions in PKR with instant delivery on email and WhatsApp.",
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z"
+    },
+    {
+      "id": "cat_music",
+      "name": "Music & Video",
+      "slug": "music-video",
+      "description": "Ad-free music and video with Spotify Premium and YouTube Premium.",
+      "image": "/brands/spotify.svg",
+      "icon": "Music",
+      "status": "active",
+      "displayOrder": 2,
+      "featured": true,
+      "seoTitle": "Spotify Premium & YouTube Premium in Pakistan",
+      "seoDescription": "Ad-free music and video plans in PKR with instant digital delivery.",
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z"
+    },
+    {
+      "id": "cat_ai",
+      "name": "AI Tools",
+      "slug": "ai-developer-tools",
+      "description": "ChatGPT Plus, Gemini AI Pro and other AI assistants for work and study.",
+      "image": "/brands/chatgpt.svg",
+      "icon": "Bot",
+      "status": "active",
+      "displayOrder": 3,
+      "featured": true,
+      "seoTitle": "Buy ChatGPT Plus & AI Tools in Pakistan",
+      "seoDescription": "AI subscriptions in PKR with protected checkout and private delivery.",
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z"
+    },
+    {
+      "id": "cat_vpn",
+      "name": "VPN & Security",
+      "slug": "vpn-security",
+      "description": "NordVPN, ExpressVPN, Surfshark and Proton VPN for private, secure browsing.",
+      "image": "/brands/nordvpn.svg",
+      "icon": "ShieldCheck",
+      "status": "active",
+      "displayOrder": 4,
+      "featured": true,
+      "seoTitle": "Buy NordVPN, ExpressVPN & Surfshark in Pakistan",
+      "seoDescription": "VPN accounts in PKR with instant delivery and replacement support.",
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z"
+    },
+    {
+      "id": "cat_antivirus",
+      "name": "Antivirus",
+      "slug": "antivirus",
+      "description": "Kaspersky and Norton protection for your PC, laptop and phone.",
+      "image": "/brands/kaspersky.svg",
+      "icon": "Shield",
+      "status": "active",
+      "displayOrder": 5,
+      "featured": true,
+      "seoTitle": "Buy Kaspersky & Norton Antivirus in Pakistan",
+      "seoDescription": "Genuine antivirus licences in PKR delivered by email and WhatsApp.",
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z"
+    },
+    {
+      "id": "cat_productivity",
+      "name": "Creative & Productivity",
+      "slug": "productivity-creative",
+      "description": "Canva Pro, Microsoft 365, Adobe Creative Cloud, CapCut, Zoom and Grammarly.",
+      "image": "/brands/canva.jpg",
+      "icon": "Sparkles",
+      "status": "active",
+      "displayOrder": 6,
+      "featured": true,
+      "seoTitle": "Buy Canva Pro, Microsoft 365 & Creative Software in Pakistan",
+      "seoDescription": "Creative and office software plans in PKR with instant delivery.",
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z"
+    }
+  ],
+  "products": [
+    {
+      "id": "prod_netflix_uhd",
+      "name": "Netflix Premium 4K",
+      "slug": "netflix-premium-4k",
+      "sku": "S4U-NFLX",
+      "shortDescription": "Private Netflix profile with Ultra HD 4K streaming on TV, mobile and laptop.",
+      "longDescription": "Netflix Premium 4K with clear plan options, protected checkout and convenient digital delivery. Private Netflix profile with Ultra HD 4K streaming on TV, mobile and laptop. After payment, your access details are sent to your email and WhatsApp, and our support team is available if you need help with activation.",
+      "images": [
+        "/brands/netflix.svg"
+      ],
+      "logo": "/brands/netflix.svg",
+      "categoryId": "cat_streaming",
+      "tags": [
+        "Netflix",
+        "Streaming",
+        "Movies",
+        "Dramas"
+      ],
+      "price": 699,
+      "compareAtPrice": 1100,
+      "discount": 36,
+      "status": "active",
+      "featured": true,
+      "bestseller": true,
+      "isNew": false,
+      "trending": true,
+      "badge": "Most popular",
+      "deliveryTime": "Instant (5–15 min)",
+      "deliveryMethod": "Email & WhatsApp",
+      "productType": "Digital Subscription",
+      "inventoryModel": "credential",
+      "features": [
+        "Private profile with your own PIN",
+        "Ultra HD 4K + HDR",
+        "Works on TV, mobile and laptop",
+        "Replacement support for the full plan"
+      ],
+      "requirements": [
+        "A valid email address and WhatsApp number for delivery",
+        "Stable internet connection"
+      ],
+      "usageInstructions": "After payment you receive your Netflix access details by email and WhatsApp. Follow the activation steps in the message, or contact Soft4u support for help.",
+      "refundInfo": "If your access does not work and we cannot fix or replace it, you are eligible for a refund as per our Refund Policy.",
+      "seoTitle": "Buy Netflix Premium 4K in Pakistan | Soft4u",
+      "seoDescription": "Netflix Premium 4K in PKR with instant delivery on email and WhatsApp. Private Netflix profile with Ultra HD 4K streaming on TV, mobile and laptop.",
+      "relatedProductIds": [
+        "prod_prime_video",
+        "prod_disney_plus"
+      ],
+      "variants": [
+        {
+          "id": "var_nflx_1m",
+          "productId": "prod_netflix_uhd",
+          "name": "1 Month",
+          "price": 699,
+          "compareAtPrice": 1100,
+          "sku": "S4U-NFLX-1M",
+          "stock": 48,
+          "description": "Netflix access for 1 month (30 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 30
+        },
+        {
+          "id": "var_nflx_3m",
+          "productId": "prod_netflix_uhd",
+          "name": "3 Months",
+          "price": 1899,
+          "compareAtPrice": 3300,
+          "sku": "S4U-NFLX-3M",
+          "stock": 31,
+          "description": "Netflix access for 3 months (90 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 90
+        },
+        {
+          "id": "var_nflx_1y",
+          "productId": "prod_netflix_uhd",
+          "name": "12 Months",
+          "price": 6999,
+          "compareAtPrice": 13200,
+          "sku": "S4U-NFLX-12M",
+          "stock": 12,
+          "description": "Netflix access for 12 months (365 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 365
+        }
+      ],
+      "createdAt": "2026-01-05T00:00:00Z",
+      "updatedAt": "2026-01-05T00:00:00Z"
+    },
+    {
+      "id": "prod_prime_video",
+      "name": "Amazon Prime Video",
+      "slug": "amazon-prime-video",
+      "sku": "S4U-PRIME",
+      "shortDescription": "Prime Video originals, movies and live sports in HD on any device.",
+      "longDescription": "Amazon Prime Video with clear plan options, protected checkout and convenient digital delivery. Prime Video originals, movies and live sports in HD on any device. After payment, your access details are sent to your email and WhatsApp, and our support team is available if you need help with activation.",
+      "images": [
+        "/brands/prime-video.svg"
+      ],
+      "logo": "/brands/prime-video.svg",
+      "categoryId": "cat_streaming",
+      "tags": [
+        "Prime Video",
+        "Amazon",
+        "Streaming",
+        "Movies"
+      ],
+      "price": 399,
+      "compareAtPrice": 700,
+      "discount": 43,
+      "status": "active",
+      "featured": true,
+      "bestseller": false,
+      "isNew": false,
+      "trending": false,
+      "deliveryTime": "Instant (5–15 min)",
+      "deliveryMethod": "Email & WhatsApp",
+      "productType": "Digital Subscription",
+      "inventoryModel": "credential",
+      "features": [
+        "Private profile",
+        "HD and 4K titles",
+        "Download to watch offline",
+        "Works on Smart TV and mobile"
+      ],
+      "requirements": [
+        "A valid email address and WhatsApp number for delivery",
+        "Stable internet connection"
+      ],
+      "usageInstructions": "After payment you receive your Prime Video access details by email and WhatsApp. Follow the activation steps in the message, or contact Soft4u support for help.",
+      "refundInfo": "If your access does not work and we cannot fix or replace it, you are eligible for a refund as per our Refund Policy.",
+      "seoTitle": "Buy Amazon Prime Video in Pakistan | Soft4u",
+      "seoDescription": "Amazon Prime Video in PKR with instant delivery on email and WhatsApp. Prime Video originals, movies and live sports in HD on any device.",
+      "relatedProductIds": [
+        "prod_netflix_uhd",
+        "prod_hbo_max"
+      ],
+      "variants": [
+        {
+          "id": "var_prime_1m",
+          "productId": "prod_prime_video",
+          "name": "1 Month",
+          "price": 399,
+          "compareAtPrice": 700,
+          "sku": "S4U-PRIME-1M",
+          "stock": 64,
+          "description": "Prime Video access for 1 month (30 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 30
+        },
+        {
+          "id": "var_prime_3m",
+          "productId": "prod_prime_video",
+          "name": "3 Months",
+          "price": 1099,
+          "compareAtPrice": 2100,
+          "sku": "S4U-PRIME-3M",
+          "stock": 40,
+          "description": "Prime Video access for 3 months (90 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 90
+        },
+        {
+          "id": "var_prime_1y",
+          "productId": "prod_prime_video",
+          "name": "12 Months",
+          "price": 3999,
+          "compareAtPrice": 8400,
+          "sku": "S4U-PRIME-12M",
+          "stock": 18,
+          "description": "Prime Video access for 12 months (365 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 365
+        }
+      ],
+      "createdAt": "2026-01-05T00:00:00Z",
+      "updatedAt": "2026-01-05T00:00:00Z"
+    },
+    {
+      "id": "prod_disney_plus",
+      "name": "Disney+ Premium",
+      "slug": "disney-plus-premium",
+      "sku": "S4U-DSNY",
+      "shortDescription": "Disney, Pixar, Marvel, Star Wars and National Geographic in one plan.",
+      "longDescription": "Disney+ Premium with clear plan options, protected checkout and convenient digital delivery. Disney, Pixar, Marvel, Star Wars and National Geographic in one plan. After payment, your access details are sent to your email and WhatsApp, and our support team is available if you need help with activation.",
+      "images": [
+        "/brands/disney-plus.svg"
+      ],
+      "logo": "/brands/disney-plus.svg",
+      "categoryId": "cat_streaming",
+      "tags": [
+        "Disney+",
+        "Marvel",
+        "Pixar",
+        "Streaming"
+      ],
+      "price": 599,
+      "compareAtPrice": 1000,
+      "discount": 40,
+      "status": "active",
+      "featured": false,
+      "bestseller": false,
+      "isNew": true,
+      "trending": false,
+      "deliveryTime": "Instant (5–15 min)",
+      "deliveryMethod": "Email & WhatsApp",
+      "productType": "Digital Subscription",
+      "inventoryModel": "credential",
+      "features": [
+        "Private profile",
+        "4K Ultra HD where available",
+        "Kids-friendly profiles",
+        "Replacement support"
+      ],
+      "requirements": [
+        "A valid email address and WhatsApp number for delivery",
+        "Stable internet connection"
+      ],
+      "usageInstructions": "After payment you receive your Disney+ access details by email and WhatsApp. Follow the activation steps in the message, or contact Soft4u support for help.",
+      "refundInfo": "If your access does not work and we cannot fix or replace it, you are eligible for a refund as per our Refund Policy.",
+      "seoTitle": "Buy Disney+ Premium in Pakistan | Soft4u",
+      "seoDescription": "Disney+ Premium in PKR with instant delivery on email and WhatsApp. Disney, Pixar, Marvel, Star Wars and National Geographic in one plan.",
+      "relatedProductIds": [
+        "prod_netflix_uhd",
+        "prod_prime_video"
+      ],
+      "variants": [
+        {
+          "id": "var_dsny_1m",
+          "productId": "prod_disney_plus",
+          "name": "1 Month",
+          "price": 599,
+          "compareAtPrice": 1000,
+          "sku": "S4U-DSNY-1M",
+          "stock": 27,
+          "description": "Disney+ access for 1 month (30 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 30
+        },
+        {
+          "id": "var_dsny_3m",
+          "productId": "prod_disney_plus",
+          "name": "3 Months",
+          "price": 1599,
+          "compareAtPrice": 3000,
+          "sku": "S4U-DSNY-3M",
+          "stock": 19,
+          "description": "Disney+ access for 3 months (90 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 90
+        },
+        {
+          "id": "var_dsny_1y",
+          "productId": "prod_disney_plus",
+          "name": "12 Months",
+          "price": 5999,
+          "compareAtPrice": 12000,
+          "sku": "S4U-DSNY-12M",
+          "stock": 8,
+          "description": "Disney+ access for 12 months (365 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 365
+        }
+      ],
+      "createdAt": "2026-01-05T00:00:00Z",
+      "updatedAt": "2026-01-05T00:00:00Z"
+    },
+    {
+      "id": "prod_hbo_max",
+      "name": "HBO Max",
+      "slug": "hbo-max",
+      "sku": "S4U-HBO",
+      "shortDescription": "HBO originals, Warner Bros. movies and blockbuster series.",
+      "longDescription": "HBO Max with clear plan options, protected checkout and convenient digital delivery. HBO originals, Warner Bros. movies and blockbuster series. After payment, your access details are sent to your email and WhatsApp, and our support team is available if you need help with activation.",
+      "images": [
+        "/brands/hbo-max.svg"
+      ],
+      "logo": "/brands/hbo-max.svg",
+      "categoryId": "cat_streaming",
+      "tags": [
+        "HBO Max",
+        "Max",
+        "Streaming",
+        "Series"
+      ],
+      "price": 699,
+      "compareAtPrice": 1500,
+      "discount": 53,
+      "status": "active",
+      "featured": false,
+      "bestseller": false,
+      "isNew": true,
+      "trending": false,
+      "deliveryTime": "15–30 min",
+      "deliveryMethod": "Email & WhatsApp",
+      "productType": "Digital Subscription",
+      "inventoryModel": "credential",
+      "features": [
+        "Private profile",
+        "Full HD streaming",
+        "HBO originals and new releases",
+        "Replacement support"
+      ],
+      "requirements": [
+        "A valid email address and WhatsApp number for delivery",
+        "Stable internet connection"
+      ],
+      "usageInstructions": "After payment you receive your HBO Max access details by email and WhatsApp. Follow the activation steps in the message, or contact Soft4u support for help.",
+      "refundInfo": "If your access does not work and we cannot fix or replace it, you are eligible for a refund as per our Refund Policy.",
+      "seoTitle": "Buy HBO Max in Pakistan | Soft4u",
+      "seoDescription": "HBO Max in PKR with instant delivery on email and WhatsApp. HBO originals, Warner Bros. movies and blockbuster series.",
+      "relatedProductIds": [
+        "prod_netflix_uhd",
+        "prod_disney_plus"
+      ],
+      "variants": [
+        {
+          "id": "var_hbo_1m",
+          "productId": "prod_hbo_max",
+          "name": "1 Month",
+          "price": 699,
+          "compareAtPrice": 1500,
+          "sku": "S4U-HBO-1M",
+          "stock": 15,
+          "description": "HBO Max access for 1 month (30 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "15–30 min",
+          "status": "active",
+          "expiryDays": 30
+        },
+        {
+          "id": "var_hbo_3m",
+          "productId": "prod_hbo_max",
+          "name": "3 Months",
+          "price": 1899,
+          "compareAtPrice": 4500,
+          "sku": "S4U-HBO-3M",
+          "stock": 9,
+          "description": "HBO Max access for 3 months (90 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "15–30 min",
+          "status": "active",
+          "expiryDays": 90
+        },
+        {
+          "id": "var_hbo_1y",
+          "productId": "prod_hbo_max",
+          "name": "12 Months",
+          "price": 6999,
+          "compareAtPrice": 18000,
+          "sku": "S4U-HBO-12M",
+          "stock": 4,
+          "description": "HBO Max access for 12 months (365 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "15–30 min",
+          "status": "active",
+          "expiryDays": 365
+        }
+      ],
+      "createdAt": "2026-01-05T00:00:00Z",
+      "updatedAt": "2026-01-05T00:00:00Z"
+    },
+    {
+      "id": "prod_youtube_premium",
+      "name": "YouTube Premium",
+      "slug": "youtube-premium",
+      "sku": "S4U-YT",
+      "shortDescription": "Ad-free YouTube, background play, downloads and YouTube Music on your own account.",
+      "longDescription": "YouTube Premium with clear plan options, protected checkout and convenient digital delivery. Ad-free YouTube, background play, downloads and YouTube Music on your own account. After payment, your access details are sent to your email and WhatsApp, and our support team is available if you need help with activation.",
+      "images": [
+        "/brands/youtube-premium.svg"
+      ],
+      "logo": "/brands/youtube-premium.svg",
+      "categoryId": "cat_music",
+      "tags": [
+        "YouTube",
+        "Music",
+        "Video",
+        "Ad-free"
+      ],
+      "price": 349,
+      "compareAtPrice": 600,
+      "discount": 42,
+      "status": "active",
+      "featured": true,
+      "bestseller": true,
+      "isNew": false,
+      "trending": false,
+      "badge": "Fast delivery",
+      "deliveryTime": "Instant (5–15 min)",
+      "deliveryMethod": "Email & WhatsApp",
+      "productType": "Digital Subscription",
+      "inventoryModel": "credential",
+      "features": [
+        "No ads on YouTube",
+        "Background play on mobile",
+        "Offline downloads",
+        "YouTube Music Premium included"
+      ],
+      "requirements": [
+        "A valid email address and WhatsApp number for delivery",
+        "Stable internet connection"
+      ],
+      "usageInstructions": "After payment you receive your YouTube Premium access details by email and WhatsApp. Follow the activation steps in the message, or contact Soft4u support for help.",
+      "refundInfo": "If your access does not work and we cannot fix or replace it, you are eligible for a refund as per our Refund Policy.",
+      "seoTitle": "Buy YouTube Premium in Pakistan | Soft4u",
+      "seoDescription": "YouTube Premium in PKR with instant delivery on email and WhatsApp. Ad-free YouTube, background play, downloads and YouTube Music on your own account.",
+      "relatedProductIds": [
+        "prod_spotify_premium"
+      ],
+      "variants": [
+        {
+          "id": "var_yt_1m",
+          "productId": "prod_youtube_premium",
+          "name": "1 Month",
+          "price": 349,
+          "compareAtPrice": 600,
+          "sku": "S4U-YT-1M",
+          "stock": 29,
+          "description": "YouTube Premium access for 1 month (30 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 30
+        },
+        {
+          "id": "var_yt_3m",
+          "productId": "prod_youtube_premium",
+          "name": "3 Months",
+          "price": 949,
+          "compareAtPrice": 1800,
+          "sku": "S4U-YT-3M",
+          "stock": 22,
+          "description": "YouTube Premium access for 3 months (90 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 90
+        },
+        {
+          "id": "var_yt_1y",
+          "productId": "prod_youtube_premium",
+          "name": "12 Months",
+          "price": 3499,
+          "compareAtPrice": 7200,
+          "sku": "S4U-YT-12M",
+          "stock": 10,
+          "description": "YouTube Premium access for 12 months (365 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 365
+        }
+      ],
+      "createdAt": "2026-01-05T00:00:00Z",
+      "updatedAt": "2026-01-05T00:00:00Z"
+    },
+    {
+      "id": "prod_spotify_premium",
+      "name": "Spotify Premium",
+      "slug": "spotify-premium",
+      "sku": "S4U-SPOT",
+      "shortDescription": "Ad-free music, offline listening and unlimited skips on your own Spotify account.",
+      "longDescription": "Spotify Premium with clear plan options, protected checkout and convenient digital delivery. Ad-free music, offline listening and unlimited skips on your own Spotify account. After payment, your access details are sent to your email and WhatsApp, and our support team is available if you need help with activation.",
+      "images": [
+        "/brands/spotify.svg"
+      ],
+      "logo": "/brands/spotify.svg",
+      "categoryId": "cat_music",
+      "tags": [
+        "Spotify",
+        "Music",
+        "Podcasts"
+      ],
+      "price": 299,
+      "compareAtPrice": 500,
+      "discount": 40,
+      "status": "active",
+      "featured": false,
+      "bestseller": true,
+      "isNew": false,
+      "trending": false,
+      "deliveryTime": "Instant (5–15 min)",
+      "deliveryMethod": "Email & WhatsApp",
+      "productType": "Digital Subscription",
+      "inventoryModel": "credential",
+      "features": [
+        "Ad-free listening",
+        "Download songs and podcasts",
+        "Unlimited skips",
+        "High-quality audio"
+      ],
+      "requirements": [
+        "A valid email address and WhatsApp number for delivery",
+        "Stable internet connection"
+      ],
+      "usageInstructions": "After payment you receive your Spotify access details by email and WhatsApp. Follow the activation steps in the message, or contact Soft4u support for help.",
+      "refundInfo": "If your access does not work and we cannot fix or replace it, you are eligible for a refund as per our Refund Policy.",
+      "seoTitle": "Buy Spotify Premium in Pakistan | Soft4u",
+      "seoDescription": "Spotify Premium in PKR with instant delivery on email and WhatsApp. Ad-free music, offline listening and unlimited skips on your own Spotify account.",
+      "relatedProductIds": [
+        "prod_youtube_premium"
+      ],
+      "variants": [
+        {
+          "id": "var_spot_1m",
+          "productId": "prod_spotify_premium",
+          "name": "1 Month",
+          "price": 299,
+          "compareAtPrice": 500,
+          "sku": "S4U-SPOT-1M",
+          "stock": 73,
+          "description": "Spotify access for 1 month (30 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 30
+        },
+        {
+          "id": "var_spot_3m",
+          "productId": "prod_spotify_premium",
+          "name": "3 Months",
+          "price": 799,
+          "compareAtPrice": 1500,
+          "sku": "S4U-SPOT-3M",
+          "stock": 44,
+          "description": "Spotify access for 3 months (90 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 90
+        },
+        {
+          "id": "var_spot_1y",
+          "productId": "prod_spotify_premium",
+          "name": "12 Months",
+          "price": 2999,
+          "compareAtPrice": 6000,
+          "sku": "S4U-SPOT-12M",
+          "stock": 21,
+          "description": "Spotify access for 12 months (365 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 365
+        }
+      ],
+      "createdAt": "2026-01-05T00:00:00Z",
+      "updatedAt": "2026-01-05T00:00:00Z"
+    },
+    {
+      "id": "prod_chatgpt_plus",
+      "name": "ChatGPT Plus",
+      "slug": "chatgpt-plus",
+      "sku": "S4U-CGPT",
+      "shortDescription": "Private ChatGPT Plus with the latest OpenAI models, image generation and file uploads.",
+      "longDescription": "ChatGPT Plus with clear plan options, protected checkout and convenient digital delivery. Private ChatGPT Plus with the latest OpenAI models, image generation and file uploads. After payment, your access details are sent to your email and WhatsApp, and our support team is available if you need help with activation.",
+      "images": [
+        "/brands/chatgpt.svg"
+      ],
+      "logo": "/brands/chatgpt.svg",
+      "categoryId": "cat_ai",
+      "tags": [
+        "ChatGPT",
+        "OpenAI",
+        "AI"
+      ],
+      "price": 2499,
+      "compareAtPrice": 5600,
+      "discount": 55,
+      "status": "active",
+      "featured": true,
+      "bestseller": true,
+      "isNew": false,
+      "trending": true,
+      "badge": "Most popular",
+      "deliveryTime": "Instant (5–15 min)",
+      "deliveryMethod": "Email & WhatsApp",
+      "productType": "Digital Subscription",
+      "inventoryModel": "credential",
+      "features": [
+        "Latest GPT models",
+        "Image generation and analysis",
+        "File and data uploads",
+        "Private account access"
+      ],
+      "requirements": [
+        "A valid email address and WhatsApp number for delivery",
+        "Stable internet connection"
+      ],
+      "usageInstructions": "After payment you receive your ChatGPT Plus access details by email and WhatsApp. Follow the activation steps in the message, or contact Soft4u support for help.",
+      "refundInfo": "If your access does not work and we cannot fix or replace it, you are eligible for a refund as per our Refund Policy.",
+      "seoTitle": "Buy ChatGPT Plus in Pakistan | Soft4u",
+      "seoDescription": "ChatGPT Plus in PKR with instant delivery on email and WhatsApp. Private ChatGPT Plus with the latest OpenAI models, image generation and file uploads.",
+      "relatedProductIds": [
+        "prod_gemini_pro",
+        "prod_grammarly_premium"
+      ],
+      "variants": [
+        {
+          "id": "var_cgpt_1m",
+          "productId": "prod_chatgpt_plus",
+          "name": "1 Month",
+          "price": 2499,
+          "compareAtPrice": 5600,
+          "sku": "S4U-CGPT-1M",
+          "stock": 36,
+          "description": "ChatGPT Plus access for 1 month (30 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 30
+        },
+        {
+          "id": "var_cgpt_3m",
+          "productId": "prod_chatgpt_plus",
+          "name": "3 Months",
+          "price": 6999,
+          "compareAtPrice": 16800,
+          "sku": "S4U-CGPT-3M",
+          "stock": 20,
+          "description": "ChatGPT Plus access for 3 months (90 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 90
+        },
+        {
+          "id": "var_cgpt_1y",
+          "productId": "prod_chatgpt_plus",
+          "name": "12 Months",
+          "price": 26999,
+          "compareAtPrice": 67200,
+          "sku": "S4U-CGPT-12M",
+          "stock": 6,
+          "description": "ChatGPT Plus access for 12 months (365 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 365
+        }
+      ],
+      "createdAt": "2026-01-05T00:00:00Z",
+      "updatedAt": "2026-01-05T00:00:00Z"
+    },
+    {
+      "id": "prod_gemini_pro",
+      "name": "Gemini AI Pro",
+      "slug": "gemini-ai-pro",
+      "sku": "S4U-GEM",
+      "shortDescription": "Google Gemini AI Pro with advanced models, Gemini in Gmail and Docs, plus 2 TB storage.",
+      "longDescription": "Gemini AI Pro with clear plan options, protected checkout and convenient digital delivery. Google Gemini AI Pro with advanced models, Gemini in Gmail and Docs, plus 2 TB storage. After payment, your access details are sent to your email and WhatsApp, and our support team is available if you need help with activation.",
+      "images": [
+        "/brands/gemini.svg"
+      ],
+      "logo": "/brands/gemini.svg",
+      "categoryId": "cat_ai",
+      "tags": [
+        "Gemini",
+        "Google",
+        "AI"
+      ],
+      "price": 999,
+      "compareAtPrice": 5000,
+      "discount": 80,
+      "status": "active",
+      "featured": false,
+      "bestseller": false,
+      "isNew": true,
+      "trending": true,
+      "deliveryTime": "Instant (5–15 min)",
+      "deliveryMethod": "Email & WhatsApp",
+      "productType": "Digital Subscription",
+      "inventoryModel": "credential",
+      "features": [
+        "Advanced Gemini models",
+        "Gemini in Gmail, Docs and Sheets",
+        "2 TB Google storage",
+        "Activated on your Google account"
+      ],
+      "requirements": [
+        "A valid email address and WhatsApp number for delivery",
+        "Stable internet connection"
+      ],
+      "usageInstructions": "After payment you receive your Gemini AI Pro access details by email and WhatsApp. Follow the activation steps in the message, or contact Soft4u support for help.",
+      "refundInfo": "If your access does not work and we cannot fix or replace it, you are eligible for a refund as per our Refund Policy.",
+      "seoTitle": "Buy Gemini AI Pro in Pakistan | Soft4u",
+      "seoDescription": "Gemini AI Pro in PKR with instant delivery on email and WhatsApp. Google Gemini AI Pro with advanced models, Gemini in Gmail and Docs, plus 2 TB storage.",
+      "relatedProductIds": [
+        "prod_chatgpt_plus"
+      ],
+      "variants": [
+        {
+          "id": "var_gem_1m",
+          "productId": "prod_gemini_pro",
+          "name": "1 Month",
+          "price": 999,
+          "compareAtPrice": 5000,
+          "sku": "S4U-GEM-1M",
+          "stock": 52,
+          "description": "Gemini AI Pro access for 1 month (30 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 30
+        },
+        {
+          "id": "var_gem_3m",
+          "productId": "prod_gemini_pro",
+          "name": "3 Months",
+          "price": 2699,
+          "compareAtPrice": 15000,
+          "sku": "S4U-GEM-3M",
+          "stock": 30,
+          "description": "Gemini AI Pro access for 3 months (90 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 90
+        },
+        {
+          "id": "var_gem_1y",
+          "productId": "prod_gemini_pro",
+          "name": "12 Months",
+          "price": 8999,
+          "compareAtPrice": 60000,
+          "sku": "S4U-GEM-12M",
+          "stock": 14,
+          "description": "Gemini AI Pro access for 12 months (365 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 365
+        }
+      ],
+      "createdAt": "2026-01-05T00:00:00Z",
+      "updatedAt": "2026-01-05T00:00:00Z"
+    },
+    {
+      "id": "prod_nordvpn_ultimate",
+      "name": "NordVPN",
+      "slug": "nordvpn",
+      "sku": "S4U-NVPN",
+      "shortDescription": "Private browsing with global servers and threat protection on up to 10 devices.",
+      "longDescription": "NordVPN with clear plan options, protected checkout and convenient digital delivery. Private browsing with global servers and threat protection on up to 10 devices. After payment, your access details are sent to your email and WhatsApp, and our support team is available if you need help with activation.",
+      "images": [
+        "/brands/nordvpn.svg"
+      ],
+      "logo": "/brands/nordvpn.svg",
+      "categoryId": "cat_vpn",
+      "tags": [
+        "NordVPN",
+        "VPN",
+        "Privacy",
+        "Security"
+      ],
+      "price": 599,
+      "compareAtPrice": 1200,
+      "discount": 50,
+      "status": "active",
+      "featured": true,
+      "bestseller": true,
+      "isNew": false,
+      "trending": false,
+      "badge": "Protected",
+      "deliveryTime": "Instant (5–15 min)",
+      "deliveryMethod": "Email & WhatsApp",
+      "productType": "Digital Subscription",
+      "inventoryModel": "credential",
+      "features": [
+        "Servers in 100+ countries",
+        "Threat protection",
+        "Up to 10 devices",
+        "No-logs policy"
+      ],
+      "requirements": [
+        "A valid email address and WhatsApp number for delivery",
+        "Stable internet connection"
+      ],
+      "usageInstructions": "After payment you receive your NordVPN access details by email and WhatsApp. Follow the activation steps in the message, or contact Soft4u support for help.",
+      "refundInfo": "If your access does not work and we cannot fix or replace it, you are eligible for a refund as per our Refund Policy.",
+      "seoTitle": "Buy NordVPN in Pakistan | Soft4u",
+      "seoDescription": "NordVPN in PKR with instant delivery on email and WhatsApp. Private browsing with global servers and threat protection on up to 10 devices.",
+      "relatedProductIds": [
+        "prod_expressvpn",
+        "prod_surfshark"
+      ],
+      "variants": [
+        {
+          "id": "var_nvpn_1m",
+          "productId": "prod_nordvpn_ultimate",
+          "name": "1 Month",
+          "price": 599,
+          "compareAtPrice": 1200,
+          "sku": "S4U-NVPN-1M",
+          "stock": 41,
+          "description": "NordVPN access for 1 month (30 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 30
+        },
+        {
+          "id": "var_nvpn_3m",
+          "productId": "prod_nordvpn_ultimate",
+          "name": "3 Months",
+          "price": 1599,
+          "compareAtPrice": 3600,
+          "sku": "S4U-NVPN-3M",
+          "stock": 25,
+          "description": "NordVPN access for 3 months (90 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 90
+        },
+        {
+          "id": "var_nvpn_1y",
+          "productId": "prod_nordvpn_ultimate",
+          "name": "12 Months",
+          "price": 4999,
+          "compareAtPrice": 14400,
+          "sku": "S4U-NVPN-12M",
+          "stock": 11,
+          "description": "NordVPN access for 12 months (365 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 365
+        }
+      ],
+      "createdAt": "2026-01-05T00:00:00Z",
+      "updatedAt": "2026-01-05T00:00:00Z"
+    },
+    {
+      "id": "prod_expressvpn",
+      "name": "ExpressVPN",
+      "slug": "expressvpn",
+      "sku": "S4U-XVPN",
+      "shortDescription": "Fast, reliable VPN for streaming and secure browsing on all your devices.",
+      "longDescription": "ExpressVPN with clear plan options, protected checkout and convenient digital delivery. Fast, reliable VPN for streaming and secure browsing on all your devices. After payment, your access details are sent to your email and WhatsApp, and our support team is available if you need help with activation.",
+      "images": [
+        "/brands/expressvpn.svg"
+      ],
+      "logo": "/brands/expressvpn.svg",
+      "categoryId": "cat_vpn",
+      "tags": [
+        "ExpressVPN",
+        "VPN",
+        "Privacy"
+      ],
+      "price": 899,
+      "compareAtPrice": 1800,
+      "discount": 50,
+      "status": "active",
+      "featured": false,
+      "bestseller": false,
+      "isNew": false,
+      "trending": false,
+      "deliveryTime": "Instant (5–15 min)",
+      "deliveryMethod": "Email & WhatsApp",
+      "productType": "Digital Subscription",
+      "inventoryModel": "credential",
+      "features": [
+        "High-speed servers worldwide",
+        "Works with streaming apps",
+        "8 simultaneous devices",
+        "Kill switch"
+      ],
+      "requirements": [
+        "A valid email address and WhatsApp number for delivery",
+        "Stable internet connection"
+      ],
+      "usageInstructions": "After payment you receive your ExpressVPN access details by email and WhatsApp. Follow the activation steps in the message, or contact Soft4u support for help.",
+      "refundInfo": "If your access does not work and we cannot fix or replace it, you are eligible for a refund as per our Refund Policy.",
+      "seoTitle": "Buy ExpressVPN in Pakistan | Soft4u",
+      "seoDescription": "ExpressVPN in PKR with instant delivery on email and WhatsApp. Fast, reliable VPN for streaming and secure browsing on all your devices.",
+      "relatedProductIds": [
+        "prod_nordvpn_ultimate",
+        "prod_proton_vpn"
+      ],
+      "variants": [
+        {
+          "id": "var_xvpn_1m",
+          "productId": "prod_expressvpn",
+          "name": "1 Month",
+          "price": 899,
+          "compareAtPrice": 1800,
+          "sku": "S4U-XVPN-1M",
+          "stock": 6,
+          "description": "ExpressVPN access for 1 month (30 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 30
+        },
+        {
+          "id": "var_xvpn_3m",
+          "productId": "prod_expressvpn",
+          "name": "3 Months",
+          "price": 2399,
+          "compareAtPrice": 5400,
+          "sku": "S4U-XVPN-3M",
+          "stock": 4,
+          "description": "ExpressVPN access for 3 months (90 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 90
+        },
+        {
+          "id": "var_xvpn_1y",
+          "productId": "prod_expressvpn",
+          "name": "12 Months",
+          "price": 7999,
+          "compareAtPrice": 21600,
+          "sku": "S4U-XVPN-12M",
+          "stock": 2,
+          "description": "ExpressVPN access for 12 months (365 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 365
+        }
+      ],
+      "createdAt": "2026-01-05T00:00:00Z",
+      "updatedAt": "2026-01-05T00:00:00Z"
+    },
+    {
+      "id": "prod_surfshark",
+      "name": "Surfshark VPN",
+      "slug": "surfshark-vpn",
+      "sku": "S4U-SURF",
+      "shortDescription": "Unlimited devices on one plan with ad blocking and secure Wi-Fi protection.",
+      "longDescription": "Surfshark VPN with clear plan options, protected checkout and convenient digital delivery. Unlimited devices on one plan with ad blocking and secure Wi-Fi protection. After payment, your access details are sent to your email and WhatsApp, and our support team is available if you need help with activation.",
+      "images": [
+        "/brands/surfshark.svg"
+      ],
+      "logo": "/brands/surfshark.svg",
+      "categoryId": "cat_vpn",
+      "tags": [
+        "Surfshark",
+        "VPN",
+        "Privacy"
+      ],
+      "price": 499,
+      "compareAtPrice": 700,
+      "discount": 29,
+      "status": "active",
+      "featured": false,
+      "bestseller": false,
+      "isNew": false,
+      "trending": false,
+      "deliveryTime": "Instant (5–15 min)",
+      "deliveryMethod": "Email & WhatsApp",
+      "productType": "Digital Subscription",
+      "inventoryModel": "credential",
+      "features": [
+        "Unlimited devices",
+        "CleanWeb ad blocker",
+        "Global servers",
+        "No-logs policy"
+      ],
+      "requirements": [
+        "A valid email address and WhatsApp number for delivery",
+        "Stable internet connection"
+      ],
+      "usageInstructions": "After payment you receive your Surfshark access details by email and WhatsApp. Follow the activation steps in the message, or contact Soft4u support for help.",
+      "refundInfo": "If your access does not work and we cannot fix or replace it, you are eligible for a refund as per our Refund Policy.",
+      "seoTitle": "Buy Surfshark VPN in Pakistan | Soft4u",
+      "seoDescription": "Surfshark VPN in PKR with instant delivery on email and WhatsApp. Unlimited devices on one plan with ad blocking and secure Wi-Fi protection.",
+      "relatedProductIds": [
+        "prod_nordvpn_ultimate",
+        "prod_expressvpn"
+      ],
+      "variants": [
+        {
+          "id": "var_surf_1m",
+          "productId": "prod_surfshark",
+          "name": "1 Month",
+          "price": 499,
+          "compareAtPrice": 700,
+          "sku": "S4U-SURF-1M",
+          "stock": 167,
+          "description": "Surfshark access for 1 month (30 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 30
+        },
+        {
+          "id": "var_surf_3m",
+          "productId": "prod_surfshark",
+          "name": "3 Months",
+          "price": 1299,
+          "compareAtPrice": 2100,
+          "sku": "S4U-SURF-3M",
+          "stock": 90,
+          "description": "Surfshark access for 3 months (90 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 90
+        },
+        {
+          "id": "var_surf_1y",
+          "productId": "prod_surfshark",
+          "name": "12 Months",
+          "price": 3999,
+          "compareAtPrice": 8400,
+          "sku": "S4U-SURF-12M",
+          "stock": 35,
+          "description": "Surfshark access for 12 months (365 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 365
+        }
+      ],
+      "createdAt": "2026-01-05T00:00:00Z",
+      "updatedAt": "2026-01-05T00:00:00Z"
+    },
+    {
+      "id": "prod_proton_vpn",
+      "name": "Proton VPN Plus",
+      "slug": "proton-vpn-plus",
+      "sku": "S4U-PRTN",
+      "shortDescription": "Swiss-based VPN with Secure Core servers and strong privacy protection.",
+      "longDescription": "Proton VPN Plus with clear plan options, protected checkout and convenient digital delivery. Swiss-based VPN with Secure Core servers and strong privacy protection. After payment, your access details are sent to your email and WhatsApp, and our support team is available if you need help with activation.",
+      "images": [
+        "/brands/proton-vpn.svg"
+      ],
+      "logo": "/brands/proton-vpn.svg",
+      "categoryId": "cat_vpn",
+      "tags": [
+        "Proton VPN",
+        "VPN",
+        "Privacy"
+      ],
+      "price": 599,
+      "compareAtPrice": 2000,
+      "discount": 70,
+      "status": "active",
+      "featured": false,
+      "bestseller": false,
+      "isNew": true,
+      "trending": false,
+      "deliveryTime": "Instant (5–15 min)",
+      "deliveryMethod": "Email & WhatsApp",
+      "productType": "Digital Subscription",
+      "inventoryModel": "credential",
+      "features": [
+        "Secure Core servers",
+        "Streaming support",
+        "Up to 10 devices",
+        "Swiss privacy laws"
+      ],
+      "requirements": [
+        "A valid email address and WhatsApp number for delivery",
+        "Stable internet connection"
+      ],
+      "usageInstructions": "After payment you receive your Proton VPN access details by email and WhatsApp. Follow the activation steps in the message, or contact Soft4u support for help.",
+      "refundInfo": "If your access does not work and we cannot fix or replace it, you are eligible for a refund as per our Refund Policy.",
+      "seoTitle": "Buy Proton VPN Plus in Pakistan | Soft4u",
+      "seoDescription": "Proton VPN Plus in PKR with instant delivery on email and WhatsApp. Swiss-based VPN with Secure Core servers and strong privacy protection.",
+      "relatedProductIds": [
+        "prod_nordvpn_ultimate",
+        "prod_surfshark"
+      ],
+      "variants": [
+        {
+          "id": "var_proton_1m",
+          "productId": "prod_proton_vpn",
+          "name": "1 Month",
+          "price": 599,
+          "compareAtPrice": 2000,
+          "sku": "S4U-PRTN-1M",
+          "stock": 8,
+          "description": "Proton VPN access for 1 month (30 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 30
+        },
+        {
+          "id": "var_proton_3m",
+          "productId": "prod_proton_vpn",
+          "name": "3 Months",
+          "price": 1599,
+          "compareAtPrice": 6000,
+          "sku": "S4U-PRTN-3M",
+          "stock": 5,
+          "description": "Proton VPN access for 3 months (90 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 90
+        },
+        {
+          "id": "var_proton_1y",
+          "productId": "prod_proton_vpn",
+          "name": "12 Months",
+          "price": 4999,
+          "compareAtPrice": 24000,
+          "sku": "S4U-PRTN-12M",
+          "stock": 3,
+          "description": "Proton VPN access for 12 months (365 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 365
+        }
+      ],
+      "createdAt": "2026-01-05T00:00:00Z",
+      "updatedAt": "2026-01-05T00:00:00Z"
+    },
+    {
+      "id": "prod_kaspersky_premium",
+      "name": "Kaspersky Premium",
+      "slug": "kaspersky-premium",
+      "sku": "S4U-KAV",
+      "shortDescription": "Complete antivirus, anti-ransomware and safe browsing protection for 1 device.",
+      "longDescription": "Kaspersky Premium with clear plan options, protected checkout and convenient digital delivery. Complete antivirus, anti-ransomware and safe browsing protection for 1 device. After payment, your access details are sent to your email and WhatsApp, and our support team is available if you need help with activation.",
+      "images": [
+        "/brands/kaspersky.svg"
+      ],
+      "logo": "/brands/kaspersky.svg",
+      "categoryId": "cat_antivirus",
+      "tags": [
+        "Kaspersky",
+        "Antivirus",
+        "Security"
+      ],
+      "price": 299,
+      "compareAtPrice": 600,
+      "discount": 50,
+      "status": "active",
+      "featured": false,
+      "bestseller": false,
+      "isNew": false,
+      "trending": false,
+      "deliveryTime": "Instant (5–15 min)",
+      "deliveryMethod": "Email & WhatsApp",
+      "productType": "Software Licence",
+      "inventoryModel": "license_key",
+      "features": [
+        "Real-time antivirus",
+        "Ransomware protection",
+        "Safe online payments",
+        "Genuine licence key"
+      ],
+      "requirements": [
+        "Windows, macOS or Android device",
+        "A valid email address for the licence"
+      ],
+      "usageInstructions": "After payment you receive your Kaspersky access details by email and WhatsApp. Follow the activation steps in the message, or contact Soft4u support for help.",
+      "refundInfo": "If your access does not work and we cannot fix or replace it, you are eligible for a refund as per our Refund Policy.",
+      "seoTitle": "Buy Kaspersky Premium in Pakistan | Soft4u",
+      "seoDescription": "Kaspersky Premium in PKR with instant delivery on email and WhatsApp. Complete antivirus, anti-ransomware and safe browsing protection for 1 device.",
+      "relatedProductIds": [
+        "prod_norton_360"
+      ],
+      "variants": [
+        {
+          "id": "var_kav_1m",
+          "productId": "prod_kaspersky_premium",
+          "name": "1 Month",
+          "price": 299,
+          "compareAtPrice": 600,
+          "sku": "S4U-KAV-1M",
+          "stock": 120,
+          "description": "Kaspersky access for 1 month (30 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 30
+        },
+        {
+          "id": "var_kav_3m",
+          "productId": "prod_kaspersky_premium",
+          "name": "3 Months",
+          "price": 799,
+          "compareAtPrice": 1800,
+          "sku": "S4U-KAV-3M",
+          "stock": 80,
+          "description": "Kaspersky access for 3 months (90 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 90
+        },
+        {
+          "id": "var_kav_1y",
+          "productId": "prod_kaspersky_premium",
+          "name": "12 Months",
+          "price": 2499,
+          "compareAtPrice": 7200,
+          "sku": "S4U-KAV-12M",
+          "stock": 45,
+          "description": "Kaspersky access for 12 months (365 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 365
+        }
+      ],
+      "createdAt": "2026-01-05T00:00:00Z",
+      "updatedAt": "2026-01-05T00:00:00Z"
+    },
+    {
+      "id": "prod_norton_360",
+      "name": "Norton 360 Deluxe",
+      "slug": "norton-360-deluxe",
+      "sku": "S4U-NRTN",
+      "shortDescription": "Antivirus, secure VPN and password manager for up to 5 devices.",
+      "longDescription": "Norton 360 Deluxe with clear plan options, protected checkout and convenient digital delivery. Antivirus, secure VPN and password manager for up to 5 devices. After payment, your access details are sent to your email and WhatsApp, and our support team is available if you need help with activation.",
+      "images": [
+        "/brands/norton.svg"
+      ],
+      "logo": "/brands/norton.svg",
+      "categoryId": "cat_antivirus",
+      "tags": [
+        "Norton",
+        "Antivirus",
+        "Security"
+      ],
+      "price": 349,
+      "compareAtPrice": 700,
+      "discount": 50,
+      "status": "active",
+      "featured": false,
+      "bestseller": false,
+      "isNew": false,
+      "trending": false,
+      "deliveryTime": "Instant (5–15 min)",
+      "deliveryMethod": "Email & WhatsApp",
+      "productType": "Software Licence",
+      "inventoryModel": "license_key",
+      "features": [
+        "Device security for 5 devices",
+        "Secure VPN included",
+        "Password manager",
+        "Genuine licence key"
+      ],
+      "requirements": [
+        "Windows, macOS, Android or iOS device",
+        "A valid email address for the licence"
+      ],
+      "usageInstructions": "After payment you receive your Norton 360 access details by email and WhatsApp. Follow the activation steps in the message, or contact Soft4u support for help.",
+      "refundInfo": "If your access does not work and we cannot fix or replace it, you are eligible for a refund as per our Refund Policy.",
+      "seoTitle": "Buy Norton 360 Deluxe in Pakistan | Soft4u",
+      "seoDescription": "Norton 360 Deluxe in PKR with instant delivery on email and WhatsApp. Antivirus, secure VPN and password manager for up to 5 devices.",
+      "relatedProductIds": [
+        "prod_kaspersky_premium"
+      ],
+      "variants": [
+        {
+          "id": "var_norton_1m",
+          "productId": "prod_norton_360",
+          "name": "1 Month",
+          "price": 349,
+          "compareAtPrice": 700,
+          "sku": "S4U-NRTN-1M",
+          "stock": 60,
+          "description": "Norton 360 access for 1 month (30 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 30
+        },
+        {
+          "id": "var_norton_3m",
+          "productId": "prod_norton_360",
+          "name": "3 Months",
+          "price": 899,
+          "compareAtPrice": 2100,
+          "sku": "S4U-NRTN-3M",
+          "stock": 38,
+          "description": "Norton 360 access for 3 months (90 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 90
+        },
+        {
+          "id": "var_norton_1y",
+          "productId": "prod_norton_360",
+          "name": "12 Months",
+          "price": 2799,
+          "compareAtPrice": 8400,
+          "sku": "S4U-NRTN-12M",
+          "stock": 20,
+          "description": "Norton 360 access for 12 months (365 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 365
+        }
+      ],
+      "createdAt": "2026-01-05T00:00:00Z",
+      "updatedAt": "2026-01-05T00:00:00Z"
+    },
+    {
+      "id": "prod_canva_pro_lifetime",
+      "name": "Canva Pro",
+      "slug": "canva-pro",
+      "sku": "S4U-CNVA",
+      "shortDescription": "Premium templates, Magic Studio AI tools and background remover on your own email.",
+      "longDescription": "Canva Pro with clear plan options, protected checkout and convenient digital delivery. Premium templates, Magic Studio AI tools and background remover on your own email. After payment, your access details are sent to your email and WhatsApp, and our support team is available if you need help with activation.",
+      "images": [
+        "/brands/canva.jpg"
+      ],
+      "logo": "/brands/canva.jpg",
+      "categoryId": "cat_productivity",
+      "tags": [
+        "Canva",
+        "Design",
+        "Creative"
+      ],
+      "price": 349,
+      "compareAtPrice": 900,
+      "discount": 61,
+      "status": "active",
+      "featured": true,
+      "bestseller": true,
+      "isNew": false,
+      "trending": false,
+      "deliveryTime": "Instant (5–15 min)",
+      "deliveryMethod": "Email & WhatsApp",
+      "productType": "Digital Subscription",
+      "inventoryModel": "credential",
+      "features": [
+        "100M+ premium photos and templates",
+        "Magic Studio AI tools",
+        "Background remover",
+        "Activated on your email"
+      ],
+      "requirements": [
+        "A valid email address and WhatsApp number for delivery",
+        "Stable internet connection"
+      ],
+      "usageInstructions": "After payment you receive your Canva Pro access details by email and WhatsApp. Follow the activation steps in the message, or contact Soft4u support for help.",
+      "refundInfo": "If your access does not work and we cannot fix or replace it, you are eligible for a refund as per our Refund Policy.",
+      "seoTitle": "Buy Canva Pro in Pakistan | Soft4u",
+      "seoDescription": "Canva Pro in PKR with instant delivery on email and WhatsApp. Premium templates, Magic Studio AI tools and background remover on your own email.",
+      "relatedProductIds": [
+        "prod_capcut_pro",
+        "prod_adobe_creative_cloud"
+      ],
+      "variants": [
+        {
+          "id": "var_canva_1m",
+          "productId": "prod_canva_pro_lifetime",
+          "name": "1 Month",
+          "price": 349,
+          "compareAtPrice": 900,
+          "sku": "S4U-CNVA-1M",
+          "stock": 58,
+          "description": "Canva Pro access for 1 month (30 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 30
+        },
+        {
+          "id": "var_canva_3m",
+          "productId": "prod_canva_pro_lifetime",
+          "name": "3 Months",
+          "price": 899,
+          "compareAtPrice": 2700,
+          "sku": "S4U-CNVA-3M",
+          "stock": 40,
+          "description": "Canva Pro access for 3 months (90 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 90
+        },
+        {
+          "id": "var_canva_1y",
+          "productId": "prod_canva_pro_lifetime",
+          "name": "12 Months",
+          "price": 2999,
+          "compareAtPrice": 10800,
+          "sku": "S4U-CNVA-12M",
+          "stock": 25,
+          "description": "Canva Pro access for 12 months (365 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 365
+        }
+      ],
+      "createdAt": "2026-01-05T00:00:00Z",
+      "updatedAt": "2026-01-05T00:00:00Z"
+    },
+    {
+      "id": "prod_microsoft_365",
+      "name": "Microsoft 365",
+      "slug": "microsoft-365",
+      "sku": "S4U-M365",
+      "shortDescription": "Word, Excel, PowerPoint, Outlook and 1 TB OneDrive storage on PC, Mac and mobile.",
+      "longDescription": "Microsoft 365 with clear plan options, protected checkout and convenient digital delivery. Word, Excel, PowerPoint, Outlook and 1 TB OneDrive storage on PC, Mac and mobile. After payment, your access details are sent to your email and WhatsApp, and our support team is available if you need help with activation.",
+      "images": [
+        "/brands/microsoft-365.svg"
+      ],
+      "logo": "/brands/microsoft-365.svg",
+      "categoryId": "cat_productivity",
+      "tags": [
+        "Microsoft",
+        "Office",
+        "Productivity"
+      ],
+      "price": 499,
+      "compareAtPrice": 1100,
+      "discount": 55,
+      "status": "active",
+      "featured": true,
+      "bestseller": false,
+      "isNew": false,
+      "trending": true,
+      "deliveryTime": "Instant (5–15 min)",
+      "deliveryMethod": "Email & WhatsApp",
+      "productType": "Software Subscription",
+      "inventoryModel": "credential",
+      "features": [
+        "Word, Excel, PowerPoint, Outlook",
+        "1 TB OneDrive storage",
+        "Install on PC, Mac and mobile",
+        "Activated on your account"
+      ],
+      "requirements": [
+        "A valid email address and WhatsApp number for delivery",
+        "Stable internet connection"
+      ],
+      "usageInstructions": "After payment you receive your Microsoft 365 access details by email and WhatsApp. Follow the activation steps in the message, or contact Soft4u support for help.",
+      "refundInfo": "If your access does not work and we cannot fix or replace it, you are eligible for a refund as per our Refund Policy.",
+      "seoTitle": "Buy Microsoft 365 in Pakistan | Soft4u",
+      "seoDescription": "Microsoft 365 in PKR with instant delivery on email and WhatsApp. Word, Excel, PowerPoint, Outlook and 1 TB OneDrive storage on PC, Mac and mobile.",
+      "relatedProductIds": [
+        "prod_grammarly_premium",
+        "prod_zoom_pro"
+      ],
+      "variants": [
+        {
+          "id": "var_m365_1m",
+          "productId": "prod_microsoft_365",
+          "name": "1 Month",
+          "price": 499,
+          "compareAtPrice": 1100,
+          "sku": "S4U-M365-1M",
+          "stock": 70,
+          "description": "Microsoft 365 access for 1 month (30 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 30
+        },
+        {
+          "id": "var_m365_3m",
+          "productId": "prod_microsoft_365",
+          "name": "3 Months",
+          "price": 1299,
+          "compareAtPrice": 3300,
+          "sku": "S4U-M365-3M",
+          "stock": 42,
+          "description": "Microsoft 365 access for 3 months (90 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 90
+        },
+        {
+          "id": "var_m365_1y",
+          "productId": "prod_microsoft_365",
+          "name": "12 Months",
+          "price": 4499,
+          "compareAtPrice": 13200,
+          "sku": "S4U-M365-12M",
+          "stock": 24,
+          "description": "Microsoft 365 access for 12 months (365 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 365
+        }
+      ],
+      "createdAt": "2026-01-05T00:00:00Z",
+      "updatedAt": "2026-01-05T00:00:00Z"
+    },
+    {
+      "id": "prod_adobe_creative_cloud",
+      "name": "Adobe Creative Cloud",
+      "slug": "adobe-creative-cloud",
+      "sku": "S4U-ADBE",
+      "shortDescription": "Photoshop, Illustrator, Premiere Pro and 20+ Adobe apps on one plan.",
+      "longDescription": "Adobe Creative Cloud with clear plan options, protected checkout and convenient digital delivery. Photoshop, Illustrator, Premiere Pro and 20+ Adobe apps on one plan. After payment, your access details are sent to your email and WhatsApp, and our support team is available if you need help with activation.",
+      "images": [
+        "/brands/adobe-creative-cloud.svg"
+      ],
+      "logo": "/brands/adobe-creative-cloud.svg",
+      "categoryId": "cat_productivity",
+      "tags": [
+        "Adobe",
+        "Photoshop",
+        "Creative"
+      ],
+      "price": 1499,
+      "compareAtPrice": 6000,
+      "discount": 75,
+      "status": "active",
+      "featured": false,
+      "bestseller": false,
+      "isNew": false,
+      "trending": false,
+      "deliveryTime": "15–30 min",
+      "deliveryMethod": "Email & WhatsApp",
+      "productType": "Software Subscription",
+      "inventoryModel": "credential",
+      "features": [
+        "All Creative Cloud apps",
+        "Photoshop, Illustrator, Premiere Pro",
+        "100 GB cloud storage",
+        "Adobe Fonts included"
+      ],
+      "requirements": [
+        "A valid email address and WhatsApp number for delivery",
+        "Stable internet connection"
+      ],
+      "usageInstructions": "After payment you receive your Adobe Creative Cloud access details by email and WhatsApp. Follow the activation steps in the message, or contact Soft4u support for help.",
+      "refundInfo": "If your access does not work and we cannot fix or replace it, you are eligible for a refund as per our Refund Policy.",
+      "seoTitle": "Buy Adobe Creative Cloud in Pakistan | Soft4u",
+      "seoDescription": "Adobe Creative Cloud in PKR with instant delivery on email and WhatsApp. Photoshop, Illustrator, Premiere Pro and 20+ Adobe apps on one plan.",
+      "relatedProductIds": [
+        "prod_canva_pro_lifetime",
+        "prod_capcut_pro"
+      ],
+      "variants": [
+        {
+          "id": "var_adobe_1m",
+          "productId": "prod_adobe_creative_cloud",
+          "name": "1 Month",
+          "price": 1499,
+          "compareAtPrice": 6000,
+          "sku": "S4U-ADBE-1M",
+          "stock": 14,
+          "description": "Adobe Creative Cloud access for 1 month (30 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "15–30 min",
+          "status": "active",
+          "expiryDays": 30
+        },
+        {
+          "id": "var_adobe_3m",
+          "productId": "prod_adobe_creative_cloud",
+          "name": "3 Months",
+          "price": 3999,
+          "compareAtPrice": 18000,
+          "sku": "S4U-ADBE-3M",
+          "stock": 9,
+          "description": "Adobe Creative Cloud access for 3 months (90 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "15–30 min",
+          "status": "active",
+          "expiryDays": 90
+        },
+        {
+          "id": "var_adobe_1y",
+          "productId": "prod_adobe_creative_cloud",
+          "name": "12 Months",
+          "price": 13999,
+          "compareAtPrice": 72000,
+          "sku": "S4U-ADBE-12M",
+          "stock": 5,
+          "description": "Adobe Creative Cloud access for 12 months (365 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "15–30 min",
+          "status": "active",
+          "expiryDays": 365
+        }
+      ],
+      "createdAt": "2026-01-05T00:00:00Z",
+      "updatedAt": "2026-01-05T00:00:00Z"
+    },
+    {
+      "id": "prod_capcut_pro",
+      "name": "CapCut Pro",
+      "slug": "capcut-pro",
+      "sku": "S4U-CAPC",
+      "shortDescription": "Pro video effects, AI editing tools and watermark-free exports.",
+      "longDescription": "CapCut Pro with clear plan options, protected checkout and convenient digital delivery. Pro video effects, AI editing tools and watermark-free exports. After payment, your access details are sent to your email and WhatsApp, and our support team is available if you need help with activation.",
+      "images": [
+        "/brands/capcut.svg"
+      ],
+      "logo": "/brands/capcut.svg",
+      "categoryId": "cat_productivity",
+      "tags": [
+        "CapCut",
+        "Video",
+        "Creative"
+      ],
+      "price": 399,
+      "compareAtPrice": 900,
+      "discount": 56,
+      "status": "active",
+      "featured": false,
+      "bestseller": false,
+      "isNew": true,
+      "trending": false,
+      "deliveryTime": "Instant (5–15 min)",
+      "deliveryMethod": "Email & WhatsApp",
+      "productType": "Digital Subscription",
+      "inventoryModel": "credential",
+      "features": [
+        "Pro effects and transitions",
+        "AI editing tools",
+        "No watermark on export",
+        "Cloud storage"
+      ],
+      "requirements": [
+        "A valid email address and WhatsApp number for delivery",
+        "Stable internet connection"
+      ],
+      "usageInstructions": "After payment you receive your CapCut Pro access details by email and WhatsApp. Follow the activation steps in the message, or contact Soft4u support for help.",
+      "refundInfo": "If your access does not work and we cannot fix or replace it, you are eligible for a refund as per our Refund Policy.",
+      "seoTitle": "Buy CapCut Pro in Pakistan | Soft4u",
+      "seoDescription": "CapCut Pro in PKR with instant delivery on email and WhatsApp. Pro video effects, AI editing tools and watermark-free exports.",
+      "relatedProductIds": [
+        "prod_canva_pro_lifetime"
+      ],
+      "variants": [
+        {
+          "id": "var_capcut_1m",
+          "productId": "prod_capcut_pro",
+          "name": "1 Month",
+          "price": 399,
+          "compareAtPrice": 900,
+          "sku": "S4U-CAPC-1M",
+          "stock": 8,
+          "description": "CapCut Pro access for 1 month (30 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 30
+        },
+        {
+          "id": "var_capcut_3m",
+          "productId": "prod_capcut_pro",
+          "name": "3 Months",
+          "price": 1099,
+          "compareAtPrice": 2700,
+          "sku": "S4U-CAPC-3M",
+          "stock": 6,
+          "description": "CapCut Pro access for 3 months (90 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 90
+        },
+        {
+          "id": "var_capcut_1y",
+          "productId": "prod_capcut_pro",
+          "name": "12 Months",
+          "price": 3499,
+          "compareAtPrice": 10800,
+          "sku": "S4U-CAPC-12M",
+          "stock": 3,
+          "description": "CapCut Pro access for 12 months (365 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 365
+        }
+      ],
+      "createdAt": "2026-01-05T00:00:00Z",
+      "updatedAt": "2026-01-05T00:00:00Z"
+    },
+    {
+      "id": "prod_zoom_pro",
+      "name": "Zoom Pro",
+      "slug": "zoom-pro",
+      "sku": "S4U-ZOOM",
+      "shortDescription": "Meetings up to 30 hours with 100 participants and cloud recording.",
+      "longDescription": "Zoom Pro with clear plan options, protected checkout and convenient digital delivery. Meetings up to 30 hours with 100 participants and cloud recording. After payment, your access details are sent to your email and WhatsApp, and our support team is available if you need help with activation.",
+      "images": [
+        "/brands/zoom.svg"
+      ],
+      "logo": "/brands/zoom.svg",
+      "categoryId": "cat_productivity",
+      "tags": [
+        "Zoom",
+        "Meetings",
+        "Productivity"
+      ],
+      "price": 799,
+      "compareAtPrice": 1350,
+      "discount": 41,
+      "status": "active",
+      "featured": false,
+      "bestseller": false,
+      "isNew": false,
+      "trending": false,
+      "deliveryTime": "Instant (5–15 min)",
+      "deliveryMethod": "Email & WhatsApp",
+      "productType": "Software Subscription",
+      "inventoryModel": "credential",
+      "features": [
+        "Meetings up to 30 hours",
+        "Up to 100 participants",
+        "Cloud recording",
+        "Private account"
+      ],
+      "requirements": [
+        "A valid email address and WhatsApp number for delivery",
+        "Stable internet connection"
+      ],
+      "usageInstructions": "After payment you receive your Zoom Pro access details by email and WhatsApp. Follow the activation steps in the message, or contact Soft4u support for help.",
+      "refundInfo": "If your access does not work and we cannot fix or replace it, you are eligible for a refund as per our Refund Policy.",
+      "seoTitle": "Buy Zoom Pro in Pakistan | Soft4u",
+      "seoDescription": "Zoom Pro in PKR with instant delivery on email and WhatsApp. Meetings up to 30 hours with 100 participants and cloud recording.",
+      "relatedProductIds": [
+        "prod_microsoft_365"
+      ],
+      "variants": [
+        {
+          "id": "var_zoom_1m",
+          "productId": "prod_zoom_pro",
+          "name": "1 Month",
+          "price": 799,
+          "compareAtPrice": 1350,
+          "sku": "S4U-ZOOM-1M",
+          "stock": 32,
+          "description": "Zoom Pro access for 1 month (30 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 30
+        },
+        {
+          "id": "var_zoom_3m",
+          "productId": "prod_zoom_pro",
+          "name": "3 Months",
+          "price": 2199,
+          "compareAtPrice": 4050,
+          "sku": "S4U-ZOOM-3M",
+          "stock": 20,
+          "description": "Zoom Pro access for 3 months (90 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 90
+        },
+        {
+          "id": "var_zoom_1y",
+          "productId": "prod_zoom_pro",
+          "name": "12 Months",
+          "price": 7499,
+          "compareAtPrice": 16200,
+          "sku": "S4U-ZOOM-12M",
+          "stock": 9,
+          "description": "Zoom Pro access for 12 months (365 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 365
+        }
+      ],
+      "createdAt": "2026-01-05T00:00:00Z",
+      "updatedAt": "2026-01-05T00:00:00Z"
+    },
+    {
+      "id": "prod_grammarly_premium",
+      "name": "Grammarly Premium",
+      "slug": "grammarly-premium",
+      "sku": "S4U-GRAM",
+      "shortDescription": "Advanced grammar, tone and clarity suggestions plus plagiarism checks.",
+      "longDescription": "Grammarly Premium with clear plan options, protected checkout and convenient digital delivery. Advanced grammar, tone and clarity suggestions plus plagiarism checks. After payment, your access details are sent to your email and WhatsApp, and our support team is available if you need help with activation.",
+      "images": [
+        "/brands/grammarly.svg"
+      ],
+      "logo": "/brands/grammarly.svg",
+      "categoryId": "cat_productivity",
+      "tags": [
+        "Grammarly",
+        "Writing",
+        "Productivity"
+      ],
+      "price": 599,
+      "compareAtPrice": 3500,
+      "discount": 83,
+      "status": "active",
+      "featured": false,
+      "bestseller": false,
+      "isNew": false,
+      "trending": false,
+      "deliveryTime": "Instant (5–15 min)",
+      "deliveryMethod": "Email & WhatsApp",
+      "productType": "Digital Subscription",
+      "inventoryModel": "credential",
+      "features": [
+        "Advanced grammar and clarity",
+        "Tone suggestions",
+        "Plagiarism checker",
+        "Works in browser and Word"
+      ],
+      "requirements": [
+        "A valid email address and WhatsApp number for delivery",
+        "Stable internet connection"
+      ],
+      "usageInstructions": "After payment you receive your Grammarly Premium access details by email and WhatsApp. Follow the activation steps in the message, or contact Soft4u support for help.",
+      "refundInfo": "If your access does not work and we cannot fix or replace it, you are eligible for a refund as per our Refund Policy.",
+      "seoTitle": "Buy Grammarly Premium in Pakistan | Soft4u",
+      "seoDescription": "Grammarly Premium in PKR with instant delivery on email and WhatsApp. Advanced grammar, tone and clarity suggestions plus plagiarism checks.",
+      "relatedProductIds": [
+        "prod_chatgpt_plus",
+        "prod_microsoft_365"
+      ],
+      "variants": [
+        {
+          "id": "var_gram_1m",
+          "productId": "prod_grammarly_premium",
+          "name": "1 Month",
+          "price": 599,
+          "compareAtPrice": 3500,
+          "sku": "S4U-GRAM-1M",
+          "stock": 26,
+          "description": "Grammarly Premium access for 1 month (30 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 30
+        },
+        {
+          "id": "var_gram_3m",
+          "productId": "prod_grammarly_premium",
+          "name": "3 Months",
+          "price": 1599,
+          "compareAtPrice": 10500,
+          "sku": "S4U-GRAM-3M",
+          "stock": 15,
+          "description": "Grammarly Premium access for 3 months (90 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 90
+        },
+        {
+          "id": "var_gram_1y",
+          "productId": "prod_grammarly_premium",
+          "name": "12 Months",
+          "price": 4999,
+          "compareAtPrice": 42000,
+          "sku": "S4U-GRAM-12M",
+          "stock": 7,
+          "description": "Grammarly Premium access for 12 months (365 days).",
+          "deliveryMethod": "Email & WhatsApp",
+          "deliveryTime": "Instant (5–15 min)",
+          "status": "active",
+          "expiryDays": 365
+        }
+      ],
+      "createdAt": "2026-01-05T00:00:00Z",
+      "updatedAt": "2026-01-05T00:00:00Z"
+    }
+  ],
+  "inventory": [
+    {
+      "id": "inv_cgpt_01",
+      "productId": "prod_chatgpt_plus",
+      "variantId": "var_cgpt_1m",
+      "type": "credential",
+      "data": {
+        "email": "vault.account01@example.com",
+        "password": "SecureKey$2026OpenAI",
+        "notes": "Private account. Log in directly at chatgpt.com"
+      },
+      "status": "available",
+      "createdAt": "2026-02-01T00:00:00Z",
+      "updatedAt": "2026-02-01T00:00:00Z"
+    },
+    {
+      "id": "inv_cgpt_02",
+      "productId": "prod_chatgpt_plus",
+      "variantId": "var_cgpt_1m",
+      "type": "credential",
+      "data": {
+        "email": "vault.account02@example.com",
+        "password": "PassKey#2026ChatGPT",
+        "notes": "Private account. Dedicated subscription."
+      },
+      "status": "available",
+      "createdAt": "2026-02-01T00:00:00Z",
+      "updatedAt": "2026-02-01T00:00:00Z"
+    },
+    {
+      "id": "inv_nflx_01",
+      "productId": "prod_netflix_uhd",
+      "variantId": "var_nflx_1m",
+      "type": "credential",
+      "data": {
+        "email": "vault.account03@example.com",
+        "password": "Stream$2026Soft4u",
+        "profileName": "Profile 3 (VIP)",
+        "pin": "8492",
+        "notes": "Stream strictly on Profile 3 with PIN 8492"
+      },
+      "status": "available",
+      "createdAt": "2026-02-01T00:00:00Z",
+      "updatedAt": "2026-02-01T00:00:00Z"
+    },
+    {
+      "id": "inv_nvpn_01",
+      "productId": "prod_nordvpn_ultimate",
+      "variantId": "var_nvpn_1y",
+      "type": "license_key",
+      "data": {
+        "licenseKey": "NVPN-89X4-2KM9-L9Q1-7B8A",
+        "notes": "Redeem at nordvpn.com/order/activate or inside app"
+      },
+      "status": "available",
+      "createdAt": "2026-02-01T00:00:00Z",
+      "updatedAt": "2026-02-01T00:00:00Z"
+    },
+    {
+      "id": "inv_canva_01",
+      "productId": "prod_canva_pro_lifetime",
+      "variantId": "var_canva_life",
+      "type": "license_key",
+      "data": {
+        "licenseKey": "https://canva.com/brand/join?token=pk_invite_92819f8a9e",
+        "notes": "Click the link to join the official Canva Pro team workspace"
+      },
+      "status": "available",
+      "createdAt": "2026-02-01T00:00:00Z",
+      "updatedAt": "2026-02-01T00:00:00Z"
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord_101",
+      "orderNumber": "PK-84912",
+      "customerId": "usr_customer_demo",
+      "customerName": "Demo Customer",
+      "customerEmail": "customer@example.com",
+      "customerPhone": "+923000000000",
+      "items": [
+        {
+          "id": "item_101_1",
+          "orderId": "ord_101",
+          "productId": "prod_chatgpt_plus",
+          "productName": "ChatGPT Plus Private Access",
+          "productImage": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80",
+          "variantId": "var_cgpt_1m",
+          "variantName": "1 Month Access (30 Days)",
+          "price": 11.99,
+          "quantity": 1,
+          "expiryDays": 30,
+          "fulfillmentData": {
+            "credentials": [
+              {
+                "email": "vault.demo@example.com",
+                "password": "Soft4uDemo#2026",
+                "profile": "Dedicated Plus Account"
+              }
+            ],
+            "instructions": "Visit chatgpt.com and sign in with the credentials above. Do not alter billing parameters."
+          }
+        }
+      ],
+      "subtotal": 11.99,
+      "discount": 0,
+      "tax": 0,
+      "total": 11.99,
+      "paymentMethod": "Credit / Debit Card (Stripe)",
+      "paymentStatus": "paid",
+      "fulfillmentStatus": "fulfilled",
+      "orderStatus": "completed",
+      "timeline": [
+        {
+          "status": "Order Created",
+          "note": "Customer completed checkout successfully",
+          "timestamp": "2026-02-14T09:20:00Z"
+        },
+        {
+          "status": "Payment Confirmed",
+          "note": "Card transaction authorized $11.99",
+          "timestamp": "2026-02-14T09:20:15Z"
+        },
+        {
+          "status": "Automated Fulfillment",
+          "note": "Digital inventory credentials dispatched to dashboard & email",
+          "timestamp": "2026-02-14T09:20:25Z"
+        }
+      ],
+      "createdAt": "2026-02-14T09:20:00Z",
+      "updatedAt": "2026-02-14T09:20:25Z"
+    },
+    {
+      "id": "ord_102",
+      "orderNumber": "PK-84913",
+      "customerName": "Elena Rostova",
+      "customerEmail": "elena@example.com",
+      "customerPhone": "+923002222222",
+      "items": [
+        {
+          "id": "item_102_1",
+          "orderId": "ord_102",
+          "productId": "prod_canva_pro_lifetime",
+          "productName": "Canva Pro Designer Team Pass (Lifetime)",
+          "variantId": "var_canva_life",
+          "variantName": "Lifetime VIP Team Pass",
+          "price": 9.99,
+          "quantity": 1,
+          "fulfillmentData": {
+            "licenseKeys": [
+              "https://canva.com/brand/join?token=pk_canva_vip_elena94"
+            ],
+            "instructions": "Accept the invite on your Canva profile."
+          }
+        }
+      ],
+      "subtotal": 9.99,
+      "discount": 0,
+      "tax": 0,
+      "total": 9.99,
+      "paymentMethod": "USDT Crypto",
+      "paymentStatus": "paid",
+      "fulfillmentStatus": "fulfilled",
+      "orderStatus": "completed",
+      "timeline": [
+        {
+          "status": "Order Created",
+          "note": "Order placed via crypto gateway",
+          "timestamp": "2026-02-15T14:10:00Z"
+        },
+        {
+          "status": "Payment Confirmed",
+          "note": "USDT (TRC20) confirmed on blockchain",
+          "timestamp": "2026-02-15T14:12:00Z"
+        },
+        {
+          "status": "Fulfilled",
+          "note": "Invite link delivered",
+          "timestamp": "2026-02-15T14:12:05Z"
+        }
+      ],
+      "createdAt": "2026-02-15T14:10:00Z",
+      "updatedAt": "2026-02-15T14:12:05Z"
+    },
+    {
+      "id": "ord_103",
+      "orderNumber": "PK-84914",
+      "customerName": "Marcus Wright",
+      "customerEmail": "m.wright@example.com",
+      "items": [
+        {
+          "id": "item_103_1",
+          "orderId": "ord_103",
+          "productId": "prod_netflix_uhd",
+          "productName": "Netflix 4K Ultra HD Private Profile",
+          "variantId": "var_nflx_3m",
+          "variantName": "3 Months Private Profile",
+          "price": 12.99,
+          "quantity": 1
+        }
+      ],
+      "subtotal": 12.99,
+      "discount": 2,
+      "couponCode": "SOFT20",
+      "tax": 0,
+      "total": 10.99,
+      "paymentMethod": "Credit / Debit Card",
+      "paymentStatus": "pending",
+      "fulfillmentStatus": "unfulfilled",
+      "orderStatus": "pending",
+      "timeline": [
+        {
+          "status": "Order Created",
+          "note": "Customer awaiting 3D Secure verification",
+          "timestamp": "2026-02-16T11:00:00Z"
+        }
+      ],
+      "createdAt": "2026-02-16T11:00:00Z",
+      "updatedAt": "2026-02-16T11:00:00Z"
+    }
+  ],
+  "coupons": [
+    {
+      "id": "coup_soft20",
+      "code": "SOFT20",
+      "description": "20% off your entire digital order",
+      "type": "percentage",
+      "value": 20,
+      "minOrderAmount": 10,
+      "maxDiscount": 25,
+      "usageLimit": 500,
+      "usageCount": 42,
+      "perUserLimit": 1,
+      "enabled": true,
+      "createdAt": "2026-01-01T00:00:00Z"
+    },
+    {
+      "id": "coup_welcome10",
+      "code": "WELCOME10",
+      "description": "10% discount on first-time digital subscription purchases",
+      "type": "percentage",
+      "value": 10,
+      "minOrderAmount": 5,
+      "usageCount": 118,
+      "perUserLimit": 1,
+      "enabled": true,
+      "createdAt": "2026-01-01T00:00:00Z"
+    },
+    {
+      "id": "coup_save5",
+      "code": "SAVE5",
+      "description": "$5 flat savings on orders $30+",
+      "type": "fixed",
+      "value": 5,
+      "minOrderAmount": 30,
+      "usageCount": 19,
+      "perUserLimit": 2,
+      "enabled": true,
+      "createdAt": "2026-01-01T00:00:00Z"
+    }
+  ],
+  "tickets": [
+    {
+      "id": "tkt_01",
+      "ticketNumber": "TKT-9201",
+      "customerId": "usr_customer_demo",
+      "customerName": "Demo Customer",
+      "customerEmail": "customer@example.com",
+      "subject": "Question regarding renewal on ChatGPT Plus",
+      "orderId": "ord_101",
+      "productId": "prod_chatgpt_plus",
+      "category": "Subscription Extension",
+      "status": "waiting_customer",
+      "priority": "medium",
+      "messages": [
+        {
+          "id": "msg_01_1",
+          "senderId": "usr_customer_demo",
+          "senderName": "Demo Customer",
+          "senderRole": "CUSTOMER",
+          "message": "Hello team, if I want to extend my 1-month pass to a 12-month pass, do I keep the same email or receive a new one?",
+          "isInternalNote": false,
+          "timestamp": "2026-02-14T10:00:00Z"
+        },
+        {
+          "id": "msg_01_2",
+          "senderId": "usr_support",
+          "senderName": "Samira Patel (Support)",
+          "senderRole": "ADMIN",
+          "message": "Hi there! You can seamlessly extend the exact same credentials without losing your chats. Just submit your current order ID during checkout or reply here and our automated system will renew it directly.",
+          "isInternalNote": false,
+          "timestamp": "2026-02-14T10:15:00Z"
+        }
+      ],
+      "createdAt": "2026-02-14T10:00:00Z",
+      "updatedAt": "2026-02-14T10:15:00Z"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_01",
+      "productId": "prod_chatgpt_plus",
+      "customerId": "usr_customer_demo",
+      "customerName": "Demo C.",
+      "customerEmail": "customer@example.com",
+      "rating": 5,
+      "title": "Instant delivery and works flawlessly!",
+      "comment": "Credentials arrived in my inbox in literally 2 minutes after checkout. GPT-4o voice and reasoning models work perfectly. Excellent support.",
+      "verifiedPurchase": true,
+      "status": "approved",
+      "isFeatured": true,
+      "createdAt": "2026-02-14T11:00:00Z"
+    },
+    {
+      "id": "rev_02",
+      "productId": "prod_netflix_uhd",
+      "customerName": "Sarah Jenkins",
+      "customerEmail": "sarah@example.com",
+      "rating": 5,
+      "title": "No household error! True 4K HDR quality",
+      "comment": "Was skeptical after Netflix cracked down on sharing, but this private profile has its own PIN and works on my LG OLED without any issues.",
+      "verifiedPurchase": true,
+      "status": "approved",
+      "isFeatured": true,
+      "createdAt": "2026-02-10T16:20:00Z"
+    },
+    {
+      "id": "rev_03",
+      "productId": "prod_canva_pro_lifetime",
+      "customerName": "Liam Chen",
+      "customerEmail": "liam@example.com",
+      "rating": 5,
+      "title": "Upgraded my own existing account instantly",
+      "comment": "Clicked the invite link and my existing account upgraded to Pro immediately. Saved hundreds compared to annual Canva pricing.",
+      "verifiedPurchase": true,
+      "status": "approved",
+      "isFeatured": true,
+      "createdAt": "2026-02-08T14:10:00Z"
+    }
+  ],
+  "announcements": [
+    {
+      "id": "ann_01",
+      "text": "SPRING SALE: Use code SOFT20 for 20% OFF all AI & Streaming subscriptions",
+      "link": "/shop",
+      "ctaText": "Claim Discount",
+      "priority": 1,
+      "enabled": true,
+      "createdAt": "2026-02-01T00:00:00Z"
+    }
+  ],
+  "banners": [
+    {
+      "id": "ban_01",
+      "title": "Enterprise AI & Creative Software at Fraction of Retail Cost",
+      "subtitle": "100% Guaranteed automated fulfillment with 24/7 dedicated replacement warranty.",
+      "image": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=80",
+      "ctaText": "Explore Catalog",
+      "url": "/shop",
+      "priority": 1,
+      "position": "hero_bottom",
+      "status": "active",
+      "createdAt": "2026-02-01T00:00:00Z"
+    }
+  ],
+  "faqs": [
+    {
+      "id": "faq_01",
+      "question": "How quickly will I receive my digital subscription after payment?",
+      "answer": "Delivery is automated and near-instantaneous. For digital credentials and license keys, fulfillment details are immediately displayed on your Order Confirmation screen and securely emailed to you within 2 to 5 minutes.",
+      "category": "Fulfillment & Delivery",
+      "displayOrder": 1,
+      "status": "active",
+      "createdAt": "2026-01-01T00:00:00Z"
+    },
+    {
+      "id": "faq_02",
+      "question": "What happens if an account or key stops working?",
+      "answer": "Every product on Soft4u includes our Full Term Replacement Warranty. If you encounter any access difficulty, open a support ticket or track your order; our system or agent will swap your credentials promptly at zero cost.",
+      "category": "Warranty & Replacement",
+      "displayOrder": 2,
+      "status": "active",
+      "createdAt": "2026-01-01T00:00:00Z"
+    },
+    {
+      "id": "faq_03",
+      "question": "Can I use these services globally without restrictions?",
+      "answer": "Yes! All accounts and license keys provided by Soft4u are global licenses unless explicitly indicated in the product specifications. They work without geographic region locks.",
+      "category": "Product Compatibility",
+      "displayOrder": 3,
+      "status": "active",
+      "createdAt": "2026-01-01T00:00:00Z"
+    },
+    {
+      "id": "faq_04",
+      "question": "What payment methods do you accept?",
+      "answer": "We support Visa, MasterCard, American Express, Apple Pay, Google Pay, PayPal, major cryptocurrencies (USDT, BTC, ETH), and direct wire transfer.",
+      "category": "Payments",
+      "displayOrder": 4,
+      "status": "active",
+      "createdAt": "2026-01-01T00:00:00Z"
+    }
+  ],
+  "testimonials": [
+    {
+      "id": "test_01",
+      "name": "David K.",
+      "roleOrCompany": "Fullstack Software Engineer",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
+      "rating": 5,
+      "content": "Soft4u is easily the most reliable digital software store I have ever used. Fast delivery, working ChatGPT Plus credentials, and zero downtime.",
+      "featured": true,
+      "displayOrder": 1,
+      "status": "active",
+      "createdAt": "2026-01-01T00:00:00Z"
+    },
+    {
+      "id": "test_02",
+      "name": "Rebecca M.",
+      "roleOrCompany": "Creative Agency Lead",
+      "avatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=200&q=80",
+      "rating": 5,
+      "content": "Our design team relies on Canva and Midjourney daily. Getting verified access at these price points with immediate delivery saved us thousands.",
+      "featured": true,
+      "displayOrder": 2,
+      "status": "active",
+      "createdAt": "2026-01-01T00:00:00Z"
+    },
+    {
+      "id": "test_03",
+      "name": "Tariq Al-Mansoor",
+      "roleOrCompany": "Media Producer",
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
+      "rating": 5,
+      "content": "I was hesitant about Netflix household locks, but Soft4u provides a true private profile with custom PIN. Flawless experience.",
+      "featured": true,
+      "displayOrder": 3,
+      "status": "active",
+      "createdAt": "2026-01-01T00:00:00Z"
+    }
+  ],
+  "navigation": [
+    {
+      "id": "nav_h1",
+      "label": "Home",
+      "url": "/",
+      "displayOrder": 1,
+      "visible": true,
+      "targetBlank": false,
+      "position": "header"
+    },
+    {
+      "id": "nav_h2",
+      "label": "All Products",
+      "url": "/shop",
+      "displayOrder": 2,
+      "visible": true,
+      "targetBlank": false,
+      "position": "header"
+    },
+    {
+      "id": "nav_h3",
+      "label": "Categories",
+      "url": "/categories",
+      "displayOrder": 3,
+      "visible": true,
+      "targetBlank": false,
+      "position": "header"
+    },
+    {
+      "id": "nav_h4",
+      "label": "Track Order",
+      "url": "/track-order",
+      "displayOrder": 4,
+      "visible": true,
+      "targetBlank": false,
+      "position": "header"
+    },
+    {
+      "id": "nav_h5",
+      "label": "FAQ",
+      "url": "/faq",
+      "displayOrder": 5,
+      "visible": true,
+      "targetBlank": false,
+      "position": "header"
+    },
+    {
+      "id": "nav_h6",
+      "label": "About",
+      "url": "/about",
+      "displayOrder": 6,
+      "visible": true,
+      "targetBlank": false,
+      "position": "header"
+    },
+    {
+      "id": "nav_h7",
+      "label": "Contact",
+      "url": "/contact",
+      "displayOrder": 7,
+      "visible": true,
+      "targetBlank": false,
+      "position": "header"
+    },
+    {
+      "id": "nav_f1",
+      "label": "Shop Catalog",
+      "url": "/shop",
+      "displayOrder": 1,
+      "visible": true,
+      "targetBlank": false,
+      "position": "footer"
+    },
+    {
+      "id": "nav_f2",
+      "label": "Categories",
+      "url": "/categories",
+      "displayOrder": 2,
+      "visible": true,
+      "targetBlank": false,
+      "position": "footer"
+    },
+    {
+      "id": "nav_f3",
+      "label": "Order Tracking",
+      "url": "/track-order",
+      "displayOrder": 3,
+      "visible": true,
+      "targetBlank": false,
+      "position": "footer"
+    },
+    {
+      "id": "nav_f4",
+      "label": "Support & Helpdesk",
+      "url": "/account/support",
+      "displayOrder": 4,
+      "visible": true,
+      "targetBlank": false,
+      "position": "footer"
+    },
+    {
+      "id": "nav_f5",
+      "label": "Terms & Conditions",
+      "url": "/terms",
+      "displayOrder": 5,
+      "visible": true,
+      "targetBlank": false,
+      "position": "footer"
+    },
+    {
+      "id": "nav_f6",
+      "label": "Privacy Policy",
+      "url": "/privacy",
+      "displayOrder": 6,
+      "visible": true,
+      "targetBlank": false,
+      "position": "footer"
+    },
+    {
+      "id": "nav_f7",
+      "label": "Refund Policy",
+      "url": "/refund-policy",
+      "displayOrder": 7,
+      "visible": true,
+      "targetBlank": false,
+      "position": "footer"
+    },
+    {
+      "id": "nav_f8",
+      "label": "Cookie Policy",
+      "url": "/cookie-policy",
+      "displayOrder": 8,
+      "visible": true,
+      "targetBlank": false,
+      "position": "footer"
+    }
+  ],
+  "homepageSections": [
+    {
+      "id": "sec_hero",
+      "type": "hero",
+      "name": "Hero Section",
+      "enabled": true,
+      "order": 1,
+      "settings": {
+        "kicker": "PREMIUM DIGITAL COMMERCE & VERIFIED LICENSES",
+        "headline": "Enterprise Subscriptions & Digital Keys at Wholesale Rates",
+        "subheadline": "Automated 2-minute delivery, full-term replacement guarantees, and verified private accounts for AI, streaming, security, and developer software.",
+        "primaryCtaText": "Browse Catalog",
+        "primaryCtaUrl": "/shop",
+        "secondaryCtaText": "Track an Order",
+        "secondaryCtaUrl": "/track-order",
+        "badgeText": "Instant Delivery · 24/7 Verified",
+        "stats": [
+          {
+            "label": "Active Subscribers",
+            "value": "48,000+"
+          },
+          {
+            "label": "Avg Fulfillment Time",
+            "value": "110 Sec"
+          },
+          {
+            "label": "Replacement Guarantee",
+            "value": "100%"
+          }
+        ]
+      }
+    },
+    {
+      "id": "sec_trust",
+      "type": "trust_bar",
+      "name": "Trust & Guarantees Bar",
+      "enabled": true,
+      "order": 2,
+      "settings": {
+        "items": [
+          {
+            "icon": "Zap",
+            "title": "Instant Automated Delivery",
+            "desc": "Credentials issued immediately to your dashboard"
+          },
+          {
+            "icon": "ShieldCheck",
+            "title": "Full Replacement Warranty",
+            "desc": "100% covered for the entire paid duration"
+          },
+          {
+            "icon": "Lock",
+            "title": "Bank-Grade Privacy",
+            "desc": "Encrypted transactions with zero data resale"
+          },
+          {
+            "icon": "LifeBuoy",
+            "title": "24/7 Priority Support",
+            "desc": "Live ticketing and fast human agent response"
+          }
+        ]
+      }
+    },
+    {
+      "id": "sec_categories",
+      "type": "categories",
+      "name": "Featured Categories",
+      "enabled": true,
+      "order": 3,
+      "settings": {
+        "title": "Curated Software & Subscription Categories",
+        "subtitle": "Browse industry-leading platforms across artificial intelligence, entertainment, privacy, and design."
+      }
+    },
+    {
+      "id": "sec_bestsellers",
+      "type": "bestsellers",
+      "name": "Best Selling Products",
+      "enabled": true,
+      "order": 4,
+      "settings": {
+        "title": "Most Popular Digital Subscriptions",
+        "subtitle": "Verified accounts and licenses trusted by over 48,000 satisfied professionals and consumers.",
+        "limit": 4
+      }
+    },
+    {
+      "id": "sec_banner",
+      "type": "banner",
+      "name": "Promotional Banner",
+      "enabled": true,
+      "order": 5,
+      "settings": {
+        "title": "Save up to 80% on Developer AI & Creative Suites",
+        "description": "Stop paying inflated monthly SaaS fees. Get genuine private accounts with instant automated onboarding.",
+        "couponCode": "SOFT20",
+        "ctaText": "Shop All Deals",
+        "ctaUrl": "/shop"
+      }
+    },
+    {
+      "id": "sec_benefits",
+      "type": "benefits",
+      "name": "Why Choose Us",
+      "enabled": true,
+      "order": 6,
+      "settings": {
+        "title": "The Soft4u Standard: Trust, Speed & Assurance",
+        "subtitle": "Unlike unverified marketplace sellers, we manage and warrant every subscription directly.",
+        "items": [
+          {
+            "title": "Direct Account Provisioning",
+            "description": "No shared mess or broken password conflicts. Our accounts are private, clean, and pre-tested."
+          },
+          {
+            "title": "Automated Instant Vault",
+            "description": "Access your login credentials, license keys, and renewal dates right inside your personal dashboard anytime."
+          },
+          {
+            "title": "Zero-Question Replacement",
+            "description": "If a service changes policies or revokes access, click replacement and get fresh working credentials."
+          }
+        ]
+      }
+    },
+    {
+      "id": "sec_how_it_works",
+      "type": "how_it_works",
+      "name": "How It Works",
+      "enabled": true,
+      "order": 7,
+      "settings": {
+        "title": "Simple 3-Step Fulfillment Flow",
+        "subtitle": "From selection to active software in less than 3 minutes.",
+        "steps": [
+          {
+            "step": "01",
+            "title": "Choose Your Plan",
+            "desc": "Select from flexible 1-month, 3-month, or annual billing options."
+          },
+          {
+            "step": "02",
+            "title": "Secure Instant Checkout",
+            "desc": "Pay via Card, Apple Pay, PayPal, or Crypto with zero transaction fees."
+          },
+          {
+            "step": "03",
+            "title": "Immediate Digital Access",
+            "desc": "View your keys or credentials on screen and in your email immediately."
+          }
+        ]
+      }
+    },
+    {
+      "id": "sec_testimonials",
+      "type": "testimonials",
+      "name": "Customer Testimonials",
+      "enabled": true,
+      "order": 8,
+      "settings": {
+        "title": "Real Reviews From Real Subscribers",
+        "subtitle": "See what engineers, designers, and media enthusiasts say about Soft4u."
+      }
+    },
+    {
+      "id": "sec_faq",
+      "type": "faq",
+      "name": "Frequently Asked Questions",
+      "enabled": true,
+      "order": 9,
+      "settings": {
+        "title": "Frequently Asked Questions",
+        "subtitle": "Everything you need to know about our digital licenses and warranty.",
+        "limit": 4
+      }
+    },
+    {
+      "id": "sec_cta",
+      "type": "cta",
+      "name": "Final Call To Action",
+      "enabled": true,
+      "order": 10,
+      "settings": {
+        "title": "Ready to Upgrade Your Digital Workflow?",
+        "subtitle": "Unlock premium AI, 4K streaming, and creative licenses in under 2 minutes.",
+        "ctaText": "Explore All Subscriptions",
+        "ctaUrl": "/shop"
+      }
+    }
+  ],
+  "paymentGateways": [
+    {
+      "id": "gw_stripe",
+      "key": "stripe",
+      "name": "Credit / Debit Card (Stripe)",
+      "description": "Instant processing for Visa, MasterCard, Amex, Apple Pay, Google Pay",
+      "enabled": true,
+      "isSandbox": true,
+      "currencies": [
+        "USD",
+        "EUR",
+        "GBP",
+        "CAD",
+        "AUD",
+        "INR"
+      ],
+      "feePercentage": 0,
+      "instructions": "Secure 256-bit SSL encrypted card authorization.",
+      "minAmount": 1,
+      "maxAmount": 5000
+    },
+    {
+      "id": "gw_crypto",
+      "key": "crypto",
+      "name": "Cryptocurrency (USDT / BTC / ETH)",
+      "description": "Instant decentralized settlement with zero card chargeback fees",
+      "enabled": true,
+      "isSandbox": false,
+      "currencies": [
+        "USDT",
+        "BTC",
+        "ETH",
+        "SOL"
+      ],
+      "feePercentage": 0,
+      "instructions": "Send exact calculated amount to the generated TRC20/ERC20 address. Order fulfills upon 1 network confirmation.",
+      "minAmount": 5,
+      "maxAmount": 10000
+    },
+    {
+      "id": "gw_paypal",
+      "key": "paypal",
+      "name": "PayPal Global",
+      "description": "Pay securely with your PayPal balance or linked bank account",
+      "enabled": true,
+      "isSandbox": true,
+      "currencies": [
+        "USD",
+        "EUR",
+        "GBP"
+      ],
+      "feePercentage": 1.5,
+      "instructions": "Redirects to PayPal portal for instant 1-click confirmation.",
+      "minAmount": 2,
+      "maxAmount": 2000
+    },
+    {
+      "id": "gw_manual",
+      "key": "manual",
+      "name": "Direct Bank Wire / UPI Transfer",
+      "description": "Manual verification for enterprise or localized payment methods",
+      "enabled": true,
+      "isSandbox": false,
+      "currencies": [
+        "USD",
+        "INR",
+        "EUR"
+      ],
+      "feePercentage": 0,
+      "instructions": "Transfer to our business account and enter transaction reference ID. Admin reviews within 30 minutes.",
+      "minAmount": 20,
+      "maxAmount": 20000
+    }
+  ],
+  "auditLogs": [
+    {
+      "id": "log_01",
+      "adminEmail": "admin@soft4u.top",
+      "adminName": "Alex Vance",
+      "action": "SYSTEM_INITIALIZED",
+      "entity": "SiteSettings",
+      "entityId": "default",
+      "details": "System bootstrapped with complete production catalog, CMS sections, and payment gateways.",
+      "timestamp": "2026-02-01T00:00:00Z"
+    }
+  ]
+}
