@@ -22,8 +22,8 @@ export const siteConfig = {
   whatsapp: "+92 323 9539487",
   whatsappHref: "https://wa.me/923239539487",
 
-  // TODO: replace with the real business address in Pakistan.
-  address: "Pakistan",
+  address: "House No. B-II-431, Shatak Street, Mohallah Usmania, Mandi Bahauddin, Pakistan",
+  city: "Mandi Bahauddin, Pakistan",
   // TODO: confirm business hours with the client.
   hours: "Mon – Sat, 10:00 AM – 10:00 PM (PKT)",
 

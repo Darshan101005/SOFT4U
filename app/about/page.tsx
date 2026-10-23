@@ -52,7 +52,7 @@ export default function AboutPage() {
             <div className="text-xs font-bold text-pista-dark uppercase tracking-wider">About {siteConfig.name}</div>
             <h1 className="text-3xl sm:text-5xl font-extrabold text-charcoal">All Subscriptions at One Place</h1>
             <p className="text-sm sm:text-base text-charcoal-muted max-w-2xl mx-auto leading-relaxed">
-              {siteConfig.name} is an online digital store based in {siteConfig.address}. We make premium OTT
+              {siteConfig.name} is an online digital store based in {siteConfig.city}. We make premium OTT
               subscriptions, streaming services, VPNs, AI tools and software easy and affordable to buy, with
               protected checkout and private digital delivery.
             </p>
