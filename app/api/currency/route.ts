@@ -1,17 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readJson } from '@/lib/api';
-import { CURRENCY_COOKIE, GEO_CURRENCY_COOKIE, currencyForCountry, getCurrencyFromCookies, requestCountry } from '@/lib/currency-pref';
+import { CURRENCY_COOKIE, GEO_CURRENCY_COOKIE, currencyForCountry, getCurrencyFromCookies, isUsdOnly, requestCountry } from '@/lib/currency-pref';
 
 export const dynamic = 'force-dynamic';
 
 const cookieBase = { httpOnly: false, sameSite: 'lax' as const, secure: process.env.NODE_ENV === 'production', path: '/' };
 
 /**
- * GET -> { currency, source: 'manual' | 'geo' | 'default' }.
+ * GET -> { currency, source: 'manual' | 'geo' | 'default', usdOnly? }.
  * Called by the browser after the page loads. Pakistan -> PKR, elsewhere -> USD;
- * the result is cached in a session cookie. A manual choice is never overridden.
+ * the result is cached in a session cookie. A manual choice is never overridden,
+ * except that visitors outside Pakistan get USD only while the PKR lock is on.
  */
 export async function GET(req: NextRequest) {
+  if (await isUsdOnly(req.headers).catch(() => false)) {
+    return NextResponse.json({ currency: 'USD', source: 'geo', usdOnly: true }, { headers: { 'Cache-Control': 'private, no-store' } });
+  }
   const current = await getCurrencyFromCookies();
   if (current.source !== 'default') return NextResponse.json(current, { headers: { 'Cache-Control': 'private, no-store' } });
   let currency: 'PKR' | 'USD' = 'PKR';
@@ -30,11 +34,14 @@ export async function GET(req: NextRequest) {
   return res;
 }
 
-/** POST { currency: 'PKR' | 'USD' } -> remembers the customer's own choice for a year. */
+/** POST { currency: 'PKR' | 'USD' } -> remembers the customer's own choice for a year. PKR is refused for USD-only visitors. */
 export async function POST(req: NextRequest) {
   const body = await readJson(req);
   const currency = body.currency === 'USD' ? 'USD' : body.currency === 'PKR' ? 'PKR' : null;
   if (!currency) return NextResponse.json({ error: 'currency must be PKR or USD' }, { status: 400 });
+  if (currency === 'PKR' && (await isUsdOnly(req.headers).catch(() => true))) {
+    return NextResponse.json({ error: 'Prices are shown in USD outside Pakistan', currency: 'USD', usdOnly: true }, { status: 403 });
+  }
   const res = NextResponse.json({ currency, source: 'manual' });
   res.cookies.set(CURRENCY_COOKIE, currency, { ...cookieBase, maxAge: 365 * 24 * 60 * 60 });
   return res;

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { parseCatalogQuery } from '@/lib/catalog-query';
 import { searchCatalog } from '@/lib/catalog';
-import { getCurrencyFromCookies } from '@/lib/currency-pref';
+import { allowedCurrency, getCurrencyFromCookies } from '@/lib/currency-pref';
 import { errorResponse } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
@@ -15,7 +15,8 @@ export async function GET(req: NextRequest) {
   try {
     const sp = req.nextUrl.searchParams;
     const requested = sp.get('currency');
-    const currency = requested === 'USD' || requested === 'PKR' ? requested : (await getCurrencyFromCookies()).currency;
+    const wanted = requested === 'USD' || requested === 'PKR' ? requested : (await getCurrencyFromCookies()).currency;
+    const currency = await allowedCurrency(wanted, req.headers);
     const result = await searchCatalog(parseCatalogQuery(sp), currency);
     return NextResponse.json(result, { headers: { 'Cache-Control': 'private, no-store' } });
   } catch (err) {

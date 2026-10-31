@@ -20,6 +20,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   currencySymbol: siteConfig.currencySymbol,
   currencyCode: siteConfig.currency,
   usdEnabled: true,
+  pkrOnlyInPakistan: true,
   fallbackUsdRate: 280,
   usdPricing: { mode: 'auto', percent: 0, amount: 0, roundTo: 0.01 },
   taxRate: 0,

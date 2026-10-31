@@ -534,6 +534,8 @@ export interface SiteSettings {
   currencyCode: string;
   /** Show the PKR / USD switcher and accept USD orders. */
   usdEnabled: boolean;
+  /** When on, visitors outside Pakistan (by request IP) always see and pay in USD; only Pakistan can switch to PKR. */
+  pkrOnlyInPakistan: boolean;
   /** Used when every live FX source and the stored rate are unavailable. */
   fallbackUsdRate: number;
   usdPricing: UsdPricingDefaults;

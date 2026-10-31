@@ -21,6 +21,7 @@ const KEYS: Array<keyof SiteSettings> = [
   'businessHours',
   'storeTimezone',
   'usdEnabled',
+  'pkrOnlyInPakistan',
   'fallbackUsdRate',
   'usdPricing',
   'taxRate',
@@ -57,6 +58,7 @@ export async function POST(req: NextRequest) {
       if (!(r > 1 && r < 10000)) return NextResponse.json({ error: 'Enter a realistic fallback rate (PKR per 1 USD)' }, { status: 400 });
       updates.fallbackUsdRate = r;
     }
+    if ('pkrOnlyInPakistan' in updates) updates.pkrOnlyInPakistan = updates.pkrOnlyInPakistan !== false;
     if ('storeTimezone' in updates && !isValidTimeZone(updates.storeTimezone)) {
       return NextResponse.json({ error: 'Choose a valid store time zone' }, { status: 400 });
     }

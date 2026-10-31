@@ -27,12 +27,14 @@ function initials(name: string): string {
 
 export function HeaderClient({
   nav,
+  mobileNav,
   whatsapp,
   whatsappHref,
   pricing,
   logoUrl,
 }: {
   nav: HeaderNavLink[];
+  mobileNav: HeaderNavLink[];
   whatsapp: string;
   whatsappHref: string;
   pricing: Pricing;
@@ -152,7 +154,17 @@ export function HeaderClient({
           </nav>
 
           <div className="flex items-center gap-1 sm:gap-2">
-            {pricing.usdEnabled && <CurrencySwitcher currency={pricing.currency} resolved={pricing.resolved} className="w-[76px] sm:w-[84px]" />}
+            {pricing.usdOnly ? (
+              <span
+                title="Prices are shown in USD"
+                aria-label="Prices are shown in USD"
+                className="inline-flex items-center justify-center w-[76px] sm:w-[84px] min-h-11 px-2.5 rounded-xl border border-charcoal-border bg-white text-xs sm:text-sm font-semibold text-charcoal select-none"
+              >
+                USD
+              </span>
+            ) : (
+              pricing.usdEnabled && <CurrencySwitcher currency={pricing.currency} resolved={pricing.resolved} className="w-[76px] sm:w-[84px]" />
+            )}
 
             <button
               type="button"
@@ -253,7 +265,7 @@ export function HeaderClient({
         {mobileMenuOpen && (
           <div id="mobile-menu" className="lg:hidden border-t border-charcoal-border bg-white px-4 pt-3 pb-5 animate-fade max-h-[calc(100svh-4rem)] overflow-y-auto">
             <nav aria-label="Mobile navigation" className="flex flex-col gap-1">
-              {nav.map(link => (
+              {mobileNav.map(link => (
                 <Link
                   key={link.href + link.label}
                   href={link.href}

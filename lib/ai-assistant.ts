@@ -41,6 +41,8 @@ export interface AssistantContext {
   /** Signed-in customer id from the session or the linked Telegram chat; null for guests. */
   userId: string | null;
   channel: 'web' | 'telegram';
+  /** Visitor outside Pakistan while the PKR lock is on: quote USD prices only. */
+  usdOnly?: boolean;
 }
 
 export interface AssistantReply {
@@ -84,10 +86,16 @@ async function storeData(): Promise<StoreData> {
   return data;
 }
 
-function priceLabels(v: Product['variants'][number], d: StoreData): { pkr: string; usd?: string } {
+function priceLabels(v: Product['variants'][number], d: StoreData, usdOnly = false): { pkr?: string; usd?: string } {
   const pkr = formatMoney(v.price, 'PKR');
   if (!d.settings.usdEnabled || !(d.rate > 0)) return { pkr };
-  return { pkr, usd: formatMoney(usdPriceFor(v, d.rate, d.settings.usdPricing), 'USD') };
+  const usd = formatMoney(usdPriceFor(v, d.rate, d.settings.usdPricing), 'USD');
+  return usdOnly ? { usd } : { pkr, usd };
+}
+
+/** One price for short lists: PKR, or USD for USD-only visitors. */
+function oneLabel(pr: { pkr?: string; usd?: string }): string {
+  return pr.pkr || pr.usd || '';
 }
 
 function activeVariants(p: Product) {
@@ -99,11 +107,11 @@ function stockLabel(v: Product['variants'][number]): string {
   return v.stock > 0 ? 'in stock' : 'out of stock';
 }
 
-function fromPrice(p: Product, d: StoreData) {
+function fromPrice(p: Product, d: StoreData, usdOnly = false) {
   const vs = activeVariants(p);
   if (vs.length === 0) return { pkr: formatMoney(p.price, 'PKR') };
   const cheapest = vs.reduce((a, b) => (b.price < a.price ? b : a));
-  return priceLabels(cheapest, d);
+  return priceLabels(cheapest, d, usdOnly);
 }
 
 const words = (s: string) =>
@@ -206,7 +214,7 @@ const TOOLS: ToolDef[] = [
       query: { type: 'string', description: 'Product, brand or need, e.g. "netflix", "vpn", "video editing". Optional.' },
       category: { type: 'string', description: 'Category name or slug. Optional.' },
     }),
-    run: async args => {
+    run: async (args, ctx) => {
       const d = await storeData();
       const q = str(args.query);
       const catTerm = str(args.category).toLowerCase();
@@ -226,7 +234,7 @@ const TOOLS: ToolDef[] = [
           name: p.name,
           brand: p.brand,
           category: d.categories.find(c => c.id === p.categoryId)?.name,
-          from_price: fromPrice(p, d),
+          from_price: fromPrice(p, d, ctx.usdOnly),
           plans: activeVariants(p).map(v => v.name),
           delivery_time: p.deliveryTime,
           url: `${baseUrl()}/products/${p.slug}`,
@@ -238,7 +246,7 @@ const TOOLS: ToolDef[] = [
     name: 'get_product_details',
     description: 'Full details of one product: every plan with its PKR and USD price, stock, delivery, features, requirements and refund terms.',
     parameters: obj({ product: { type: 'string', description: 'Product name or slug, e.g. "Netflix Premium".' } }, ['product']),
-    run: async args => {
+    run: async (args, ctx) => {
       const d = await storeData();
       const p = findProduct(str(args.product), d);
       if (!p) return { found: false, hint: 'No matching product. Use search_products to see what is available.' };
@@ -250,8 +258,8 @@ const TOOLS: ToolDef[] = [
         category: d.categories.find(c => c.id === p.categoryId)?.name,
         plans: activeVariants(p).map(v => ({
           plan: v.name,
-          price: priceLabels(v, d),
-          compare_at: v.compareAtPrice && v.compareAtPrice > v.price ? formatMoney(v.compareAtPrice, 'PKR') : undefined,
+          price: priceLabels(v, d, ctx.usdOnly),
+          compare_at: !ctx.usdOnly && v.compareAtPrice && v.compareAtPrice > v.price ? formatMoney(v.compareAtPrice, 'PKR') : undefined,
           availability: stockLabel(v),
           delivery_time: v.deliveryTime || p.deliveryTime,
         })),
@@ -303,7 +311,7 @@ const TOOLS: ToolDef[] = [
     name: 'get_store_info',
     description: 'Contact details, business hours, how ordering and delivery work, and the accepted payment methods with their account details.',
     parameters: obj({}),
-    run: async () => {
+    run: async (_args, ctx) => {
       const d = await storeData();
       const s = d.settings;
       const methods = await db.getPaymentMethods(true);
@@ -314,7 +322,7 @@ const TOOLS: ToolDef[] = [
         whatsapp: s.contactWhatsapp || siteConfig.whatsapp,
         phone: s.contactPhone || siteConfig.phone,
         business_hours: s.businessHours || siteConfig.hours,
-        currencies: s.usdEnabled ? ['PKR', 'USD'] : ['PKR'],
+        currencies: ctx.usdOnly && s.usdEnabled ? ['USD'] : s.usdEnabled ? ['PKR', 'USD'] : ['PKR'],
         how_to_order: [
           'Choose a product and plan, add it to the cart and check out (an account is recommended so orders and deliveries stay in one place).',
           'Pay the exact order total in the order currency to one of the payment accounts.',
@@ -474,6 +482,7 @@ async function systemPrompt(ctx: AssistantContext): Promise<string> {
     '- Be friendly, short and clear: a few sentences or a short list. Use full https links from the tools. Plain text with **bold** and "- " bullets only; no tables or headings.',
     '- Use neutral wording; do not mention a country unless the customer asks about the business address.',
     '- In general answers say "any of our payment methods". Name a specific payment method or account only when the customer asks how to pay or is at the payment step of their own order.',
+    ctx.usdOnly ? '- This customer sees and pays in USD only. Quote USD prices only and never offer PKR.' : '',
     ctx.channel === 'telegram' ? '- You are chatting inside the Telegram bot. Bot commands: /orders, /order ORDER-ID, /access ORDER-ID, /products, /support, /link, /unlink.' : '',
   ]
     .filter(Boolean)
@@ -680,19 +689,19 @@ async function fallbackReply(message: string, ctx: AssistantContext): Promise<st
       const p = hits[0];
       const plans = activeVariants(p)
         .map(v => {
-          const pr = priceLabels(v, d);
-          return `- ${v.name}: ${pr.pkr}${pr.usd ? ` / ${pr.usd}` : ''}`;
+          const pr = priceLabels(v, d, ctx.usdOnly);
+          return `- ${v.name}: ${[pr.pkr, pr.usd].filter(Boolean).join(' / ')}`;
         })
         .join('\n');
       return `**${p.name}**\n${plans}\n\nDetails and ordering: ${baseUrl()}/products/${p.slug}`;
     }
     if (hits.length > 1) {
-      const lines = hits.slice(0, 8).map(p => `- ${p.name} from ${fromPrice(p, d).pkr}: ${baseUrl()}/products/${p.slug}`);
+      const lines = hits.slice(0, 8).map(p => `- ${p.name} from ${oneLabel(fromPrice(p, d, ctx.usdOnly))}: ${baseUrl()}/products/${p.slug}`);
       return `Here is what matches:\n${lines.join('\n')}`;
     }
     const sample = d.products
       .slice(0, 8)
-      .map(p => `- ${p.name} from ${fromPrice(p, d).pkr}`)
+      .map(p => `- ${p.name} from ${oneLabel(fromPrice(p, d, ctx.usdOnly))}`)
       .join('\n');
     return `Here is some of what is available now:\n${sample}\n\nSee everything at ${baseUrl()}/shop. For anything else: ${contact}`;
   }

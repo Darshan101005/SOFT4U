@@ -53,7 +53,8 @@ export function CrudList({
   activeKey?: [string, unknown, unknown];
   orderKey?: 'displayOrder' | 'priority';
   icon?: React.ComponentType<{ className?: string }>;
-  groupBy?: { key: string; labels: Record<string, string> };
+  /** `empty` gives a per-group message for groups without items. */
+  groupBy?: { key: string; labels: Record<string, string>; empty?: Record<string, string> };
 }) {
   const [items, setItems] = useState(initialItems);
   const [form, setForm] = useState<Record<string, any> | null>(null);
@@ -70,8 +71,8 @@ export function CrudList({
     return f;
   };
 
-  const open = (item?: Item) => {
-    if (!item) return setForm(blank());
+  const open = (item?: Item, group?: string) => {
+    if (!item) return setForm(groupBy && group ? { ...blank(), [groupBy.key]: group } : blank());
     const f: Record<string, any> = { id: item.id };
     if (orderKey) f[orderKey] = item[orderKey];
     if (activeKey) f[activeKey[0]] = item[activeKey[0]];
@@ -189,7 +190,12 @@ export function CrudList({
             <div key={g.key}>
               {g.label && <div className="text-xs font-bold text-pista-dark uppercase tracking-wider mb-2">{g.label}</div>}
               {g.list.length === 0 ? (
-                <p className="text-xs text-charcoal-subtle">Nothing here yet.</p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-xl border border-dashed border-pista-200 bg-pista-50 px-4 py-3">
+                  <p className="text-xs text-charcoal-muted">{groupBy?.empty?.[g.key] || `No ${noun.toLowerCase()}s yet. Click Add ${noun.toLowerCase()}.`}</p>
+                  <Button size="sm" variant="secondary" icon={Plus} onClick={() => open(undefined, g.key)}>
+                    Add {noun.toLowerCase()}
+                  </Button>
+                </div>
               ) : (
                 <Card bodyClassName="p-0">
                   <div className="divide-y divide-surface-muted">

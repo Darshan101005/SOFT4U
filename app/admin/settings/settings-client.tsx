@@ -65,6 +65,7 @@ export function SettingsClient({ initialSettings }: { initialSettings: SiteSetti
           maintenanceMessage: s.maintenanceMessage,
           requirePhone: s.requirePhone,
           requireWhatsapp: s.requireWhatsapp,
+          pkrOnlyInPakistan: s.pkrOnlyInPakistan,
           aiSupportEnabled: s.aiSupportEnabled,
           aiSupportName: s.aiSupportName,
           aiWelcomeMessage: s.aiWelcomeMessage,
@@ -169,6 +170,12 @@ export function SettingsClient({ initialSettings }: { initialSettings: SiteSetti
               <Toggle checked={s.requireWhatsapp} onChange={v => set('requireWhatsapp', v)} label="Ask for WhatsApp" description={s.requireWhatsapp ? 'Required at checkout' : 'Optional at checkout'} />
               <Toggle checked={s.requirePhone} onChange={v => set('requirePhone', v)} label="Ask for phone" description={s.requirePhone ? 'Required at checkout' : 'Optional at checkout'} />
             </div>
+            <Toggle
+              checked={s.pkrOnlyInPakistan}
+              onChange={v => set('pkrOnlyInPakistan', v)}
+              label="Allow PKR only for visitors in Pakistan"
+              description="When on, visitors outside Pakistan always see and pay in USD. Turn off to let everyone switch between PKR and USD."
+            />
           </div>
         </Card>
 

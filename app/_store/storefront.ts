@@ -2,7 +2,8 @@ import { cache } from 'react';
 import { db } from '@/lib/db';
 import type { SiteSettings } from '@/lib/db/types';
 import { getUsdPkrRate } from '@/lib/fx';
-import { getCurrencyFromCookies } from '@/lib/currency-pref';
+import { headers } from 'next/headers';
+import { getCurrencyFromCookies, isUsdOnly } from '@/lib/currency-pref';
 import { DEFAULT_USD_PRICING } from '@/lib/pricing';
 import { siteConfig } from '@/lib/site-config';
 import type { Pricing } from '@/app/_store/price';
@@ -28,9 +29,12 @@ export const getPricing = cache(async (): Promise<Pricing> => {
   const settings = await getSettings();
   const usdEnabled = settings?.usdEnabled ?? false;
   const { currency: wanted, source } = await getCurrencyFromCookies();
-  const currency = usdEnabled && wanted === 'USD' ? 'USD' : 'PKR';
+  // Outside Pakistan (while the PKR lock is on) the cookie is ignored: USD only.
+  const h = await headers();
+  const usdOnly = settings && usdEnabled ? await safe(() => isUsdOnly(h, settings), true) : false;
+  const currency = usdOnly || (usdEnabled && wanted === 'USD') ? 'USD' : 'PKR';
   const rate = currency === 'USD' ? await safe(async () => (await getUsdPkrRate()).rate, settings?.fallbackUsdRate || 280) : 1;
-  return { currency, rate, usdPricing: settings?.usdPricing || DEFAULT_USD_PRICING, usdEnabled, resolved: !usdEnabled || source !== 'default' };
+  return { currency, rate, usdPricing: settings?.usdPricing || DEFAULT_USD_PRICING, usdEnabled, resolved: usdOnly || !usdEnabled || source !== 'default', usdOnly };
 });
 
 export interface StoreInfo {

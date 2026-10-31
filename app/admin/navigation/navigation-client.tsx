@@ -19,7 +19,11 @@ export function NavigationClient({ initialNavigation }: { initialNavigation: Nav
       initialItems={initialNavigation as never}
       orderKey="displayOrder"
       activeKey={['visible', true, false]}
-      groupBy={{ key: 'position', labels: POSITIONS }}
+      groupBy={{
+        key: 'position',
+        labels: POSITIONS,
+        empty: { mobile: 'Empty: the mobile menu uses your Header menu links. Add links here only if you want a different menu on phones.' },
+      }}
       primary={i => i.label}
       secondary={i => i.url}
       badges={i =>

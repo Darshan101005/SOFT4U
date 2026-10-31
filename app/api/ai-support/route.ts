@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { askAssistant, type AssistantTurn } from '@/lib/ai-assistant';
 import { readJson } from '@/lib/api';
+import { isUsdOnly } from '@/lib/currency-pref';
 import { getSessionUser } from '@/lib/session';
 import { clientIp } from '@/lib/request-meta';
 import { isLimited, recordAttempt } from '@/lib/rate-limit';
@@ -41,7 +42,8 @@ export async function POST(req: NextRequest) {
     await recordAttempt(key);
 
     const history = Array.isArray(body.history) ? (body.history as AssistantTurn[]) : [];
-    const result = await askAssistant(message, history, { userId: user?.id ?? null, channel: 'web' });
+    const usdOnly = await isUsdOnly(req.headers, settings).catch(() => false);
+    const result = await askAssistant(message, history, { userId: user?.id ?? null, channel: 'web', usdOnly });
     return NextResponse.json({ ...result, signedIn: Boolean(user) });
   } catch (err) {
     console.error('[ai-support] error:', err instanceof Error ? err.message : err);

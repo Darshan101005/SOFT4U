@@ -3,6 +3,7 @@ import { errorResponse, readJson } from '@/lib/api';
 import { couponProblem, priceCart } from '@/lib/checkout';
 import { getSessionUser } from '@/lib/session';
 import { db } from '@/lib/db';
+import { allowedCurrency } from '@/lib/currency-pref';
 
 /** GET ?code= -> { coupon } quick check (dates, limit). Checkout re-validates everything. */
 export async function GET(req: NextRequest) {
@@ -29,7 +30,7 @@ export async function POST(req: NextRequest) {
     const user = await getSessionUser();
     const cart = await priceCart({
       lines: Array.isArray(body.items) ? body.items : [],
-      currency: body.currency === 'USD' ? 'USD' : 'PKR',
+      currency: await allowedCurrency(body.currency, req.headers),
       couponCode: String(body.code || ''),
       customerId: user?.id,
       email: user?.email || (body.email ? String(body.email) : undefined),

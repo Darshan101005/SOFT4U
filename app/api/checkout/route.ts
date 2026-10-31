@@ -11,6 +11,7 @@ import { requestMeta } from '@/lib/request-meta';
 import { logActivity } from '@/lib/activity';
 import { runSweeps } from '@/lib/maintenance';
 import { formatPersonName } from '@/lib/format-name';
+import { allowedCurrency } from '@/lib/currency-pref';
 
 const PHONE_RE = /^\+?[0-9 ()-]{7,20}$/;
 
@@ -47,7 +48,8 @@ export async function POST(req: NextRequest) {
     if (settings.requirePhone && !phone) throw new CheckoutError('PHONE', 'Enter your mobile number');
     if (phone && !PHONE_RE.test(phone)) throw new CheckoutError('PHONE', 'Enter a valid mobile number');
 
-    const currency: Currency = body.currency === 'USD' ? 'USD' : 'PKR';
+    // Outside Pakistan (while the PKR lock is on) the order is always USD, whatever the body says.
+    const currency: Currency = await allowedCurrency(body.currency, req.headers, settings);
     const method = await db.getPaymentMethodByKey(String(body.paymentMethod || ''));
     if (!method || !method.enabled) throw new CheckoutError('PAYMENT_METHOD', 'Choose an available payment method');
 

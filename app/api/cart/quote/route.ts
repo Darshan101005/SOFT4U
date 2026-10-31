@@ -5,6 +5,7 @@ import { errorResponse, readJson } from '@/lib/api';
 import { CheckoutError, priceCart } from '@/lib/checkout';
 import { getUsdPkrRate } from '@/lib/fx';
 import { getSessionUser } from '@/lib/session';
+import { allowedCurrency } from '@/lib/currency-pref';
 import { variantCompareAt, variantPrice } from '@/lib/pricing';
 
 export const dynamic = 'force-dynamic';
@@ -28,7 +29,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await readJson(req);
     const settings = await db.getSiteSettings();
-    const currency: Currency = body.currency === 'USD' && settings.usdEnabled ? 'USD' : 'PKR';
+    const currency: Currency = await allowedCurrency(body.currency, req.headers, settings);
     const rate = currency === 'USD' ? (await getUsdPkrRate()).rate : 1;
     const input: LineIn[] = Array.isArray(body.items) ? body.items.slice(0, 20) : [];
 

@@ -17,9 +17,11 @@ export interface Pricing {
   usdEnabled: boolean;
   /** False when the visitor's currency is not known yet (no cookie, no edge country); prices render as skeletons until the browser detects it. */
   resolved: boolean;
+  /** True for visitors outside Pakistan while the PKR lock is on: USD only, no switcher. */
+  usdOnly: boolean;
 }
 
-export const PKR_PRICING: Pricing = { currency: 'PKR', rate: 1, usdPricing: DEFAULT_USD_PRICING, usdEnabled: false, resolved: true };
+export const PKR_PRICING: Pricing = { currency: 'PKR', rate: 1, usdPricing: DEFAULT_USD_PRICING, usdEnabled: false, resolved: true, usdOnly: false };
 
 /** Formats an amount, e.g. "PKR 1,299" or "USD 4.99". */
 export function formatPrice(amount: number, currency: Currency = 'PKR'): string {

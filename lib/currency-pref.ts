@@ -1,6 +1,7 @@
 import https from 'https';
 import { cookies, headers } from 'next/headers';
-import type { Currency } from '@/lib/db/types';
+import { db } from '@/lib/db';
+import type { Currency, SiteSettings } from '@/lib/db/types';
 import { clientIp } from '@/lib/request-meta';
 
 /**
@@ -82,4 +83,25 @@ export async function requestCountry(headers: Headers): Promise<string | null> {
 export function currencyForCountry(country: string | null): Currency {
   if (!country) return 'PKR';
   return country === 'PK' ? 'PKR' : 'USD';
+}
+
+/**
+ * True when this request may only use USD: USD is accepted, the admin setting
+ * "Allow PKR only for visitors in Pakistan" is on, and the request IP is not in
+ * Pakistan (an unknown country counts as outside). The country comes from the
+ * server side only (Vercel's edge header or the IP lookup), never from the client.
+ */
+export async function isUsdOnly(h: Headers, settings?: Pick<SiteSettings, 'usdEnabled' | 'pkrOnlyInPakistan'>): Promise<boolean> {
+  const s = settings ?? (await db.getSiteSettings());
+  if (!s.usdEnabled || !s.pkrOnlyInPakistan) return false;
+  const country = await requestCountry(h).catch(() => null);
+  return country !== 'PK';
+}
+
+/** The currency a request may price in: PKR when USD is off, USD for USD-only visitors, otherwise what was asked for. */
+export async function allowedCurrency(wanted: unknown, h: Headers, settings?: Pick<SiteSettings, 'usdEnabled' | 'pkrOnlyInPakistan'>): Promise<Currency> {
+  const s = settings ?? (await db.getSiteSettings());
+  if (!s.usdEnabled) return 'PKR';
+  if (await isUsdOnly(h, s)) return 'USD';
+  return wanted === 'USD' ? 'USD' : 'PKR';
 }
