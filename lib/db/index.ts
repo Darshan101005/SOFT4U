@@ -1892,8 +1892,9 @@ export const db = {
     db.updatePaymentMethod(id, updates),
 
   /* ---------------- Site settings (cached 60s per instance) ---------------- */
-  getSiteSettings: async (): Promise<SiteSettings> => {
-    if (settingsCache && Date.now() - settingsCache.at < SETTINGS_TTL_MS) return settingsCache.value;
+  /** `fresh` skips the per-instance cache (checkout rules must follow the last admin save on every server instance). */
+  getSiteSettings: async (opts?: { fresh?: boolean }): Promise<SiteSettings> => {
+    if (!opts?.fresh && settingsCache && Date.now() - settingsCache.at < SETTINGS_TTL_MS) return settingsCache.value;
     const r = await queryOne<{ data: Partial<SiteSettings> }>(`SELECT data FROM site_settings WHERE id = 1`);
     const value = mergeSettings(r?.data);
     settingsCache = { value, at: Date.now() };
@@ -1901,7 +1902,7 @@ export const db = {
   },
 
   updateSiteSettings: async (updates: Partial<SiteSettings>): Promise<SiteSettings> => {
-    const current = await db.getSiteSettings();
+    const current = await db.getSiteSettings({ fresh: true });
     const next = mergeSettings({
       ...current,
       ...updates,

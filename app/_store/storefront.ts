@@ -27,10 +27,10 @@ export const getSettings = cache(async (): Promise<SiteSettings | null> => safe(
 export const getPricing = cache(async (): Promise<Pricing> => {
   const settings = await getSettings();
   const usdEnabled = settings?.usdEnabled ?? false;
-  const { currency: wanted } = await getCurrencyFromCookies();
+  const { currency: wanted, source } = await getCurrencyFromCookies();
   const currency = usdEnabled && wanted === 'USD' ? 'USD' : 'PKR';
   const rate = currency === 'USD' ? await safe(async () => (await getUsdPkrRate()).rate, settings?.fallbackUsdRate || 280) : 1;
-  return { currency, rate, usdPricing: settings?.usdPricing || DEFAULT_USD_PRICING, usdEnabled };
+  return { currency, rate, usdPricing: settings?.usdPricing || DEFAULT_USD_PRICING, usdEnabled, resolved: !usdEnabled || source !== 'default' };
 });
 
 export interface StoreInfo {

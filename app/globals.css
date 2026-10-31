@@ -134,6 +134,69 @@ summary::-webkit-details-marker {
   display: none;
 }
 
+/* Loading skeletons: soft light-pistachio shimmer */
+@keyframes soft4u-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+.soft4u-shimmer {
+  background: linear-gradient(90deg, var(--color-pista-50) 0%, var(--color-pista-100) 40%, var(--color-pista-50) 80%);
+  background-size: 200% 100%;
+  animation: soft4u-shimmer 1.4s ease-in-out infinite;
+}
+
+/*
+ * Prices. Every rendered price carries data-price. The currency switcher's hidden
+ * marker (data-price-state) turns them into skeleton bars while the visitor's
+ * currency is unknown, and fades them while a new currency loads. Cart and
+ * checkout mark a quote in the previous currency with data-price-stale.
+ */
+html:has([data-price-state='unresolved']) [data-price] {
+  color: transparent !important;
+  border-radius: 6px;
+  user-select: none;
+  background: linear-gradient(90deg, var(--color-pista-50) 0%, var(--color-pista-100) 40%, var(--color-pista-50) 80%);
+  background-size: 200% 100%;
+  animation: soft4u-shimmer 1.4s ease-in-out infinite;
+}
+html:has([data-price-state='unresolved']) [data-price] * {
+  color: transparent !important;
+}
+html:has([data-price-state='switching']) [data-price],
+[data-price-stale] {
+  opacity: 0.45;
+  transition: opacity 0.2s ease;
+}
+
+/* Route progress bar */
+@keyframes soft4u-progress {
+  from {
+    transform: scaleX(0.05);
+  }
+  to {
+    transform: scaleX(0.85);
+  }
+}
+.soft4u-progress {
+  transform-origin: left;
+  animation: soft4u-progress 8s cubic-bezier(0.1, 0.7, 0.2, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .soft4u-shimmer,
+  html:has([data-price-state='unresolved']) [data-price] {
+    animation: none !important;
+  }
+  .soft4u-progress {
+    animation: none !important;
+    transform: scaleX(0.6);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

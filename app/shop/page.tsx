@@ -16,7 +16,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   const sp = await searchParams;
   const filtered = Object.keys(sp).length > 0;
   const title = `Shop All Subscriptions & Software | ${siteConfig.name}`;
-  const description = `Browse OTT and streaming subscriptions, AI tools, VPNs and software licences at ${siteConfig.name}. Prices in PKR and USD with private digital delivery.`;
+  const description = `Browse OTT and streaming subscriptions, AI tools, VPNs and software licences at ${siteConfig.name}. Clear prices with private digital delivery.`;
   return {
     title: { absolute: title },
     description,

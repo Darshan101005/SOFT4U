@@ -7,6 +7,7 @@ import { OrderView } from '@/components/order/order-view';
 import { loadOrderForViewer, toPublicOrder, type PublicOrder } from '@/lib/order-access';
 import { normalizeEmail } from '@/lib/password-policy';
 import { getStoreInfo, safe } from '@/app/_store/storefront';
+import { FormSubmitButton } from '@/components/ui/loading-button';
 
 export const dynamic = 'force-dynamic';
 
@@ -66,10 +67,10 @@ export default async function TrackOrderPage({ searchParams }: Props) {
               </label>
               <input id="track-email" name="email" type="email" required defaultValue={email} autoComplete="email" className={inputCls} />
             </div>
-            <button type="submit" className="w-full min-h-12 bg-pista-dark text-white hover:bg-pista-darker text-sm font-bold rounded-xl flex items-center justify-center gap-2 transition-colors">
+            <FormSubmitButton className="w-full min-h-12 bg-pista-dark text-white hover:bg-pista-darker text-sm font-bold rounded-xl flex items-center justify-center gap-2 transition-colors">
               <Search className="w-4 h-4" aria-hidden="true" />
               Track Order
-            </button>
+            </FormSubmitButton>
           </form>
 
           {(error || needEmail) && (

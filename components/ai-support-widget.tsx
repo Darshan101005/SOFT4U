@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { Bot, X, Send, RefreshCw } from 'lucide-react';
+import { Bot, X, Send, RefreshCw, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/context/auth-context';
 
 const ASSISTANT_NAME = 'SOFT4U ASSISTANT';
@@ -268,8 +268,9 @@ export function AiSupportWidget() {
               disabled={!input.trim() || isLoading}
               className="px-3.5 bg-pista-dark text-white rounded-md hover:bg-pista-darker disabled:opacity-40 transition-colors flex items-center justify-center"
               aria-label="Send message"
+              aria-busy={isLoading || undefined}
             >
-              <Send className="w-4 h-4" />
+              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <Send className="w-4 h-4" />}
             </button>
           </form>
         </div>

@@ -32,7 +32,7 @@ export function PaymentDetails({
   sendValue,
 }: {
   method: PaymentAccount;
-  amountLabel: string;
+  amountLabel: React.ReactNode;
   amountValue?: string;
   /** "GBP 7.90" when the account receives another currency than the order. */
   sendLabel?: string;

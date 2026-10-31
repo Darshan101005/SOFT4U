@@ -15,9 +15,11 @@ export interface Pricing {
   usdPricing: UsdPricingDefaults;
   /** False hides the PKR / USD switcher and forces PKR. */
   usdEnabled: boolean;
+  /** False when the visitor's currency is not known yet (no cookie, no edge country); prices render as skeletons until the browser detects it. */
+  resolved: boolean;
 }
 
-export const PKR_PRICING: Pricing = { currency: 'PKR', rate: 1, usdPricing: DEFAULT_USD_PRICING, usdEnabled: false };
+export const PKR_PRICING: Pricing = { currency: 'PKR', rate: 1, usdPricing: DEFAULT_USD_PRICING, usdEnabled: false, resolved: true };
 
 /** Formats an amount, e.g. "PKR 1,299" or "USD 4.99". */
 export function formatPrice(amount: number, currency: Currency = 'PKR'): string {

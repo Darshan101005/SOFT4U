@@ -462,6 +462,7 @@ async function systemPrompt(ctx: AssistantContext): Promise<string> {
     `- For problems you cannot solve, give the support contacts (email ${d.settings.contactEmail || siteConfig.email}, WhatsApp ${d.settings.contactWhatsapp || siteConfig.whatsapp}).`,
     '- Be friendly, short and clear: a few sentences or a short list. Use full https links from the tools. Plain text with **bold** and "- " bullets only; no tables or headings.',
     '- Use neutral wording; do not mention a country unless the customer asks about the business address.',
+    '- In general answers say "any of our payment methods". Name a specific payment method or account only when the customer asks how to pay or is at the payment step of their own order.',
     ctx.channel === 'telegram' ? '- You are chatting inside the Telegram bot. Bot commands: /orders, /order ORDER-ID, /access ORDER-ID, /products, /support, /link, /unlink.' : '',
   ]
     .filter(Boolean)
@@ -656,7 +657,7 @@ async function fallbackReply(message: string, ctx: AssistantContext): Promise<st
   if (aboutPaying || /\bpayment\b/.test(text)) {
     const methods = await db.getPaymentMethods(true).catch(() => []);
     const list = methods.map(m => `- ${m.name}: ${m.accountTitle}, ${m.accountNumber}${m.sortCode ? `, sort code ${m.sortCode}` : ''}${m.payCurrency === 'GBP' ? ' (send the GBP amount shown at checkout)' : ''}`).join('\n');
-    return `Payments are checked by hand:\n1. Place your order. The total is shown in your currency (PKR or USD).\n2. Transfer exactly that amount to one of these accounts:\n${list || '- shown at checkout'}\n3. Upload the payment screenshot and enter the transaction ID at checkout or on your order page.\n\nOur team approves it and delivers your access. Questions? ${contact}`;
+    return `Payments are checked by hand:\n1. Place your order. The total is shown at checkout.\n2. Transfer exactly that amount to one of these accounts:\n${list || '- shown at checkout'}\n3. Upload the payment screenshot and enter the transaction ID at checkout or on your order page.\n\nOur team approves it and delivers your access. Questions? ${contact}`;
   }
   if (/refund|replace|warranty|return/.test(text)) {
     return `Refund and replacement rules are here: ${baseUrl()}/refund-policy. If your access stops working during the plan, contact us and we will fix or replace it: ${contact}`;

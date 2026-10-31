@@ -37,7 +37,7 @@ export const seedProducts: ProductInput[] = products.map((p, index) => {
     })),
     deliveryMethod: 'Email, WhatsApp or Telegram',
     usageInstructions: `After your payment is verified, your access details are delivered to your ${siteConfig.name} account and sent by email, plus WhatsApp or Telegram if you add them. Follow the steps in the message, or contact ${siteConfig.name} support for help.`,
-    longDescription: `${p.name} with clear plan options and protected ordering. ${p.shortDescription} Pay by bank transfer, Easypaisa or JazzCash, upload your payment screenshot, and receive your access as soon as the payment is verified. Our support team is available on WhatsApp if you need help with activation.`,
+    longDescription: `${p.name} with clear plan options and protected ordering. ${p.shortDescription} Pay with any of our available payment methods, upload your payment screenshot, and receive your access as soon as the payment is verified. Our support team is available on WhatsApp if you need help with activation.`,
   };
 });
 
@@ -47,7 +47,7 @@ export const seedFaqs: Array<Omit<FAQ, 'createdAt'>> = [
   {
     id: 'faq_payment_methods',
     question: 'How can I pay?',
-    answer: 'We accept bank transfer, Easypaisa and JazzCash. At checkout you see our account details. Send the exact amount, then upload your payment screenshot and transaction ID on the order page.',
+    answer: 'We accept several bank and mobile wallet payment methods. At checkout you see the account details for the method you choose. Send the exact total, then upload your payment screenshot and transaction ID on the order page.',
     category: 'Payments',
     displayOrder: 1,
     status: 'active',
@@ -149,8 +149,8 @@ ${siteConfig.name} sells digital goods only: OTT and streaming subscriptions, ac
 - Keep delivered login details private. Do not change passwords, profiles or account emails unless the product page allows it.
 
 ## Prices and payment
-- Prices are shown in PKR or USD. You pay exactly the order total in the currency shown at checkout.
-- Payment is made by bank transfer, Easypaisa or JazzCash to the account shown at checkout. There is no automatic card gateway.
+- Prices are shown in the currency displayed on the site; you pay exactly the order total shown at checkout.
+- Payment is made using the payment methods shown at checkout, to the account shown there. There is no automatic card gateway.
 - After paying, upload your payment screenshot and transaction ID. Every payment is verified manually. An order is confirmed only after we approve the payment.
 - An order stays awaiting payment until you upload the payment proof or cancel it.
 - We may reject a payment proof that cannot be matched, and may cancel and refund any order if a pricing error occurs or fraud is suspected.
@@ -240,7 +240,7 @@ If your subscription stops working during the plan you paid for, contact us and 
 Email ${siteConfig.email} or WhatsApp ${siteConfig.whatsapp} with your Order ID, a short description and a screenshot of any error. We reply within 24 hours.
 
 ## Refund method
-Approved refunds are sent back by bank transfer, Easypaisa or JazzCash, normally within 3 working days of approval.
+Approved refunds are sent back to the original payment method or another method agreed with you, normally within 3 working days of approval.
 
 ## Cancellation
 You can cancel an order any time before it is delivered. If you already paid, the payment is refunded in full.`,
@@ -306,12 +306,12 @@ export const seedHomepageSections: Array<HomepageSection> = [
     settings: {
       kicker: `${siteConfig.name.toUpperCase()} DIGITAL STORE`,
       headline: 'All your subscriptions in one place',
-      subheadline: 'OTT, streaming, AI tools, VPN and software in PKR or USD. Pay by bank, Easypaisa or JazzCash and get private delivery after verification.',
+      subheadline: 'OTT, streaming, AI tools, VPN and software at the best prices. Pay with any of our payment methods and get fast, private delivery after verification.',
       primaryCtaText: 'Browse products',
       primaryCtaUrl: '/shop',
       secondaryCtaText: 'Track an order',
       secondaryCtaUrl: '/track-order',
-      highlights: ['Store live', 'Verified payments', 'Private delivery'],
+      highlights: ['Instant delivery', 'Secure payments', '24/7 support'],
     },
   },
   {
@@ -345,7 +345,7 @@ export const seedHomepageSections: Array<HomepageSection> = [
       subtitle: 'Four simple steps.',
       steps: [
         { step: '01', title: 'Choose your plan', desc: 'Pick a product and plan, then sign in and check out.' },
-        { step: '02', title: 'Pay and upload proof', desc: 'Send the amount by bank, Easypaisa or JazzCash and upload the screenshot and transaction ID.' },
+        { step: '02', title: 'Pay and upload proof', desc: 'Send the payment using any of our payment methods and upload the screenshot and transaction ID.' },
         { step: '03', title: 'We verify', desc: 'Our team checks your payment, usually within 5 to 30 minutes.' },
         { step: '04', title: 'Get your access', desc: 'Delivered to your order page, email, and WhatsApp or Telegram.' },
       ],
@@ -361,7 +361,7 @@ export const seedHomepageSections: Array<HomepageSection> = [
       title: `Why ${siteConfig.name}`,
       subtitle: 'Clear prices, real people, private delivery.',
       items: [
-        { icon: 'Wallet', title: 'PKR and USD prices', desc: 'Clear prices with no hidden charges.' },
+        { icon: 'Wallet', title: 'Clear prices', desc: 'No hidden charges. You pay exactly the total shown at checkout.' },
         { icon: 'BadgeCheck', title: 'Checked by a person', desc: 'Every payment and delivery is handled by our team.' },
         { icon: 'Lock', title: 'Private access', desc: 'Your details are visible only to you.' },
         { icon: 'RefreshCw', title: 'Replacement support', desc: 'If access stops working during your plan, we fix it.' },

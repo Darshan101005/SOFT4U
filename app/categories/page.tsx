@@ -14,7 +14,7 @@ import { formatPrice, fromPrice } from '@/app/_store/price';
 export const dynamic = 'force-dynamic';
 
 const title = `All Categories | ${siteConfig.name}`;
-const description = `Shop by category at ${siteConfig.name}: streaming and OTT, music, AI tools, VPN, antivirus and creative software, priced in PKR and USD.`;
+const description = `Shop by category at ${siteConfig.name}: streaming and OTT, music, AI tools, VPN, antivirus and creative software at the best prices.`;
 
 export const metadata: Metadata = {
   title: { absolute: title },
@@ -66,7 +66,12 @@ export default async function CategoriesPage() {
                       <h2 className="text-lg font-bold text-charcoal group-hover:text-pista-darker">{cat.name}</h2>
                       <p className="text-xs text-charcoal-subtle mt-0.5">
                         {list.length} product{list.length === 1 ? '' : 's'}
-                        {from !== null ? ` · from ${formatPrice(from, pricing.currency)}` : ''}
+                        {from !== null && (
+                          <>
+                            {' · from '}
+                            <span data-price>{formatPrice(from, pricing.currency)}</span>
+                          </>
+                        )}
                       </p>
                     </div>
                   </Link>
@@ -78,7 +83,7 @@ export default async function CategoriesPage() {
                           <li key={p.id}>
                             <Link href={`/products/${p.slug}`} className="flex items-center justify-between gap-2 min-h-11 text-charcoal hover:text-pista-dark">
                               <span className="truncate">{p.name}</span>
-                              <span className="text-xs text-charcoal-subtle whitespace-nowrap">{formatPrice(fromPrice(p, pricing).price, pricing.currency)}</span>
+                              <span className="text-xs text-charcoal-subtle whitespace-nowrap" data-price>{formatPrice(fromPrice(p, pricing).price, pricing.currency)}</span>
                             </Link>
                           </li>
                         ))}

@@ -65,7 +65,7 @@ export function SettingsClient({ initialSettings }: { initialSettings: SiteSetti
       });
       setS(res.settings);
       setAlertEmails((res.settings.orderAlertEmails || []).join(', '));
-      toast.success('Settings saved. The website shows them within a minute.');
+      toast.success('Settings saved. Checkout uses them right away; other pages within a minute.');
     } catch (err) {
       toast.error(errMsg(err));
     } finally {
@@ -152,8 +152,8 @@ export function SettingsClient({ initialSettings }: { initialSettings: SiteSetti
               <Input value={alertEmails} onChange={e => setAlertEmails(e.target.value)} placeholder="orders@soft4u.top, owner@gmail.com" />
             </Field>
             <div className="grid gap-4 sm:grid-cols-2">
-              <Toggle checked={s.requireWhatsapp} onChange={v => set('requireWhatsapp', v)} label="Ask for WhatsApp" description="Required at checkout" />
-              <Toggle checked={s.requirePhone} onChange={v => set('requirePhone', v)} label="Ask for phone" description="Required at checkout" />
+              <Toggle checked={s.requireWhatsapp} onChange={v => set('requireWhatsapp', v)} label="Ask for WhatsApp" description={s.requireWhatsapp ? 'Required at checkout' : 'Optional at checkout'} />
+              <Toggle checked={s.requirePhone} onChange={v => set('requirePhone', v)} label="Ask for phone" description={s.requirePhone ? 'Required at checkout' : 'Optional at checkout'} />
             </div>
           </div>
         </Card>

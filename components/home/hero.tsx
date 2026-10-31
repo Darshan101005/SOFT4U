@@ -28,12 +28,14 @@ export function Hero({ settings = {} }: { settings?: HeroSettings }) {
   const image = custom.startsWith('/') || custom.startsWith('https://res.cloudinary.com/qvjuu1ao/') ? custom : HERO_IMAGE;
   const headline = (settings.headline || 'Premium Digital Products, Instantly.').trim();
   const words = headline.split(' ');
-  const lead = words.length > 2 ? words.slice(0, -2).join(' ') : '';
+  // A non-breaking space keeps the last word of the first line (e.g. "in") with the word before it.
+  const lead = words.length > 2 ? words.slice(0, -2).join(' ').replace(/ (\S+)$/, '\u00a0$1') : '';
   const tail = words.length > 2 ? words.slice(-2).join(' ') : headline;
-  const sub = settings.subheadline || 'Software licences, subscriptions, accounts and more, delivered quickly, safely and at the best prices.';
+  const sub = settings.subheadline || 'OTT, streaming, AI tools, VPN and software at the best prices. Pay with any of our payment methods and get fast, private delivery after verification.';
   const primary = { text: settings.primaryCtaText || 'Shop Now', url: settings.primaryCtaUrl || '/shop' };
   const secondary = { text: settings.secondaryCtaText || 'Explore Categories', url: settings.secondaryCtaUrl || '/categories' };
-  const highlights = Array.isArray(settings.highlights) && settings.highlights.length ? settings.highlights : ['Store live', 'Verified payments', 'Private delivery'];
+  const highlights = Array.isArray(settings.highlights) && settings.highlights.length ? settings.highlights : ['Instant delivery', 'Secure payments', '24/7 support'];
+  const kicker = settings.kicker || 'Private delivery after payment verification';
 
   return (
     <section aria-labelledby="hero-title" className="relative isolate overflow-hidden bg-pista-50 border-b border-charcoal-border">
@@ -43,23 +45,29 @@ export function Hero({ settings = {} }: { settings?: HeroSettings }) {
       <div className="xl:hidden relative w-full aspect-[16/9] sm:aspect-[1801/873] max-h-[46svh] sm:max-h-none animate-fade">
         <Image src={image} alt="" fill priority sizes="100vw" className="object-cover object-[85%_center] sm:object-center" />
         <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-pista-50 to-transparent" aria-hidden="true" />
+        {/* Phones: the badge sits on the empty top-left of the scene */}
+        <div className="sm:hidden absolute top-4 left-4 max-w-[52%] inline-flex items-center gap-1.5 rounded-full pl-1.5 pr-3 py-1 bg-white/80 backdrop-blur-sm border border-white/70 text-[11px] leading-tight font-semibold text-charcoal-muted shadow-sm">
+          <span className="w-5 h-5 shrink-0 rounded-full inline-flex items-center justify-center bg-gradient-to-br from-pista-200 to-pista-500 text-white">
+            <Sparkles className="w-3 h-3" aria-hidden="true" />
+          </span>
+          {kicker}
+        </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:min-h-[clamp(520px,calc(100svh_-_4rem),680px)] flex items-center pt-2 pb-8 sm:pt-8 sm:pb-10 xl:py-16">
-        <div className="w-full max-w-2xl xl:max-w-[540px] animate-rise">
+        <div className="w-full max-w-2xl xl:max-w-[min(58%,700px)] animate-rise">
           {(
-
-            <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 sm:px-4 sm:py-2 bg-white/90 border border-charcoal-border text-xs sm:text-sm font-semibold text-charcoal-muted shadow-sm">
+            <div className="hidden sm:inline-flex items-center gap-2 rounded-full px-3 py-1.5 sm:px-4 sm:py-2 bg-white/90 border border-charcoal-border text-xs sm:text-sm font-semibold text-charcoal-muted shadow-sm">
               <span className="w-5 h-5 rounded-full inline-flex items-center justify-center bg-gradient-to-br from-pista-200 to-pista-500 text-white">
                 <Sparkles className="w-3 h-3" aria-hidden="true" />
               </span>
-              {settings.kicker || 'Private delivery after payment verification'}
+              {kicker}
             </div>
           )}
 
           <h1
             id="hero-title"
-            className="mt-4 sm:mt-6 mb-3 sm:mb-4 text-[length:clamp(2rem,7.5vw,4.75rem)] leading-[1.02] tracking-[-0.04em] font-extrabold text-charcoal"
+            className="mt-1 sm:mt-6 mb-3 sm:mb-4 text-[length:clamp(2rem,7.5vw,4.75rem)] sm:text-[length:clamp(2.25rem,4.6vw,3.25rem)] xl:text-[length:clamp(2.75rem,3.6vw,3.75rem)] leading-[1.04] tracking-[-0.04em] font-extrabold text-charcoal sm:text-balance"
           >
             {lead && (
               <>
@@ -88,9 +96,9 @@ export function Hero({ settings = {} }: { settings?: HeroSettings }) {
             </Link>
           </div>
 
-          <ul className="mt-5 sm:mt-7 flex flex-wrap items-center gap-x-4 sm:gap-x-5 gap-y-2 text-xs sm:text-sm text-charcoal-muted">
+          <ul className="mt-5 sm:mt-7 flex flex-wrap items-center gap-x-3 sm:gap-x-5 gap-y-1.5 text-xs sm:text-sm text-charcoal-muted">
             {highlights.map((item, idx) => (
-              <li key={item} className="inline-flex items-center gap-2">
+              <li key={item} className="inline-flex items-center gap-1.5 sm:gap-2 whitespace-nowrap">
                 <span className={`w-2 h-2 rounded-full ${idx === 0 ? 'bg-pista-500 animate-pulse' : 'bg-pista-300'}`} aria-hidden="true" />
                 {item}
               </li>

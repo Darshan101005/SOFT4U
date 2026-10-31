@@ -20,6 +20,7 @@ import {
   verifyAdminToken,
 } from '@/lib/admin-jwt';
 import { AuthError } from '@/lib/auth';
+import { formatPersonName } from '@/lib/format-name';
 
 export { ADMIN_COOKIE, ADMIN_2FA_COOKIE } from '@/lib/admin-jwt';
 
@@ -180,7 +181,7 @@ function validatePassword(password: string) {
 }
 
 export async function createAdmin(input: { name: string; email: string; password: string }, createdBy?: string): Promise<AdminUser> {
-  const name = (input.name || '').trim();
+  const name = formatPersonName(input.name);
   const email = normalizeEmail(input.email);
   if (name.length < 2) throw new AuthError('INVALID_NAME', 'Enter a name');
   if (!EMAIL_RE.test(email)) throw new AuthError('INVALID_EMAIL', 'Enter a valid email address');
@@ -209,9 +210,9 @@ export async function ensureSeedAdmin(email: string, password: string, name = 'S
 export async function updateAdminProfile(adminId: string, updates: { name?: string; email?: string }): Promise<AdminUser> {
   const row = await rowById(adminId);
   if (!row) throw new AuthError('NOT_FOUND', 'Admin not found', 404);
-  const name = updates.name !== undefined ? updates.name.trim() : row.name;
+  const name = updates.name !== undefined ? formatPersonName(updates.name) : row.name;
   const email = updates.email !== undefined ? normalizeEmail(updates.email) : row.email;
-  if (name.length < 2) throw new AuthError('INVALID_NAME', 'Enter a name');
+  if (name.length < 2 || name.length > 80) throw new AuthError('INVALID_NAME', 'Enter a name (2-80 characters)');
   if (!EMAIL_RE.test(email)) throw new AuthError('INVALID_EMAIL', 'Enter a valid email address');
   if (email !== normalizeEmail(row.email)) {
     const dupe = await rowByEmail(email);

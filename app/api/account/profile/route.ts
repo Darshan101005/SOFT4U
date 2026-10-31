@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { errorResponse, readJson, requireUser } from '@/lib/api';
+import { formatPersonName } from '@/lib/format-name';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,7 +27,8 @@ export async function PATCH(req: NextRequest) {
   if (user instanceof NextResponse) return user;
   try {
     const body = await readJson(req);
-    const name = clean(body.name, 80);
+    const rawName = clean(body.name, 80);
+    const name = rawName === undefined ? undefined : formatPersonName(rawName);
     if (name !== undefined && name.length < 2) return NextResponse.json({ error: 'Enter your full name' }, { status: 400 });
     const phone = clean(body.phone, 24);
     const whatsapp = clean(body.whatsapp, 24);

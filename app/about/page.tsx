@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 const highlights = [
   { icon: BadgeCheck, title: 'Verified by a person', text: 'Every payment is checked by our team before delivery, so you always know where your order stands.' },
   { icon: Lock, title: 'Private delivery', text: 'Access details are shown only on your order page and account, and sent to the channels you choose.' },
-  { icon: Wallet, title: 'Clear prices', text: 'Prices in PKR or USD with no hidden charges. Pay by bank transfer, Easypaisa or JazzCash.' },
+  { icon: Wallet, title: 'Clear prices', text: 'No hidden charges. Pay with any of our payment methods and you pay exactly the total shown at checkout.' },
   { icon: Headphones, title: 'Real human support', text: 'Our team answers on WhatsApp, Telegram and email, and replaces access that stops working during your plan.' },
 ];
 

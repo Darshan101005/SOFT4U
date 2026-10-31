@@ -79,6 +79,21 @@ export function CatalogBrowser({
   const abortRef = useRef<AbortController | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
 
+  // After a currency switch the server sends a new first page; price bounds and
+  // price filters from the old currency no longer apply, so drop them.
+  const [priceReset, setPriceReset] = useState(false);
+  const [lastCurrency, setLastCurrency] = useState(pricing.currency);
+  if (lastCurrency !== pricing.currency) {
+    setLastCurrency(pricing.currency);
+    setResult(initial);
+    if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
+      setFilters(f => ({ ...f, minPrice: undefined, maxPrice: undefined }));
+      setPriceReset(true);
+    }
+    setDraft(d => ({ ...d, minPrice: undefined, maxPrice: undefined }));
+    setPreview(null);
+  }
+
   const withLock = useCallback((f: CatalogFilters): CatalogFilters => (lockedCategory ? { ...f, categories: [lockedCategory] } : f), [lockedCategory]);
 
   const fetchCatalog = useCallback(
@@ -93,6 +108,7 @@ export function CatalogBrowser({
   const apply = useCallback(
     async (next: CatalogFilters, opts: { keepPage?: boolean; scroll?: boolean } = {}) => {
       const f = { ...next, page: opts.keepPage ? next.page : 1 };
+      setPriceReset(false);
       setFilters(f);
       const urlFilters = lockedCategory ? { ...f, categories: [] } : f;
       const qs = buildCatalogQuery(urlFilters);
@@ -114,6 +130,13 @@ export function CatalogBrowser({
     },
     [basePath, fetchCatalog, lockedCategory],
   );
+
+  // Reload the grid without the old-currency price filter after a currency switch.
+  useEffect(() => {
+    if (!priceReset) return;
+    const t = setTimeout(() => apply(filters), 0);
+    return () => clearTimeout(t);
+  }, [priceReset, apply, filters]);
 
   // Debounced search box.
   useEffect(() => {
@@ -285,6 +308,7 @@ export function CatalogBrowser({
                     onClick={() => removeChip(c)}
                     className="inline-flex items-center gap-1.5 min-h-9 pl-3 pr-2 rounded-full bg-pista-lighter border border-pista-200 text-xs font-semibold text-pista-darker hover:bg-pista-100"
                     aria-label={`Remove filter ${c.label}`}
+                    data-price={c.key === 'price' || undefined}
                   >
                     {c.label}
                     <X className="w-3.5 h-3.5" aria-hidden="true" />
@@ -700,6 +724,7 @@ function PriceRange({
           <input
             id={`${idPrefix}-price-min`}
             inputMode="decimal"
+            data-price
             value={loText}
             onChange={e => setLoText(e.target.value.replace(/[^\d.]/g, ''))}
             onBlur={() => {
@@ -717,6 +742,7 @@ function PriceRange({
           <input
             id={`${idPrefix}-price-max`}
             inputMode="decimal"
+            data-price
             value={hiText}
             onChange={e => setHiText(e.target.value.replace(/[^\d.]/g, ''))}
             onBlur={() => {

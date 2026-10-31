@@ -9,6 +9,8 @@ import { useCart } from '@/lib/context/cart-context';
 import { useAuth } from '@/lib/context/auth-context';
 import { ProductCard, type RatingSummary } from '@/components/product-card';
 import { ProductImage } from '@/components/brand/product-image';
+import { LoadingButton } from '@/components/ui/loading-button';
+import { startRouteProgress } from '@/components/route-progress';
 import { activeVariants, compareAtOf, discountPercent, formatPrice, isInstant, isOrderable, maxQuantity, priceOf, variantStock, type Pricing } from '@/app/_store/price';
 
 type Tab = 'description' | 'activation' | 'warranty' | 'reviews';
@@ -47,6 +49,8 @@ export function ProductClient({
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<Tab>('description');
   const [addedNotice, setAddedNotice] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [buying, setBuying] = useState(false);
 
   const price = selected ? priceOf(selected, pricing) : 0;
   const compareAt = selected ? compareAtOf(selected, pricing) : undefined;
@@ -59,14 +63,20 @@ export function ProductClient({
 
   const handleAddToCart = () => {
     if (!selected || !canBuy) return;
+    setAdding(true);
     addItem(product, selected, qty);
-    setAddedNotice(true);
-    setTimeout(() => setAddedNotice(false), 3500);
+    setTimeout(() => {
+      setAdding(false);
+      setAddedNotice(true);
+    }, 300);
+    setTimeout(() => setAddedNotice(false), 3800);
   };
 
   const handleBuyNow = () => {
     if (!selected || !canBuy) return;
+    setBuying(true);
     addItem(product, selected, qty);
+    startRouteProgress();
     router.push('/checkout');
   };
 
@@ -165,11 +175,11 @@ export function ProductClient({
 
           <div className="p-4 bg-pista-lighter border border-pista-light rounded-xl flex flex-wrap items-end justify-between gap-3">
             <div className="min-w-0">
-              <div className="text-3xl font-extrabold text-charcoal whitespace-nowrap">{formatPrice(price * qty, pricing.currency)}</div>
-              {compareAt && <div className="text-sm text-charcoal-subtle line-through whitespace-nowrap">{formatPrice(compareAt * qty, pricing.currency)}</div>}
-              {compareAt && <div className="text-xs text-pista-darker font-semibold mt-0.5">You save {formatPrice((compareAt - price) * qty, pricing.currency)}</div>}
+              <div className="text-3xl font-extrabold text-charcoal whitespace-nowrap" data-price>{formatPrice(price * qty, pricing.currency)}</div>
+              {compareAt && <div className="text-sm text-charcoal-subtle line-through whitespace-nowrap" data-price>{formatPrice(compareAt * qty, pricing.currency)}</div>}
+              {compareAt && <div className="text-xs text-pista-darker font-semibold mt-0.5" data-price>You save {formatPrice((compareAt - price) * qty, pricing.currency)}</div>}
               {qty > 1 && (
-                <div className="text-xs text-charcoal-subtle mt-0.5">
+                <div className="text-xs text-charcoal-subtle mt-0.5" data-price>
                   {formatPrice(price, pricing.currency)} each × {qty}
                 </div>
               )}
@@ -207,8 +217,8 @@ export function ProductClient({
                     >
                       <div className="text-sm font-bold text-charcoal">{v.name}</div>
                       <div className="mt-1 flex items-baseline gap-2 flex-wrap">
-                        <span className="text-base font-extrabold text-charcoal whitespace-nowrap">{formatPrice(priceOf(v, pricing), pricing.currency)}</span>
-                        {vCompare && <span className="text-xs text-charcoal-subtle line-through whitespace-nowrap">{formatPrice(vCompare, pricing.currency)}</span>}
+                        <span className="text-base font-extrabold text-charcoal whitespace-nowrap" data-price>{formatPrice(priceOf(v, pricing), pricing.currency)}</span>
+                        {vCompare && <span className="text-xs text-charcoal-subtle line-through whitespace-nowrap" data-price>{formatPrice(vCompare, pricing.currency)}</span>}
                       </div>
                       <div className={`text-[11px] mt-0.5 ${vs.kind === 'out' ? 'text-accent-rose font-semibold' : 'text-charcoal-subtle'}`}>{vs.label}</div>
                     </button>
@@ -260,24 +270,24 @@ export function ProductClient({
               </div>
             )}
             <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
+              <LoadingButton
+                loading={adding}
                 onClick={handleAddToCart}
                 disabled={!canBuy}
                 className="w-full min-h-12 px-3 bg-surface-card border-2 border-pista-dark text-pista-darker hover:bg-pista-lighter text-sm font-bold rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 <ShoppingCart className="w-4 h-4" aria-hidden="true" />
                 Add to Cart
-              </button>
-              <button
-                type="button"
+              </LoadingButton>
+              <LoadingButton
+                loading={buying}
                 onClick={handleBuyNow}
                 disabled={!canBuy}
                 className="w-full min-h-12 px-3 bg-pista-dark text-white hover:bg-pista-darker text-sm font-bold rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 Buy Now
                 <ArrowRight className="w-4 h-4" aria-hidden="true" />
-              </button>
+              </LoadingButton>
             </div>
             {!canBuy && <p className="text-xs text-accent-rose font-semibold">This plan is out of stock. Choose another plan or ask us on WhatsApp.</p>}
             <a

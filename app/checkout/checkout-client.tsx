@@ -11,8 +11,46 @@ import { useCartQuote } from '@/components/cart/use-cart-quote';
 import { Checkbox } from '@/components/ui/checkbox';
 import { PaymentDetails, PaymentLogo, type PaymentAccount } from '@/components/order/payment-details';
 import { EMPTY_PROOF, ProofFields, proofPayload, proofProblem, type ProofValue } from '@/components/order/proof-fields';
+import { PriceSkeleton } from '@/components/ui/loading-button';
 import { formatPrice } from '@/app/_store/price';
 import { convertPayAmount, formatGbp } from '@/lib/money';
+
+function Bar({ className }: { className: string }) {
+  return <div className={`rounded-lg soft4u-shimmer ${className}`} />;
+}
+
+/** Layout-matched placeholder while the cart loads from this browser. */
+function CheckoutSkeleton() {
+  return (
+    <div role="status" aria-label="Loading checkout" aria-busy="true">
+      <Bar className="h-3 w-40 mb-3" />
+      <Bar className="h-8 w-56 mb-8" />
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+        <div className="lg:col-span-7 space-y-6">
+          {[0, 1].map(k => (
+            <div key={k} className="bg-surface-card border border-charcoal-border rounded-2xl p-4 sm:p-6 space-y-4">
+              <Bar className="h-6 w-44" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[0, 1, 2, 3].map(i => (
+                  <Bar key={i} className="h-11 w-full" />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="lg:col-span-5">
+          <div className="bg-surface-card border border-charcoal-border rounded-2xl p-4 sm:p-6 space-y-4">
+            <Bar className="h-6 w-36" />
+            {[0, 1, 2].map(i => (
+              <Bar key={i} className="h-5 w-full" />
+            ))}
+            <Bar className="h-12 w-full" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const PHONE_RE = /^\+?[0-9 ()-]{7,20}$/;
 const inputClass =
@@ -72,10 +110,20 @@ export function CheckoutClient({
   const [errorMsg, setErrorMsg] = useState('');
 
   const method = methods.find(m => m.key === methodKey) || null;
+  // A quote is only usable in the currency it was priced in; until the new one arrives the old one is faded.
+  const fresh = Boolean(quote && quote.currency === currency);
+  const qc = quote?.currency ?? currency;
+  const stale = Boolean(quote) && (!fresh || quoteLoading);
   const total = quote?.total ?? 0;
-  const totalLabel = quote ? formatPrice(total, currency) : '…';
-  const amountValue = quote ? (currency === 'USD' ? total.toFixed(2) : String(Math.round(total))) : undefined;
-  const sendAmount = quote && method?.payRate ? convertPayAmount(total, method.payRate) : null;
+  const totalLabel: React.ReactNode = quote ? (
+    <span data-price data-price-stale={stale || undefined}>
+      {formatPrice(total, qc)}
+    </span>
+  ) : (
+    <PriceSkeleton className="w-24" />
+  );
+  const amountValue = fresh ? (currency === 'USD' ? total.toFixed(2) : String(Math.round(total))) : undefined;
+  const sendAmount = fresh && method?.payRate ? convertPayAmount(total, method.payRate) : null;
 
   const place = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,7 +134,8 @@ export function CheckoutClient({
     if (requirePhone && !phone.trim()) return setErrorMsg('Enter your mobile number.');
     if (phone.trim() && !PHONE_RE.test(phone.trim())) return setErrorMsg('Enter a valid mobile number.');
     if (!method) return setErrorMsg('Choose a payment method.');
-    if (!quote || !quote.allOk) return setErrorMsg('Some items in your cart are unavailable. Update your cart to continue.');
+    if (!quote || !fresh) return setErrorMsg('Prices are still updating. Please wait a moment.');
+    if (!quote.allOk) return setErrorMsg('Some items in your cart are unavailable. Update your cart to continue.');
     if (!payLater) {
       const p = proofProblem(proof);
       if (p) return setErrorMsg(`${p}, or choose "I will pay later".`);
@@ -133,7 +182,7 @@ export function CheckoutClient({
     }
   };
 
-  if (!mounted) return <div className="py-20 text-center text-sm text-charcoal-subtle">Loading checkout...</div>;
+  if (!mounted) return <CheckoutSkeleton />;
 
   if (items.length === 0 && !placing) {
     return (
@@ -193,15 +242,34 @@ export function CheckoutClient({
               </div>
               <div>
                 <label htmlFor="co-whatsapp" className="text-sm font-semibold text-charcoal block mb-1">
-                  WhatsApp number {requireWhatsapp ? '*' : '(optional)'}
+                  WhatsApp number {requireWhatsapp ? '*' : <span className="font-normal text-charcoal-subtle">(optional)</span>}
                 </label>
-                <input id="co-whatsapp" type="tel" autoComplete="tel" placeholder="+92 300 1234567" value={whatsapp} onChange={e => setWhatsapp(e.target.value)} className={inputClass} />
+                <input
+                  id="co-whatsapp"
+                  type="tel"
+                  autoComplete="tel"
+                  placeholder="+92 300 1234567"
+                  required={requireWhatsapp}
+                  aria-required={requireWhatsapp}
+                  value={whatsapp}
+                  onChange={e => setWhatsapp(e.target.value)}
+                  className={inputClass}
+                />
               </div>
               <div>
                 <label htmlFor="co-phone" className="text-sm font-semibold text-charcoal block mb-1">
-                  Mobile number {requirePhone ? '*' : '(optional)'}
+                  Mobile number {requirePhone ? '*' : <span className="font-normal text-charcoal-subtle">(optional)</span>}
                 </label>
-                <input id="co-phone" type="tel" placeholder="+92 300 1234567" value={phone} onChange={e => setPhone(e.target.value)} className={inputClass} />
+                <input
+                  id="co-phone"
+                  type="tel"
+                  placeholder="+92 300 1234567"
+                  required={requirePhone}
+                  aria-required={requirePhone}
+                  value={phone}
+                  onChange={e => setPhone(e.target.value)}
+                  className={inputClass}
+                />
               </div>
               <div className="sm:col-span-2">
                 <label htmlFor="co-telegram" className="text-sm font-semibold text-charcoal block mb-1">
@@ -214,6 +282,10 @@ export function CheckoutClient({
             <fieldset className="pt-1">
               <legend className="text-sm font-semibold text-charcoal mb-1">Send my access by</legend>
               <p className="text-xs text-charcoal-subtle mb-1">Delivered access always appears on your order page, in your account and in your email.</p>
+              <Checkbox checked onChange={() => {}} disabled>
+                Email ({user.email})
+                <span className="block text-xs font-normal text-charcoal-subtle">Always sent to your account email.</span>
+              </Checkbox>
               <Checkbox checked={sendWhatsapp} onChange={setSendWhatsapp} disabled={!whatsapp.trim()}>
                 WhatsApp {whatsapp.trim() ? `(${whatsapp.trim()})` : '(add your number above)'}
               </Checkbox>
@@ -341,7 +413,15 @@ export function CheckoutClient({
                       </div>
                       {line && !line.ok && <div className="text-xs font-semibold text-accent-rose">{line.problem}</div>}
                     </div>
-                    <div className="font-bold text-charcoal whitespace-nowrap">{line ? formatPrice(line.price * i.quantity, currency) : '…'}</div>
+                    <div className="font-bold text-charcoal whitespace-nowrap">
+                      {line ? (
+                        <span data-price data-price-stale={stale || undefined}>
+                          {formatPrice(line.price * i.quantity, qc)}
+                        </span>
+                      ) : (
+                        <PriceSkeleton />
+                      )}
+                    </div>
                   </li>
                 );
               })}
@@ -350,12 +430,22 @@ export function CheckoutClient({
             <dl className="pt-4 border-t border-surface-muted space-y-2 text-sm">
               <div className="flex justify-between text-charcoal-muted">
                 <dt>Subtotal</dt>
-                <dd className="font-bold text-charcoal">{quote ? formatPrice(quote.subtotal, currency) : '…'}</dd>
+                <dd className="font-bold text-charcoal">
+                  {quote ? (
+                    <span data-price data-price-stale={stale || undefined}>
+                      {formatPrice(quote.subtotal, qc)}
+                    </span>
+                  ) : (
+                    <PriceSkeleton />
+                  )}
+                </dd>
               </div>
               {quote && quote.discount > 0 && (
                 <div className="flex justify-between text-pista-darker">
                   <dt>Discount ({quote.couponCode})</dt>
-                  <dd className="font-bold">- {formatPrice(quote.discount, currency)}</dd>
+                  <dd className="font-bold" data-price data-price-stale={stale || undefined}>
+                    - {formatPrice(quote.discount, qc)}
+                  </dd>
                 </div>
               )}
               <div className="flex justify-between text-charcoal-muted">
@@ -400,7 +490,8 @@ export function CheckoutClient({
 
             <button
               type="submit"
-              disabled={placing || Boolean(maintenance) || !quote || methods.length === 0}
+              disabled={placing || Boolean(maintenance) || !fresh || methods.length === 0}
+              aria-busy={placing || undefined}
               className="w-full min-h-12 px-4 bg-pista-dark text-white hover:bg-pista-darker text-sm font-bold rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
             >
               {placing ? (

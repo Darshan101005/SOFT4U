@@ -94,8 +94,8 @@ export function ProductCard({
 
         <div className="mt-auto pt-3">
           <div className="text-[10px] sm:text-[11px] text-charcoal-subtle">From</div>
-          <div className="text-base sm:text-lg font-extrabold text-charcoal whitespace-nowrap leading-tight">{formatPrice(price, pricing.currency)}</div>
-          {compareAt && <div className="text-[11px] sm:text-xs text-charcoal-subtle line-through whitespace-nowrap">{formatPrice(compareAt, pricing.currency)}</div>}
+          <div className="text-base sm:text-lg font-extrabold text-charcoal whitespace-nowrap leading-tight" data-price>{formatPrice(price, pricing.currency)}</div>
+          {compareAt && <div className="text-[11px] sm:text-xs text-charcoal-subtle line-through whitespace-nowrap" data-price>{formatPrice(compareAt, pricing.currency)}</div>}
 
           <div className="mt-3 flex items-center gap-2">
             <Link

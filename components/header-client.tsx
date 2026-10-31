@@ -12,6 +12,7 @@ import { Logo } from '@/components/brand/logo';
 import { ProductImage } from '@/components/brand/product-image';
 import { CurrencySwitcher } from '@/components/currency-switcher';
 import { formatPrice, fromPrice, type Pricing } from '@/app/_store/price';
+import { formatPersonName } from '@/lib/format-name';
 
 export interface HeaderNavLink {
   label: string;
@@ -151,7 +152,7 @@ export function HeaderClient({
           </nav>
 
           <div className="flex items-center gap-1 sm:gap-2">
-            {pricing.usdEnabled && <CurrencySwitcher currency={pricing.currency} className="w-[76px] sm:w-[84px]" />}
+            {pricing.usdEnabled && <CurrencySwitcher currency={pricing.currency} resolved={pricing.resolved} className="w-[76px] sm:w-[84px]" />}
 
             <button
               type="button"
@@ -187,15 +188,15 @@ export function HeaderClient({
                   className="inline-flex items-center gap-2 min-h-11 pl-1.5 pr-2.5 rounded-xl border border-charcoal-border bg-white text-sm font-semibold text-charcoal hover:border-pista hover:bg-pista-lighter transition-colors"
                 >
                   <span className="w-8 h-8 rounded-full bg-pista-100 border border-pista-300 flex items-center justify-center text-xs font-bold text-pista-darker">
-                    {initials(user.name)}
+                    {initials(formatPersonName(user.name))}
                   </span>
-                  <span className="truncate max-w-[110px]">{user.name.split(' ')[0]}</span>
+                  <span className="truncate max-w-[110px]">{formatPersonName(user.name).split(' ')[0]}</span>
                   <ChevronDown className={`w-4 h-4 text-pista-dark transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
                 </button>
                 {userMenuOpen && (
                   <div role="menu" className="absolute right-0 mt-2 w-60 rounded-2xl border border-pista-200 bg-white p-1.5 shadow-[0_16px_40px_rgba(47,74,31,0.16)] animate-fade">
                     <div className="px-3 py-2.5 border-b border-surface-muted mb-1">
-                      <div className="text-sm font-bold text-charcoal truncate">{user.name}</div>
+                      <div className="text-sm font-bold text-charcoal truncate">{formatPersonName(user.name)}</div>
                       <div className="text-xs text-charcoal-subtle truncate">{user.email}</div>
                     </div>
                     {accountLinks.map(l => (
@@ -272,7 +273,7 @@ export function HeaderClient({
               {user ? (
                 <>
                   <div className="px-3 py-2 rounded-lg bg-pista-50">
-                    <div className="text-sm font-semibold text-charcoal truncate">{user.name}</div>
+                    <div className="text-sm font-semibold text-charcoal truncate">{formatPersonName(user.name)}</div>
                     <div className="text-xs text-charcoal-subtle truncate">{user.email}</div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
@@ -380,7 +381,7 @@ export function HeaderClient({
                             </div>
                           </div>
                           <div className="text-right shrink-0">
-                            <div className="text-sm font-bold text-charcoal whitespace-nowrap">{formatPrice(price, pricing.currency)}</div>
+                            <div className="text-sm font-bold text-charcoal whitespace-nowrap" data-price>{formatPrice(price, pricing.currency)}</div>
                             <div className="text-[11px] text-pista-dark font-medium">{p.deliveryTime}</div>
                           </div>
                         </Link>

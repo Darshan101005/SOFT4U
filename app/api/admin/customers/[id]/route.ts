@@ -4,6 +4,7 @@ import { adminResetCustomerTotp } from '@/lib/auth';
 import { db, queryOne } from '@/lib/db';
 import { errorResponse, readJson } from '@/lib/api';
 import { unlinkUser } from '@/lib/telegram-link';
+import { formatPersonName } from '@/lib/format-name';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,7 +49,8 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
   try {
     const body = await readJson(req);
     const s = (v: unknown, max: number) => (typeof v === 'string' ? v.trim().slice(0, max) : undefined);
-    const name = s(body.name, 80);
+    const rawName = s(body.name, 80);
+    const name = rawName === undefined ? undefined : formatPersonName(rawName);
     if (name !== undefined && name.length < 2) return NextResponse.json({ error: 'Enter a name' }, { status: 400 });
     // Only send keys that were provided: updateRow writes NULL for keys present with undefined.
     const patch: Record<string, string> = {};

@@ -1,5 +1,6 @@
 import { getPool } from '@/lib/db/pool';
 import { randomCode } from '@/lib/ids';
+import { formatPersonName } from '@/lib/format-name';
 
 /**
  * Linking Telegram chats to Soft4u accounts, plus per-chat bot state.
@@ -74,7 +75,7 @@ export async function consumeLinkCode(code: string, chat: ChatInfo): Promise<Con
     await getPool().query(
       `INSERT INTO telegram_admins (chat_id, admin_id, username, first_name) VALUES ($1,$2,$3,$4)
        ON CONFLICT (chat_id) DO UPDATE SET admin_id = EXCLUDED.admin_id, username = EXCLUDED.username, first_name = EXCLUDED.first_name, linked_at = now()`,
-      [chat.chatId, row.admin_id, chat.username ?? null, chat.firstName ?? null],
+      [chat.chatId, row.admin_id, chat.username ?? null, chat.firstName ? formatPersonName(chat.firstName) : null],
     );
     return { kind: 'admin', adminId: row.admin_id };
   }
@@ -86,7 +87,7 @@ export async function linkUserChat(userId: string, chat: ChatInfo): Promise<void
   await getPool().query(
     `INSERT INTO telegram_users (chat_id, user_id, username, first_name) VALUES ($1,$2,$3,$4)
      ON CONFLICT (chat_id) DO UPDATE SET user_id = EXCLUDED.user_id, username = EXCLUDED.username, first_name = EXCLUDED.first_name, linked_at = now()`,
-    [chat.chatId, userId, chat.username ?? null, chat.firstName ?? null],
+    [chat.chatId, userId, chat.username ?? null, chat.firstName ? formatPersonName(chat.firstName) : null],
   );
 }
 

@@ -14,6 +14,7 @@ import { queueEmail, sendEmail } from '@/lib/email';
 import { appBaseUrl, passwordResetEmail, resendOtpEmail, signupOtpEmail, twoFactorChangedEmail, welcomeEmail } from '@/lib/email-templates';
 import { pkTime, type RequestMeta } from '@/lib/request-meta';
 import { unlinkUser } from '@/lib/telegram-link';
+import { formatPersonName } from '@/lib/format-name';
 
 /**
  * Customer authentication (email + password only, no social login).
@@ -164,7 +165,7 @@ async function signupTokenMatches(storedHash: string | null | undefined): Promis
  * owning that account with their password.
  */
 export async function signUp(input: SignUpInput, meta: RequestMeta): Promise<{ email: string; resendInSeconds: number }> {
-  const name = (input.name || '').trim().replace(/\s+/g, ' ');
+  const name = formatPersonName(input.name);
   if (name.length < 2 || name.length > 80) throw new AuthError('INVALID_NAME', 'Enter your full name (2-80 characters)');
   const email = requireEmail(input.email);
   requireStrongPassword(input.password, input.confirmPassword);

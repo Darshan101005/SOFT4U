@@ -372,7 +372,8 @@ export function OrderView({
           {canCancel &&
             (confirmCancel ? (
               <div className="flex gap-2">
-                <button type="button" onClick={cancel} disabled={cancelling} className="flex-1 min-h-11 px-4 rounded-xl bg-accent-rose text-white text-sm font-bold disabled:opacity-60">
+                <button type="button" onClick={cancel} disabled={cancelling} aria-busy={cancelling || undefined} className="flex-1 min-h-11 px-4 rounded-xl bg-accent-rose text-white text-sm font-bold disabled:opacity-60 inline-flex items-center justify-center gap-2">
+                  {cancelling && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
                   {cancelling ? 'Cancelling...' : 'Yes, cancel order'}
                 </button>
                 <button type="button" onClick={() => setConfirmCancel(false)} className="flex-1 min-h-11 px-4 rounded-xl border border-charcoal-border text-sm font-semibold">

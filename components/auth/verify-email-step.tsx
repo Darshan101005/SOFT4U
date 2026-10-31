@@ -12,6 +12,7 @@ export function VerifyEmailStep({ email, resendInSeconds = 60, onVerified, onBac
   const { verifyEmail, resendCode } = useAuth();
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
+  const [resending, setResending] = useState(false);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
   const cooldown = useCountdown(resendInSeconds);
@@ -35,7 +36,9 @@ export function VerifyEmailStep({ email, resendInSeconds = 60, onVerified, onBac
   const resend = async () => {
     setError('');
     setInfo('');
+    setResending(true);
     const res = await resendCode(email, 'signup');
+    setResending(false);
     if (res.success) {
       cooldown.restart(res.resendInSeconds ?? 60);
       expiry.restart(CODE_MINUTES * 60);
@@ -74,6 +77,7 @@ export function VerifyEmailStep({ email, resendInSeconds = 60, onVerified, onBac
         <button
           type="submit"
           disabled={busy || code.length !== 6}
+          aria-busy={busy || undefined}
           className="w-full min-h-12 px-4 bg-pista-dark text-white hover:bg-pista-darker text-sm font-bold rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
         >
           {busy && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
@@ -85,8 +89,9 @@ export function VerifyEmailStep({ email, resendInSeconds = 60, onVerified, onBac
         <button type="button" onClick={onBack} className="min-h-11 px-1 font-semibold text-charcoal-muted hover:text-charcoal">
           Change email
         </button>
-        <button type="button" onClick={resend} disabled={cooldown.left > 0} className="min-h-11 px-1 font-bold text-pista-darker hover:underline disabled:text-charcoal-subtle disabled:no-underline">
-          {cooldown.left > 0 ? `Resend code in ${cooldown.left}s` : 'Resend code'}
+        <button type="button" onClick={resend} disabled={cooldown.left > 0 || resending} aria-busy={resending || undefined} className="min-h-11 px-1 font-bold text-pista-darker hover:underline disabled:text-charcoal-subtle disabled:no-underline inline-flex items-center gap-1.5">
+          {resending && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
+          {resending ? 'Sending...' : cooldown.left > 0 ? `Resend code in ${cooldown.left}s` : 'Resend code'}
         </button>
       </div>
       <p className="text-xs text-center text-charcoal-subtle">You have 5 attempts per code. Did not get it? Check spam, or resend.</p>

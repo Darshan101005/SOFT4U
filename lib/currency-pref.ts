@@ -1,5 +1,5 @@
 import https from 'https';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import type { Currency } from '@/lib/db/types';
 import { clientIp } from '@/lib/request-meta';
 
@@ -20,13 +20,19 @@ function valid(v: string | undefined | null): Currency | null {
   return v === 'PKR' || v === 'USD' ? v : null;
 }
 
-/** Cookie-only read for server components (no network). */
+/**
+ * Cookie and edge-header read for server components (no network). On Vercel the
+ * x-vercel-ip-country header resolves first-time visitors during the first render,
+ * so the first paint already shows the right currency.
+ */
 export async function getCurrencyFromCookies(): Promise<{ currency: Currency; source: 'manual' | 'geo' | 'default' }> {
   const store = await cookies();
   const manual = valid(store.get(CURRENCY_COOKIE)?.value);
   if (manual) return { currency: manual, source: 'manual' };
   const geo = valid(store.get(GEO_CURRENCY_COOKIE)?.value);
   if (geo) return { currency: geo, source: 'geo' };
+  const edgeCountry = (await headers()).get('x-vercel-ip-country');
+  if (edgeCountry && /^[A-Z]{2}$/i.test(edgeCountry)) return { currency: currencyForCountry(edgeCountry.toUpperCase()), source: 'geo' };
   return { currency: 'PKR', source: 'default' };
 }
 

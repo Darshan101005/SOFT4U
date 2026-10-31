@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { KeyRound, Pause, Play, Plus, RefreshCcw, ShieldCheck, ShieldOff, Trash2, Wand2 } from 'lucide-react';
+import { KeyRound, Pause, Pencil, Play, Plus, RefreshCcw, ShieldCheck, ShieldOff, Trash2, Wand2 } from 'lucide-react';
 import type { AdminUser } from '@/lib/db/types';
 import { checkPassword, EMAIL_RE } from '@/lib/password-policy';
 import { Badge, Button, Card, CopyButton, Field, Input, Modal, PageHeader, Table, api, errMsg, toast, useDialog } from '../_components/ui';
 import { PasswordMeter, generatePassword } from '../_components/password-meter';
 import { fmtDateTime } from '../_components/format';
+import { formatPersonName } from '@/lib/format-name';
 
 export function AdminsClient({ initialAdmins, meId }: { initialAdmins: AdminUser[]; meId: string }) {
   const [admins, setAdmins] = useState(initialAdmins);
@@ -17,6 +18,9 @@ export function AdminsClient({ initialAdmins, meId }: { initialAdmins: AdminUser
   const [created, setCreated] = useState<{ email: string; password: string } | null>(null);
   const [pwTarget, setPwTarget] = useState<AdminUser | null>(null);
   const [newPw, setNewPw] = useState('');
+  const [editTarget, setEditTarget] = useState<AdminUser | null>(null);
+  const [editForm, setEditForm] = useState({ name: '', email: '' });
+  const [editing, setEditing] = useState(false);
   const { confirm, dialog } = useDialog();
 
   const activeCount = admins.filter(a => a.status === 'active').length;
@@ -127,6 +131,31 @@ export function AdminsClient({ initialAdmins, meId }: { initialAdmins: AdminUser
     setNewPw('');
   };
 
+  const openEdit = (a: AdminUser) => {
+    setEditTarget(a);
+    setEditForm({ name: a.name, email: a.email });
+  };
+
+  const saveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editTarget) return;
+    const name = formatPersonName(editForm.name);
+    const email = editForm.email.trim().toLowerCase();
+    if (name.length < 2 || name.length > 80) return toast.error('Enter a name (2-80 characters)');
+    if (!EMAIL_RE.test(email)) return toast.error('Enter a valid email address');
+    setEditing(true);
+    try {
+      await api(`/api/admin/admins/${editTarget.id}`, { method: 'PATCH', body: { name, email } });
+      toast.success(editTarget.id === meId ? 'Your details are saved' : `Saved ${name}`);
+      setEditTarget(null);
+      await reload();
+    } catch (err) {
+      toast.error(errMsg(err));
+    } finally {
+      setEditing(false);
+    }
+  };
+
   return (
     <div>
       <PageHeader
@@ -175,6 +204,9 @@ export function AdminsClient({ initialAdmins, meId }: { initialAdmins: AdminUser
                 <td className="px-4 py-3 text-xs text-charcoal-subtle whitespace-nowrap">{fmtDateTime(a.lastLoginAt)}</td>
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap justify-end gap-1.5">
+                    <Button size="sm" variant="secondary" icon={Pencil} onClick={() => openEdit(a)}>
+                      Edit
+                    </Button>
                     {a.status === 'active' ? (
                       <Button size="sm" variant="secondary" icon={Pause} disabled={last || busyId === a.id} title={last ? 'The last active admin cannot be paused' : undefined} onClick={() => pause(a)}>
                         Pause
@@ -262,6 +294,28 @@ export function AdminsClient({ initialAdmins, meId }: { initialAdmins: AdminUser
             </Button>
           </div>
           <PasswordMeter password={newPw} />
+        </form>
+      </Modal>
+      <Modal
+        open={Boolean(editTarget)}
+        onClose={() => setEditTarget(null)}
+        title={editTarget ? `Edit ${editTarget.name}` : ''}
+        description={editTarget?.id === meId ? 'This is your own account. You stay signed in.' : 'Names are saved in proper name case. Emails are saved in lowercase.'}
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setEditTarget(null)}>Cancel</Button>
+            <Button onClick={saveEdit} loading={editing}>Save</Button>
+          </>
+        }
+      >
+        <form onSubmit={saveEdit} className="space-y-4">
+          <Field label="Name" required>
+            <Input value={editForm.name} maxLength={80} onChange={e => setEditForm({ ...editForm, name: e.target.value })} autoFocus />
+          </Field>
+          <Field label="Email" required>
+            <Input type="email" value={editForm.email} onChange={e => setEditForm({ ...editForm, email: e.target.value })} />
+          </Field>
+          <button type="submit" className="hidden" />
         </form>
       </Modal>
       {dialog}

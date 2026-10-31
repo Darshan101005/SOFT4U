@@ -12,7 +12,7 @@ import { getStoreInfo, jsonLd, safe } from '@/app/_store/storefront';
 export const dynamic = 'force-dynamic';
 
 const title = `FAQs | ${siteConfig.name}`;
-const description = `Answers to common questions about ordering, payment by bank transfer, Easypaisa or JazzCash, delivery, warranty and refunds at ${siteConfig.name}.`;
+const description = `Answers to common questions about ordering, payment, delivery, warranty and refunds at ${siteConfig.name}.`;
 
 export const metadata: Metadata = {
   title: { absolute: title },

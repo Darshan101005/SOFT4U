@@ -7,7 +7,7 @@ import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { db } from '@/lib/db';
 import { getSessionUser } from '@/lib/session';
-import { getPricing, getSettings, safe } from '@/app/_store/storefront';
+import { getPricing, safe } from '@/app/_store/storefront';
 import { CheckoutClient } from './checkout-client';
 
 export const dynamic = 'force-dynamic';
@@ -20,7 +20,8 @@ export default async function CheckoutPage() {
   const user = await safe(() => getSessionUser(), null);
   if (!user) redirect('/login?next=/checkout');
 
-  const [pricing, settings, methods] = await Promise.all([getPricing(), getSettings(), safe(() => db.getPaymentMethods(true), [])]);
+  // Checkout rules are read fresh (not from the 60 s per-instance cache) so an admin save applies on the next load.
+  const [pricing, settings, methods] = await Promise.all([getPricing(), safe(() => db.getSiteSettings({ fresh: true }), null), safe(() => db.getPaymentMethods(true), [])]);
   const usable = methods.filter(m => m.currencies.includes(pricing.currency));
   const ukMethods = usable.filter(m => m.payCurrency === 'GBP');
   // UK visitors see the UK bank account first; everyone else sees it last.
@@ -59,7 +60,7 @@ export default async function CheckoutPage() {
           currency={pricing.currency}
           methods={available}
           user={{ name: user.name, email: user.email, phone: user.phone || '', whatsapp: user.whatsapp || '', telegram: user.telegram || '', telegramLinked: Boolean(user.telegramLinked) }}
-          requireWhatsapp={settings?.requireWhatsapp ?? true}
+          requireWhatsapp={settings?.requireWhatsapp ?? false}
           requirePhone={settings?.requirePhone ?? false}
           maintenance={settings?.maintenanceMode ? settings.maintenanceMessage || 'Checkout is paused for maintenance.' : ''}
         />

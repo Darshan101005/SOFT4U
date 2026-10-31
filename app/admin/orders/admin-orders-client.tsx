@@ -8,6 +8,7 @@ import type { Order } from '@/lib/db/types';
 import { formatMoney } from '@/lib/money';
 import { Card, EmptyState, LoadingBlock, OrderStatusBadge, PageHeader, Pager, SearchInput, SegmentChips, Table, api, errMsg, toast } from '../_components/ui';
 import { fmtDateTime } from '../_components/format';
+import { formatPersonName } from '@/lib/format-name';
 
 type StatusKey = 'all' | Order['orderStatus'];
 
@@ -96,7 +97,7 @@ export function AdminOrdersClient({ initialStatus, initialSearch }: { initialSta
                   <tr key={o.id} onClick={() => router.push(`/admin/orders/${o.orderNumber}`)} className="hover:bg-surface-bg/60 cursor-pointer">
                     <td className="px-4 py-3 font-mono font-bold whitespace-nowrap">{o.orderNumber}</td>
                     <td className="px-4 py-3">
-                      <div className="font-semibold text-charcoal">{o.customerName}</div>
+                      <div className="font-semibold text-charcoal">{formatPersonName(o.customerName)}</div>
                       <div className="text-xs text-charcoal-subtle">{o.customerEmail}</div>
                     </td>
                     <td className="px-4 py-3 text-charcoal-muted max-w-[240px]">

@@ -1,6 +1,7 @@
 import type { Currency, DeliveryField, Order, PaymentMethod } from '@/lib/db/types';
 import { formatGbp, formatMoney } from '@/lib/money';
 import { siteConfig } from '@/lib/site-config';
+import { formatPersonName } from '@/lib/format-name';
 
 /**
  * Branded HTML emails (pistachio palette, table layout for email clients).
@@ -121,7 +122,7 @@ function heading(text: string): string {
 }
 
 function hello(name: string): string {
-  return p(`Hi <strong style="color:${C.charcoal};">${esc(name || 'there')}</strong>,`);
+  return p(`Hi <strong style="color:${C.charcoal};">${esc(formatPersonName(name) || 'there')}</strong>,`);
 }
 
 function orderSummary(order: Order): string {
@@ -281,7 +282,7 @@ ${p('Keep your Order ID private. It is also your tracking ID.', `font-size:13px;
   return {
     subject,
     html: layout({ title: subject, preheader: `Transfer ${formatMoney(order.total, order.currency)} and upload your payment proof.`, body }),
-    text: `Hi ${order.customerName},\n\nWe received order ${order.orderNumber}. Total: ${formatMoney(order.total, order.currency)}.${d.sendAmount ? ` Amount to send: ${formatGbp(d.sendAmount)}.` : ''}\nTransfer the exact total via ${d.method?.name || order.paymentMethodName || order.paymentMethod}, then upload a screenshot of the payment and the transaction ID: ${trackUrl(order)}${TEXT_FOOTER}`,
+    text: `Hi ${formatPersonName(order.customerName)},\n\nWe received order ${order.orderNumber}. Total: ${formatMoney(order.total, order.currency)}.${d.sendAmount ? ` Amount to send: ${formatGbp(d.sendAmount)}.` : ''}\nTransfer the exact total via ${d.method?.name || order.paymentMethodName || order.paymentMethod}, then upload a screenshot of the payment and the transaction ID: ${trackUrl(order)}${TEXT_FOOTER}`,
   };
 }
 
@@ -297,7 +298,7 @@ ${button(trackUrl(order), 'Track your order')}`;
   return {
     subject,
     html: layout({ title: subject, preheader: 'We received your payment proof and are verifying it.', body }),
-    text: `Hi ${order.customerName},\n\nWe received your payment proof for ${order.orderNumber} and are verifying it. Track: ${trackUrl(order)}${TEXT_FOOTER}`,
+    text: `Hi ${formatPersonName(order.customerName)},\n\nWe received your payment proof for ${order.orderNumber} and are verifying it. Track: ${trackUrl(order)}${TEXT_FOOTER}`,
   };
 }
 
@@ -313,7 +314,7 @@ ${button(trackUrl(order), 'View order')}`;
   return {
     subject,
     html: layout({ title: subject, preheader: 'Your payment is verified. Delivery is on the way.', body }),
-    text: `Hi ${order.customerName},\n\nYour payment for ${order.orderNumber} is approved. Delivery is on the way. ${trackUrl(order)}${TEXT_FOOTER}`,
+    text: `Hi ${formatPersonName(order.customerName)},\n\nYour payment for ${order.orderNumber} is approved. Delivery is on the way. ${trackUrl(order)}${TEXT_FOOTER}`,
   };
 }
 
@@ -332,7 +333,7 @@ ${button(trackUrl(order), 'Open order')}`;
   return {
     subject,
     html: layout({ title: subject, preheader: `Reason: ${d.reason}`, body }),
-    text: `Hi ${order.customerName},\n\nWe could not approve the payment for ${order.orderNumber}.\nReason: ${d.reason}\nOpen your order: ${trackUrl(order)}${TEXT_FOOTER}`,
+    text: `Hi ${formatPersonName(order.customerName)},\n\nWe could not approve the payment for ${order.orderNumber}.\nReason: ${d.reason}\nOpen your order: ${trackUrl(order)}${TEXT_FOOTER}`,
   };
 }
 
@@ -371,7 +372,7 @@ ${button(trackUrl(order), 'View order')}`;
   return {
     subject,
     html: layout({ title: subject, preheader: 'Your access details are inside. Keep them private.', body }),
-    text: `Hi ${order.customerName},\n\nOrder ${order.orderNumber} is delivered.\n\n${text}${d.note ? `\n\nNote: ${d.note}` : ''}\n\nKeep these details private.${TEXT_FOOTER}`,
+    text: `Hi ${formatPersonName(order.customerName)},\n\nOrder ${order.orderNumber} is delivered.\n\n${text}${d.note ? `\n\nNote: ${d.note}` : ''}\n\nKeep these details private.${TEXT_FOOTER}`,
   };
 }
 

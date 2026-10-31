@@ -8,6 +8,7 @@ import { useCart } from '@/lib/context/cart-context';
 import { useHydrated } from '@/hooks/use-hydrated';
 import { ProductImage } from '@/components/brand/product-image';
 import { useCartQuote } from '@/components/cart/use-cart-quote';
+import { LoadingLink, PriceSkeleton, Spinner } from '@/components/ui/loading-button';
 import { formatPrice } from '@/app/_store/price';
 
 export function CartView({ currency }: { currency: Currency }) {
@@ -28,7 +29,11 @@ export function CartView({ currency }: { currency: Currency }) {
     setCouponLoading(false);
   };
 
-  const blocked = quote ? !quote.allOk : true;
+  // A quote is only shown in the currency it was priced in; the old one fades until the new one arrives.
+  const fresh = Boolean(quote && quote.currency === currency);
+  const qc = quote?.currency ?? currency;
+  const stale = Boolean(quote) && (!fresh || loading);
+  const blocked = quote && fresh ? !quote.allOk : true;
 
   return (
     <>
@@ -56,7 +61,7 @@ export function CartView({ currency }: { currency: Currency }) {
       </div>
 
       {!mounted ? (
-        <div className="py-20 text-center text-sm text-charcoal-subtle">Loading your cart...</div>
+        <CartSkeleton />
       ) : items.length === 0 ? (
         <div className="p-10 sm:p-16 text-center bg-surface-card border border-charcoal-border rounded-2xl max-w-lg mx-auto space-y-4">
           <div className="w-16 h-16 rounded-full bg-pista-lighter text-pista-dark flex items-center justify-center mx-auto">
@@ -127,11 +132,11 @@ export function CartView({ currency }: { currency: Currency }) {
 
                       <div className="text-right min-w-[92px]">
                         {unit === undefined ? (
-                          <div className="h-5 w-20 ml-auto rounded bg-pista-50 animate-pulse" aria-label="Loading price" />
+                          <PriceSkeleton className="w-20 h-5" />
                         ) : (
                           <>
-                            <div className="text-base font-extrabold text-charcoal whitespace-nowrap">{formatPrice(unit * item.quantity, currency)}</div>
-                            <div className="text-xs text-charcoal-subtle whitespace-nowrap">{formatPrice(unit, currency)} each</div>
+                            <div className="text-base font-extrabold text-charcoal whitespace-nowrap" data-price data-price-stale={stale || undefined}>{formatPrice(unit * item.quantity, qc)}</div>
+                            <div className="text-xs text-charcoal-subtle whitespace-nowrap" data-price data-price-stale={stale || undefined}>{formatPrice(unit, qc)} each</div>
                           </>
                         )}
                       </div>
@@ -180,7 +185,7 @@ export function CartView({ currency }: { currency: Currency }) {
                       <Tag className="w-3.5 h-3.5" aria-hidden="true" />
                       Discount ({quote.couponCode})
                     </dt>
-                    <dd className="font-bold">- {formatPrice(quote.discount, currency)}</dd>
+                    <dd className="font-bold" data-price data-price-stale={stale || undefined}>- {formatPrice(quote.discount, qc)}</dd>
                   </div>
                 )}
                 <div className="flex items-center justify-between text-charcoal-muted">
@@ -234,9 +239,10 @@ export function CartView({ currency }: { currency: Currency }) {
                       <button
                         type="submit"
                         disabled={!couponInput.trim() || couponLoading}
-                        className="min-h-11 px-4 border border-pista text-pista-darker hover:bg-pista-lighter text-sm font-semibold rounded-xl disabled:opacity-50"
+                        aria-busy={couponLoading || undefined}
+                        className="min-h-11 min-w-[72px] px-4 border border-pista text-pista-darker hover:bg-pista-lighter text-sm font-semibold rounded-xl disabled:opacity-50 inline-flex items-center justify-center"
                       >
-                        {couponLoading ? '...' : 'Apply'}
+                        {couponLoading ? <Spinner /> : 'Apply'}
                       </button>
                     </div>
                     {couponError && (
@@ -251,7 +257,7 @@ export function CartView({ currency }: { currency: Currency }) {
               {blocked && quote && (
                 <p className="text-xs text-accent-rose font-semibold">Remove or change the items marked above to continue.</p>
               )}
-              <Link
+              <LoadingLink
                 href="/checkout"
                 aria-disabled={blocked}
                 onClick={e => blocked && e.preventDefault()}
@@ -261,7 +267,7 @@ export function CartView({ currency }: { currency: Currency }) {
               >
                 <span>Proceed to Checkout</span>
                 <ArrowRight className="w-4 h-4" aria-hidden="true" />
-              </Link>
+              </LoadingLink>
               <div className="text-center">
                 <Link href="/shop" className="inline-flex items-center min-h-11 text-sm text-charcoal-subtle hover:text-pista-dark hover:underline">
                   Continue shopping
@@ -272,5 +278,31 @@ export function CartView({ currency }: { currency: Currency }) {
         </div>
       )}
     </>
+  );
+}
+
+/** Layout-matched placeholder while the cart loads from this browser. */
+function CartSkeleton() {
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8" role="status" aria-label="Loading your cart" aria-busy="true">
+      <div className="lg:col-span-8 bg-surface-card border border-charcoal-border rounded-2xl divide-y divide-surface-muted">
+        {[0, 1].map(i => (
+          <div key={i} className="p-4 sm:p-5 flex items-center gap-4">
+            <div className="w-16 h-16 rounded-xl soft4u-shimmer shrink-0" />
+            <div className="flex-1 space-y-2">
+              <div className="h-4 w-2/3 rounded soft4u-shimmer" />
+              <div className="h-3 w-1/3 rounded soft4u-shimmer" />
+            </div>
+            <div className="h-5 w-20 rounded soft4u-shimmer" />
+          </div>
+        ))}
+      </div>
+      <div className="lg:col-span-4 bg-surface-card border border-charcoal-border rounded-2xl p-5 sm:p-6 space-y-4">
+        <div className="h-5 w-32 rounded soft4u-shimmer" />
+        <div className="h-4 w-full rounded soft4u-shimmer" />
+        <div className="h-8 w-full rounded soft4u-shimmer" />
+        <div className="h-12 w-full rounded-xl soft4u-shimmer" />
+      </div>
+    </div>
   );
 }

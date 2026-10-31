@@ -4,6 +4,7 @@ import React, { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Currency } from '@/lib/db/types';
 import { Select } from '@/components/ui/select';
+import { Spinner } from '@/components/ui/loading-button';
 
 const OPTIONS: { value: Currency; label: string }[] = [
   { value: 'PKR', label: 'PKR' },
@@ -11,13 +12,19 @@ const OPTIONS: { value: Currency; label: string }[] = [
 ];
 
 /**
- * PKR / USD switcher. The page is rendered with the currency from the cookie;
- * after load the browser asks /api/currency for the geo default (only when the
- * visitor never chose one) and a manual pick is remembered for a year.
+ * PKR / USD switcher. The page is rendered with the currency from the cookie
+ * (or the edge country header); when neither is known (`resolved` false) the
+ * browser asks /api/currency for the geo default and every price shows a
+ * skeleton until the answer is rendered. A manual pick is remembered for a year.
+ *
+ * The hidden marker's data-price-state drives the price styles in globals.css:
+ * "unresolved" shows skeleton bars, "switching" fades the old prices.
  */
-export function CurrencySwitcher({ currency, className = '' }: { currency: Currency; className?: string }) {
+export function CurrencySwitcher({ currency, resolved = true, className = '' }: { currency: Currency; resolved?: boolean; className?: string }) {
   const router = useRouter();
   const [value, setValue] = useState<Currency>(currency);
+  const [detecting, setDetecting] = useState(!resolved);
+  const [posting, setPosting] = useState(false);
   const [pending, startTransition] = useTransition();
 
   // Keep in sync when the server renders with a new currency.
@@ -32,13 +39,19 @@ export function CurrencySwitcher({ currency, className = '' }: { currency: Curre
     fetch('/api/currency', { cache: 'no-store' })
       .then(r => r.json())
       .then((data: { currency?: Currency }) => {
-        if (!active || !data?.currency) return;
-        if (data.currency !== currency) {
+        if (!active) return;
+        if (data?.currency && data.currency !== currency) {
           setValue(data.currency);
-          startTransition(() => router.refresh());
+          // The skeletons stay until the refreshed prices commit with this transition.
+          startTransition(() => {
+            setDetecting(false);
+            router.refresh();
+          });
+        } else {
+          setDetecting(false);
         }
       })
-      .catch(() => {});
+      .catch(() => active && setDetecting(false));
     return () => {
       active = false;
     };
@@ -49,6 +62,7 @@ export function CurrencySwitcher({ currency, className = '' }: { currency: Curre
   const change = async (next: Currency) => {
     if (next === value) return;
     setValue(next);
+    setPosting(true);
     try {
       await fetch('/api/currency', {
         method: 'POST',
@@ -58,18 +72,31 @@ export function CurrencySwitcher({ currency, className = '' }: { currency: Curre
     } catch {
       // the cookie write failed; the refresh below still re-renders with the old value
     }
-    startTransition(() => router.refresh());
+    startTransition(() => {
+      setPosting(false);
+      router.refresh();
+    });
   };
 
+  const state = detecting ? 'unresolved' : posting || pending ? 'switching' : 'ready';
+
   return (
-    <Select<Currency>
-      value={value}
-      onChange={change}
-      options={OPTIONS}
-      ariaLabel="Display currency"
-      align="right"
-      className={className}
-      buttonClassName={`!min-h-11 !px-2.5 !gap-1 text-xs sm:text-sm ${pending ? 'opacity-70' : ''}`}
-    />
+    <div className="relative" aria-busy={state !== 'ready' || undefined}>
+      <span hidden data-price-state={state} />
+      <Select<Currency>
+        value={value}
+        onChange={change}
+        options={OPTIONS}
+        ariaLabel="Display currency"
+        align="right"
+        className={className}
+        buttonClassName={`!min-h-11 !px-2.5 !gap-1 text-xs sm:text-sm ${state !== 'ready' ? 'opacity-70' : ''}`}
+      />
+      {state !== 'ready' && (
+        <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-white shadow flex items-center justify-center pointer-events-none" role="status" aria-label="Updating prices">
+          <Spinner className="w-3 h-3 text-pista-dark" />
+        </span>
+      )}
+    </div>
   );
 }

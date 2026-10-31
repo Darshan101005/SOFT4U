@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Mail, Phone, MessageCircle, Clock, MapPin, ShieldCheck, Lock, Headphones, BadgeCheck, Send } from 'lucide-react';
 import { Logo } from '@/components/brand/logo';
 import { db } from '@/lib/db';
-import { getPricing, getStoreInfo, safe } from '@/app/_store/storefront';
+import { getStoreInfo, safe } from '@/app/_store/storefront';
 
 const DEFAULT_HELP = [
   { label: 'About Us', href: '/about' },
@@ -25,11 +25,10 @@ const POLICY_HREFS = new Set(POLICY_LINKS.map(l => l.href));
 const linkClass = 'inline-flex items-center min-h-11 sm:min-h-0 sm:py-1 text-sm text-charcoal-muted hover:text-pista-darker transition-colors';
 
 export async function Footer() {
-  const [store, categories, footerNav, pricing] = await Promise.all([
+  const [store, categories, footerNav] = await Promise.all([
     getStoreInfo(),
     safe(() => db.getCategories(true), []),
     safe(() => db.getNavigation('footer'), []),
-    getPricing(),
   ]);
   const year = new Date().getFullYear();
   const cats = [...categories].sort((a, b) => a.displayOrder - b.displayOrder).slice(0, 8);
@@ -174,7 +173,6 @@ export async function Footer() {
           <p>
             &copy; {year} {store.name}. All rights reserved.
           </p>
-          <p className="text-pista-200">Prices in {pricing.usdEnabled ? 'PKR and USD' : 'PKR'}</p>
         </div>
       </div>
     </footer>

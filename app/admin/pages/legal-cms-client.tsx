@@ -4,8 +4,9 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { Clock, ExternalLink, FileText, RotateCcw, Save, Send } from 'lucide-react';
 import type { LegalPage } from '@/lib/db/types';
-import { Badge, Button, Card, EmptyState, Field, Input, PageHeader, SegmentChips, Textarea, api, errMsg, toast, useDialog } from '../_components/ui';
+import { Badge, Button, Card, EmptyState, Field, Input, PageHeader, SegmentChips, api, errMsg, toast, useDialog } from '../_components/ui';
 import { fmtDateTime } from '../_components/format';
+import { MarkdownEditor, MarkdownView } from '../_components/markdown-editor';
 
 export function LegalCmsClient({ initialPages }: { initialPages: LegalPage[] }) {
   const [pages, setPages] = useState(initialPages);
@@ -14,7 +15,7 @@ export function LegalCmsClient({ initialPages }: { initialPages: LegalPage[] }) 
   const [content, setContent] = useState(current?.draftContent || current?.content || '');
   const [title, setTitle] = useState(current?.title || '');
   const [note, setNote] = useState('');
-  const [preview, setPreview] = useState(false);
+  const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const { confirm, dialog } = useDialog();
 
@@ -35,7 +36,7 @@ export function LegalCmsClient({ initialPages }: { initialPages: LegalPage[] }) 
     setContent(p?.draftContent || p?.content || '');
     setTitle(p?.title || '');
     setNote('');
-    setPreview(false);
+    setEditing(false);
   };
 
   const call = async (action: string, extra: Record<string, unknown>, ok: string) => {
@@ -91,8 +92,8 @@ export function LegalCmsClient({ initialPages }: { initialPages: LegalPage[] }) 
           }
           description={`/${current.slug} · last published ${fmtDateTime(current.lastPublishedAt)}`}
           actions={
-            <Button size="sm" variant="secondary" onClick={() => setPreview(v => !v)}>
-              {preview ? 'Edit' : 'Preview'}
+            <Button size="sm" variant="secondary" onClick={() => setEditing(v => !v)}>
+              {editing ? 'Done editing' : 'Edit'}
             </Button>
           }
         >
@@ -100,10 +101,10 @@ export function LegalCmsClient({ initialPages }: { initialPages: LegalPage[] }) 
             <Field label="Page title">
               <Input value={title} onChange={e => setTitle(e.target.value)} />
             </Field>
-            {preview ? (
-              <div className="p-5 bg-surface-bg border border-charcoal-border rounded-xl min-h-[420px] whitespace-pre-wrap text-sm leading-relaxed">{content}</div>
+            {editing ? (
+              <MarkdownEditor value={content} onChange={setContent} rows={20} />
             ) : (
-              <Textarea rows={20} value={content} onChange={e => setContent(e.target.value)} className="font-mono text-xs" />
+              <MarkdownView source={content} className="min-h-[420px]" />
             )}
             <div className="flex flex-col sm:flex-row gap-3 sm:items-center pt-3 border-t border-surface-muted">
               <Input value={note} onChange={e => setNote(e.target.value)} placeholder="What changed? e.g. Updated refund window" className="sm:flex-1" />

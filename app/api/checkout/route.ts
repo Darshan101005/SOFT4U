@@ -10,6 +10,7 @@ import { EMAIL_RE, normalizeEmail } from '@/lib/password-policy';
 import { requestMeta } from '@/lib/request-meta';
 import { logActivity } from '@/lib/activity';
 import { runSweeps } from '@/lib/maintenance';
+import { formatPersonName } from '@/lib/format-name';
 
 const PHONE_RE = /^\+?[0-9 ()-]{7,20}$/;
 
@@ -28,13 +29,13 @@ export async function POST(req: NextRequest) {
   runSweeps();
   try {
     const body = await readJson(req);
-    const settings = await db.getSiteSettings();
+    const settings = await db.getSiteSettings({ fresh: true });
     if (settings.maintenanceMode) throw new CheckoutError('MAINTENANCE', settings.maintenanceMessage, 503);
 
     const user = await getSessionUser();
     if (!user) throw new CheckoutError('SIGN_IN_REQUIRED', 'Please sign in to place an order', 401);
 
-    const name = String(body.customerName || user?.name || '').trim().slice(0, 80);
+    const name = formatPersonName(String(body.customerName || user?.name || '').slice(0, 80));
     const email = normalizeEmail(user?.email || String(body.customerEmail || ''));
     const whatsapp = String(body.customerWhatsapp || user?.whatsapp || '').trim().slice(0, 24);
     const phone = String(body.customerPhone || user?.phone || '').trim().slice(0, 24);
