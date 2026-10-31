@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { LocalTime } from '@/components/local-time';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Loader2, Mail } from 'lucide-react';
@@ -173,7 +174,7 @@ export function ProfileForms({ user }: { user: ProfileUser }) {
         </button>
       </form>
 
-      <p className="text-xs text-charcoal-subtle">Member since {new Date(user.createdAt).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}.</p>
+      <p className="text-xs text-charcoal-subtle">Member since <LocalTime iso={user.createdAt} format="month" />.</p>
     </div>
   );
 }

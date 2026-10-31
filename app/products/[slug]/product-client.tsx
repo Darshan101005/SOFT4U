@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { LocalTime } from '@/components/local-time';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Check, ChevronDown, ChevronRight, Clock, Info, MessageCircle, Minus, Plus, ShieldCheck, ShoppingCart, Star, Zap } from 'lucide-react';
@@ -474,7 +475,7 @@ function ReviewsPanel({ productId, reviews }: { productId: string; reviews: Revi
                     <Star key={i} aria-hidden="true" className={`w-4 h-4 ${i < r.rating ? 'fill-accent-amber text-accent-amber' : 'text-charcoal-border-dark'}`} />
                   ))}
                 </div>
-                <span className="text-xs text-charcoal-subtle">{new Date(r.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                <span className="text-xs text-charcoal-subtle"><LocalTime iso={r.createdAt} format="date" /></span>
               </div>
               {r.title && <p className="mt-2 text-sm font-bold text-charcoal">{r.title}</p>}
               <p className="mt-1 text-sm text-charcoal-muted leading-relaxed">{r.comment}</p>

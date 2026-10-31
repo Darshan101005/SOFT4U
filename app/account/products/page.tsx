@@ -1,4 +1,5 @@
 import React from 'react';
+import { LocalTime } from '@/components/local-time';
 import Link from 'next/link';
 import { Boxes } from 'lucide-react';
 import { db } from '@/lib/db';
@@ -41,7 +42,7 @@ export default async function MyAccessPage() {
                   {o.orderNumber}
                 </Link>
                 <span className="text-xs text-charcoal-subtle">
-                  Delivered {o.deliveredAt ? new Date(o.deliveredAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''}
+                  Delivered <LocalTime iso={o.deliveredAt} format="date" empty="" />
                 </span>
               </div>
               <DeliveryPanel items={o.items} />

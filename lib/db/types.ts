@@ -29,6 +29,8 @@ export interface User {
   twoFactorEnabled: boolean;
   lastLoginAt?: string;
   lastSeenAt?: string;
+  /** IANA zone from the latest geo lookup (for emails and Telegram). */
+  timezone?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -526,6 +528,8 @@ export interface SiteSettings {
   contactTelegram: string;
   contactAddress: string;
   businessHours: string;
+  /** IANA zone for reports (dashboard months, admin alerts). Default Asia/Karachi. */
+  storeTimezone: string;
   currencySymbol: string;
   currencyCode: string;
   /** Show the PKR / USD switcher and accept USD orders. */

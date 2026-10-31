@@ -51,8 +51,3 @@ export function requestMeta(src: HeaderSource): RequestMeta {
   const ua = userAgent(src);
   return { ip: clientIp(src), userAgent: ua, device: deviceName(ua) };
 }
-
-/** Human date in Pakistan time for security emails. */
-export function pkTime(date = new Date()): string {
-  return `${date.toLocaleString('en-PK', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Karachi' })} PKT`;
-}

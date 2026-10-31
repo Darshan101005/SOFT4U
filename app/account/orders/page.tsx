@@ -1,4 +1,5 @@
 import React from 'react';
+import { LocalTime } from '@/components/local-time';
 import Link from 'next/link';
 import { ChevronRight, Package } from 'lucide-react';
 import { db } from '@/lib/db';
@@ -42,7 +43,7 @@ export default async function AccountOrdersPage() {
                   </div>
                   <div className="text-sm text-charcoal truncate">{o.items.map(i => `${i.productName} (${i.variantName}) × ${i.quantity}`).join(', ')}</div>
                   <div className="text-xs text-charcoal-subtle">
-                    {new Date(o.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} · {o.paymentMethodName || o.paymentMethod}
+                    <LocalTime iso={o.createdAt} format="date" /> · {o.paymentMethodName || o.paymentMethod}
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">

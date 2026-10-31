@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Save } from 'lucide-react';
+import { listTimeZones, offsetLabel } from '@/lib/datetime';
 import type { SiteSettings } from '@/lib/db/types';
 import { EMAIL_RE } from '@/lib/password-policy';
-import { Button, Card, Field, Input, PageHeader, Textarea, Toggle, api, errMsg, toast } from '../_components/ui';
+import { Button, Card, Field, Input, PageHeader, Select, Textarea, Toggle, api, errMsg, toast } from '../_components/ui';
 import { ImagePicker } from '../_components/image-picker';
 
 type Social = keyof SiteSettings['socialLinks'];
@@ -23,6 +24,11 @@ export function SettingsClient({ initialSettings }: { initialSettings: SiteSetti
   const [s, setS] = useState<SiteSettings>(initialSettings);
   const [alertEmails, setAlertEmails] = useState((initialSettings.orderAlertEmails || []).join(', '));
   const [saving, setSaving] = useState(false);
+  const zoneOptions = useMemo(() => {
+    const zones = listTimeZones();
+    if (s.storeTimezone && !zones.includes(s.storeTimezone)) zones.push(s.storeTimezone);
+    return zones.map(z => ({ value: z, label: `${z} (${offsetLabel(z)})` }));
+  }, [s.storeTimezone]);
 
   const set = <K extends keyof SiteSettings>(k: K, v: SiteSettings[K]) => setS(prev => ({ ...prev, [k]: v }));
   const setSocial = (k: Social, v: string) => setS(prev => ({ ...prev, socialLinks: { ...prev.socialLinks, [k]: v } }));
@@ -51,6 +57,7 @@ export function SettingsClient({ initialSettings }: { initialSettings: SiteSetti
           contactTelegram: s.contactTelegram,
           contactAddress: s.contactAddress,
           businessHours: s.businessHours,
+          storeTimezone: s.storeTimezone,
           socialLinks: s.socialLinks,
           seoDefaults: s.seoDefaults,
           orderAlertEmails: emails,
@@ -112,6 +119,13 @@ export function SettingsClient({ initialSettings }: { initialSettings: SiteSetti
             </Field>
             <Field label="Business hours" className="sm:col-span-2">
               <Input value={s.businessHours} onChange={e => set('businessHours', e.target.value)} placeholder="Mon – Sat, 10:00 AM – 10:00 PM (PKT)" />
+            </Field>
+            <Field
+              label="Store time zone"
+              className="sm:col-span-2"
+              hint="Used for reports (dashboard months and the revenue graph) and admin alert emails. Customers and admins always see order times in their own local time."
+            >
+              <Select value={s.storeTimezone} onChange={v => set('storeTimezone', v)} options={zoneOptions} searchable placeholder="Choose a time zone" ariaLabel="Store time zone" />
             </Field>
           </div>
         </Card>

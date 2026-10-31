@@ -5,6 +5,13 @@ import { formatMoney } from '@/lib/money';
 import { usdPriceFor } from '@/lib/pricing';
 import { siteConfig } from '@/lib/site-config';
 import { deliveredFieldsOf } from '@/lib/delivery-fields';
+import { formatDate, formatWithZone } from '@/lib/datetime';
+import { getViewerTimeZone } from '@/lib/viewer-timezone';
+
+/** Customer's zone for dates in answers: browser cookie (website), else last known zone (Telegram), else UTC. */
+async function customerZone(userId: string): Promise<string> {
+  return (await getViewerTimeZone()) || (await db.getUserById(userId))?.timezone || 'UTC';
+}
 
 /**
  * SOFT4U ASSISTANT: the store's AI helper for the website chat widget and
@@ -348,7 +355,7 @@ const TOOLS: ToolDef[] = [
         telegram_username: user.telegram,
         telegram_bot_connected: Boolean(user.telegramLinked),
         two_factor_enabled: user.twoFactorEnabled,
-        member_since: user.createdAt.slice(0, 10),
+        member_since: formatDate(user.createdAt, (await getViewerTimeZone()) || user.timezone || 'UTC'),
         orders_total: orders.length,
         orders_delivered: orders.filter(o => o.orderStatus === 'completed').length,
         account_url: `${baseUrl()}/account`,
@@ -363,10 +370,13 @@ const TOOLS: ToolDef[] = [
     run: async (args, ctx) => {
       if (!ctx.userId) return { signed_in: false };
       const status = str(args.status) as Order['orderStatus'];
-      const orders = await db.getOrders({ customerId: ctx.userId, status: STATUS_TEXT[status] ? status : undefined, limit: 15 });
+      const [orders, zone] = await Promise.all([
+        db.getOrders({ customerId: ctx.userId, status: STATUS_TEXT[status] ? status : undefined, limit: 15 }),
+        customerZone(ctx.userId),
+      ]);
       return orders.map(o => ({
         order_id: o.orderNumber,
-        date: o.createdAt.slice(0, 10),
+        date: formatWithZone(o.createdAt, zone),
         status: STATUS_TEXT[o.orderStatus] || o.orderStatus,
         total: formatMoney(o.total, o.currency),
         items: o.items.map(i => `${i.productName} (${i.variantName}) x${i.quantity}`),
@@ -389,10 +399,11 @@ const TOOLS: ToolDef[] = [
       const unpaid = ['pending', 'rejected'].includes(order.orderStatus);
       const method = unpaid ? await db.getPaymentMethodByKey(order.paymentMethod) : null;
       const send = method ? await payAmountFor(method, order) : null;
+      const zone = await customerZone(ctx.userId);
       return {
         found: true,
         order_id: order.orderNumber,
-        date: order.createdAt.slice(0, 10),
+        date: formatWithZone(order.createdAt, zone),
         status: STATUS_TEXT[order.orderStatus] || order.orderStatus,
         reason: order.statusReason,
         total: formatMoney(order.total, order.currency),
@@ -403,7 +414,7 @@ const TOOLS: ToolDef[] = [
           delivered: Boolean(i.deliveredAt || order.orderStatus === 'completed'),
           delivered_fields: deliveredFieldsOf(i).map(f => f.label),
         })),
-        history: order.timeline.slice(-6).map(t => ({ when: t.timestamp.slice(0, 16).replace('T', ' '), note: t.note || t.status })),
+        history: order.timeline.slice(-6).map(t => ({ when: formatWithZone(t.timestamp, zone), note: t.note || t.status })),
         how_to_pay: method
           ? {
               amount_to_transfer: formatMoney(order.total, order.currency),

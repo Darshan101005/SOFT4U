@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { LocalTime } from '@/components/local-time';
 import { useRouter } from 'next/navigation';
 import { CheckCircle2, ExternalLink, KeyRound, Loader2, Send, Unlink } from 'lucide-react';
 import { useAuth } from '@/lib/context/auth-context';
@@ -110,7 +111,7 @@ export function TelegramClient({
               <h2 className="text-base font-bold text-charcoal">Telegram is connected</h2>
               <p className="text-sm text-charcoal-muted">
                 {linked.username ? `Linked to @${linked.username}` : 'Your Telegram chat is linked'} since{' '}
-                {new Date(linked.linkedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}. You can choose Telegram delivery at checkout.
+                <LocalTime iso={linked.linkedAt} format="date" />. You can choose Telegram delivery at checkout.
               </p>
             </div>
           </div>

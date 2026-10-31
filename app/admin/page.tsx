@@ -7,13 +7,16 @@ import { ArrowRight, BadgeCheck, Boxes, Coins, KeyRound, LifeBuoy, Package, Send
 import { Card, EmptyState, OrderStatusBadge, PageHeader, Stat } from './_components/primitives';
 import { fmtDateTime } from './_components/format';
 import { requireAdminPage } from '@/lib/admin-auth';
+import { DEFAULT_STORE_TIMEZONE } from '@/lib/datetime';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminDashboardPage() {
   await requireAdminPage();
+  // Fresh read so a store time zone change applies on the next load, on every server instance.
+  const storeTimezone = (await db.getSiteSettings({ fresh: true }).catch(() => null))?.storeTimezone || DEFAULT_STORE_TIMEZONE;
   const [analytics, products, reviewQueue] = await Promise.all([
-    db.getAnalyticsSummary(),
+    db.getAnalyticsSummary(storeTimezone),
     db.getProducts(),
     db.getOrders({ status: ['under_review', 'processing'], limit: 8 }),
   ]);
@@ -63,7 +66,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-12 mb-6">
-        <Card className="lg:col-span-7" title="Revenue, last 6 months" description="Delivered orders only (PKR).">
+        <Card className="lg:col-span-7" title="Revenue, last 6 months" description={`Delivered orders only (PKR). Store time: ${storeTimezone}`}>
           {analytics.monthlyData.length === 0 ? (
             <EmptyState icon={Coins} title="No orders yet" description="Monthly revenue appears here once orders come in." />
           ) : (

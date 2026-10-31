@@ -3,6 +3,7 @@ import { after } from 'next/server';
 import { getPool } from '@/lib/db/pool';
 import { pruneIfDue } from '@/lib/maintenance';
 import { clientIp, deviceName, userAgent } from '@/lib/request-meta';
+import { isValidTimeZone } from '@/lib/datetime';
 
 /**
  * IP + geo + device logging for important events (signup, login, checkout,
@@ -137,7 +138,9 @@ export async function recordActivity(input: RecordActivityInput): Promise<void> 
       ],
     );
     if (input.userId && input.actorType !== 'admin') {
-      await pool.query(`UPDATE users SET last_seen_at = now() WHERE id = $1`, [input.userId]);
+      // The geo zone is kept on the user for emails and Telegram (no browser zone there).
+      const zone = isValidTimeZone(ipwho?.timezone?.id) ? ipwho.timezone.id : null;
+      await pool.query(`UPDATE users SET last_seen_at = now(), timezone = COALESCE($2, timezone) WHERE id = $1`, [input.userId, zone]);
     }
   } catch (err) {
     console.error('[activity] record failed:', err instanceof Error ? err.message : err);

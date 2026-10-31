@@ -1,5 +1,6 @@
 import type { SiteSettings } from './types';
 import { siteConfig } from '@/lib/site-config';
+import { DEFAULT_STORE_TIMEZONE, safeTimeZone } from '@/lib/datetime';
 
 /**
  * Baseline settings. Stored settings are merged over this, so a key added
@@ -15,6 +16,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   contactTelegram: '',
   contactAddress: siteConfig.address,
   businessHours: siteConfig.hours,
+  storeTimezone: DEFAULT_STORE_TIMEZONE,
   currencySymbol: siteConfig.currencySymbol,
   currencyCode: siteConfig.currency,
   usdEnabled: true,
@@ -53,6 +55,7 @@ export function mergeSettings(stored: Partial<SiteSettings> | null | undefined):
   return {
     ...DEFAULT_SITE_SETTINGS,
     ...s,
+    storeTimezone: safeTimeZone(s.storeTimezone, DEFAULT_STORE_TIMEZONE),
     usdPricing: { ...DEFAULT_SITE_SETTINGS.usdPricing, ...(s.usdPricing || {}) },
     branding: { ...DEFAULT_SITE_SETTINGS.branding, ...(s.branding || {}) },
     socialLinks: { ...DEFAULT_SITE_SETTINGS.socialLinks, ...(s.socialLinks || {}) },

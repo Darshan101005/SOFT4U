@@ -5,6 +5,7 @@ import { db } from '@/lib/db';
 import type { SiteSettings } from '@/lib/db/types';
 import { siteConfig } from '@/lib/site-config';
 import { absoluteUrl, siteUrl } from '@/lib/seo';
+import { getViewerTimeZone } from '@/lib/viewer-timezone';
 
 const FALLBACK_TITLE = `${siteConfig.name} | Digital Subscriptions, Software & AI Tools`;
 const OG_IMAGE = '/hero/soft4u-hero.png';
@@ -118,12 +119,12 @@ function jsonLd(s: SiteSettings | null) {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const s = await settings();
+  const [s, timeZone] = await Promise.all([settings(), getViewerTimeZone()]);
   return (
     <html lang="en">
       <body suppressHydrationWarning className="bg-surface-bg text-charcoal font-sans antialiased">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd(s)).replace(/</g, '\\u003c') }} />
-        <Providers>{children}</Providers>
+        <Providers timeZone={timeZone}>{children}</Providers>
       </body>
     </html>
   );

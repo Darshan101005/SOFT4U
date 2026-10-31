@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Laptop, Loader2, ShieldCheck, ShieldOff, Smartphone } from 'lucide-react';
 import { FormAlert, OtpInput, PasswordInput } from '@/components/auth/auth-ui';
 import { CopyButton } from '@/components/ui/copy-button';
+import { LocalTime } from '@/components/local-time';
 
 interface SessionRow {
   id: string;
@@ -23,7 +24,7 @@ async function post(url: string, body?: unknown) {
 }
 
 function when(iso: string) {
-  return new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  return <LocalTime iso={iso} />;
 }
 
 export function SecurityClient({ twoFactorEnabled, sessions: initialSessions }: { twoFactorEnabled: boolean; sessions: SessionRow[] }) {

@@ -90,7 +90,7 @@ export function LegalCmsClient({ initialPages }: { initialPages: LegalPage[] }) 
               {current.title} {hasDraft && <Badge tone="amber">Unpublished draft</Badge>}
             </span>
           }
-          description={`/${current.slug} · last published ${fmtDateTime(current.lastPublishedAt)}`}
+          description={<>/{current.slug} · last published {fmtDateTime(current.lastPublishedAt)}</>}
           actions={
             <Button size="sm" variant="secondary" onClick={() => setEditing(v => !v)}>
               {editing ? 'Done editing' : 'Edit'}

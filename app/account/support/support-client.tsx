@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { LocalTime } from '@/components/local-time';
 import { ChevronLeft, LifeBuoy, Loader2, Plus, Send, X } from 'lucide-react';
 import type { SupportTicket } from '@/lib/db/types';
 import { Select } from '@/components/ui/select';
@@ -154,7 +155,7 @@ export function SupportClient({ initialTickets, orderNumbers }: { initialTickets
                   </div>
                   <div className="text-sm font-bold text-charcoal line-clamp-1">{t.subject}</div>
                   <div className="text-xs text-charcoal-subtle mt-1">
-                    {t.category} · {new Date(t.updatedAt).toLocaleDateString('en-GB')}
+                    {t.category} · <LocalTime iso={t.updatedAt} format="date" />
                   </div>
                 </button>
               </li>
@@ -181,7 +182,7 @@ export function SupportClient({ initialTickets, orderNumbers }: { initialTickets
                     return (
                       <div key={m.id} className={`flex flex-col ${mine ? 'items-end' : 'items-start'}`}>
                         <div className="text-[11px] text-charcoal-subtle mb-1 px-1">
-                          <span className="font-semibold text-charcoal">{mine ? 'You' : m.senderName}</span> · {new Date(m.timestamp).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                          <span className="font-semibold text-charcoal">{mine ? 'You' : m.senderName}</span> · <LocalTime iso={m.timestamp} />
                         </div>
                         <div className={`p-3 rounded-xl max-w-[88%] text-sm leading-relaxed whitespace-pre-line break-words ${mine ? 'bg-pista-dark text-white' : 'bg-surface-bg text-charcoal border border-charcoal-border'}`}>{m.message}</div>
                       </div>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { LocalTime } from '@/components/local-time';
 import Link from 'next/link';
 import { ArrowRight, Boxes, CircleAlert, Clock, Package, Send, ShieldCheck, Smartphone } from 'lucide-react';
 import { db } from '@/lib/db';
@@ -103,7 +104,7 @@ export default async function AccountOverviewPage() {
                       <StatusBadge status={o.orderStatus} />
                     </div>
                     <div className="text-sm text-charcoal mt-1 truncate">{o.items.map(i => `${i.productName} (${i.variantName})`).join(', ')}</div>
-                    <div className="text-xs text-charcoal-subtle mt-0.5">{new Date(o.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                    <div className="text-xs text-charcoal-subtle mt-0.5"><LocalTime iso={o.createdAt} format="date" /></div>
                   </div>
                   <div className="text-base font-extrabold text-charcoal whitespace-nowrap">{formatMoney(o.total, o.currency)}</div>
                 </Link>

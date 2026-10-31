@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import type { SiteSettings } from '@/lib/db/types';
 import { requireAdmin } from '@/lib/admin-auth';
 import { errorResponse, readJson } from '@/lib/api';
+import { isValidTimeZone } from '@/lib/datetime';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +19,7 @@ const KEYS: Array<keyof SiteSettings> = [
   'contactTelegram',
   'contactAddress',
   'businessHours',
+  'storeTimezone',
   'usdEnabled',
   'fallbackUsdRate',
   'usdPricing',
@@ -54,6 +56,9 @@ export async function POST(req: NextRequest) {
       const r = Number(updates.fallbackUsdRate);
       if (!(r > 1 && r < 10000)) return NextResponse.json({ error: 'Enter a realistic fallback rate (PKR per 1 USD)' }, { status: 400 });
       updates.fallbackUsdRate = r;
+    }
+    if ('storeTimezone' in updates && !isValidTimeZone(updates.storeTimezone)) {
+      return NextResponse.json({ error: 'Choose a valid store time zone' }, { status: 400 });
     }
     if (updates.usdPricing && typeof updates.usdPricing === 'object') {
       const p = updates.usdPricing as Record<string, unknown>;

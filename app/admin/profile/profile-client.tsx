@@ -133,7 +133,7 @@ export function ProfileClient({ admin, telegramReady, botName }: { admin: AdminU
 
   return (
     <div className="max-w-4xl">
-      <PageHeader kicker="Settings" title="My profile" description={`Signed in as ${admin.email}. Last sign-in ${fmtDateTime(admin.lastLoginAt)}.`} />
+      <PageHeader kicker="Settings" title="My profile" description={<>Signed in as {admin.email}. Last sign-in {fmtDateTime(admin.lastLoginAt)}.</>} />
       <div className="grid gap-6 lg:grid-cols-2">
         <Card title={<span className="flex items-center gap-2"><UserCircle2 className="w-4 h-4 text-pista-dark" />Name and email</span>}>
           <form onSubmit={saveProfile} className="space-y-4">

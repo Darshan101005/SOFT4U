@@ -236,7 +236,7 @@ export function CustomerDetailClient({ userId }: { userId: string }) {
         <Stat label="Total orders" value={stats.totalOrders} icon={ShoppingBag} />
         <Stat label="Delivered orders" value={stats.completedOrders} icon={BadgeCheck} />
         <Stat label="Lifetime spend" value={formatMoney(stats.spentPkr, 'PKR')} hint="Delivered orders, PKR" />
-        <Stat label="Telegram bot" value={telegram ? 'Linked' : 'Not linked'} hint={telegram ? `Since ${fmtDate(telegram.linkedAt)}` : 'Customer links from their account'} icon={MessageCircle} />
+        <Stat label="Telegram bot" value={telegram ? 'Linked' : 'Not linked'} hint={telegram ? <>Since {fmtDate(telegram.linkedAt)}</> : 'Customer links from their account'} icon={MessageCircle} />
       </div>
 
       <div className="columns-1 lg:columns-2 gap-6 [&>*]:mb-6 [&>*]:break-inside-avoid">
@@ -256,7 +256,7 @@ export function CustomerDetailClient({ userId }: { userId: string }) {
             copy={u.whatsapp}
           />
           <Row icon={MessageCircle} label="Telegram" value={u.telegram ? `@${u.telegram}` : undefined} copy={u.telegram} />
-          <Row icon={MessageCircle} label="Bot account" value={telegram ? `${telegram.username ? `@${telegram.username}` : `Chat ${telegram.chatId}`} · linked ${fmtDate(telegram.linkedAt)}` : undefined} />
+          <Row icon={MessageCircle} label="Bot account" value={telegram ? <>{telegram.username ? `@${telegram.username}` : `Chat ${telegram.chatId}`} · linked {fmtDate(telegram.linkedAt)}</> : undefined} />
           <Row icon={Clock} label="Last sign-in" value={u.lastLoginAt ? fmtDateTime(u.lastLoginAt) : undefined} />
           <Row icon={Calendar} label="Joined" value={fmtDateTime(u.createdAt)} />
           {u.status === 'suspended' && <Row icon={Ban} label="Block reason" value={u.suspendedReason || 'Blocked by admin'} />}
@@ -292,7 +292,7 @@ export function CustomerDetailClient({ userId }: { userId: string }) {
               <Row icon={Globe} label="ISP" value={a.isp} />
               <Row icon={Globe} label="Network" value={a.org} />
               <Row icon={Clock} label="Timezone" value={a.timezoneId} />
-              <Row icon={Calendar} label="Recorded" value={`${EVENT_LABELS[a.eventType] || a.eventType.replace(/_/g, ' ')} · ${fmtDateTime(a.createdAt)}`} />
+              <Row icon={Calendar} label="Recorded" value={<>{EVENT_LABELS[a.eventType] || a.eventType.replace(/_/g, ' ')} · {fmtDateTime(a.createdAt)} ({timeAgo(a.createdAt)})</>} />
               <div className="px-5 py-3 flex flex-wrap gap-1.5">
                 <Badge tone={a.isVpn ? 'rose' : 'gray'}>VPN {a.isVpn ? 'yes' : 'no'}</Badge>
                 <Badge tone={a.isProxy ? 'rose' : 'gray'}>Proxy {a.isProxy ? 'yes' : 'no'}</Badge>

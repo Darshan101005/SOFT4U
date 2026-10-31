@@ -11,6 +11,7 @@ import { DeliveryPanel } from '@/components/order/delivery-panel';
 import { EMPTY_PROOF, ProofFields, proofPayload, proofProblem, type ProofValue } from '@/components/order/proof-fields';
 import { formatPrice } from '@/app/_store/price';
 import { formatGbp } from '@/lib/money';
+import { LocalTime } from '@/components/local-time';
 
 export const STATUS_LABELS: Record<OrderStatus, string> = {
   pending: 'Awaiting payment',
@@ -63,8 +64,7 @@ function stepIndex(status: OrderStatus): number {
 }
 
 function fmtDate(iso?: string) {
-  if (!iso) return '';
-  return new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  return <LocalTime iso={iso} empty="" />;
 }
 
 /**
@@ -297,7 +297,7 @@ export function OrderView({
                 <div className="font-semibold text-charcoal">{item.productName}</div>
                 <div className="text-xs text-charcoal-subtle">
                   {item.variantName} × {item.quantity}
-                  {item.deliveredAt ? ` · delivered ${fmtDate(item.deliveredAt)}` : ''}
+                  {item.deliveredAt ? <> · delivered {fmtDate(item.deliveredAt)}</> : ''}
                 </div>
               </div>
               <div className="font-bold text-charcoal whitespace-nowrap">{formatPrice(item.price * item.quantity, order.currency)}</div>

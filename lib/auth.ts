@@ -12,7 +12,9 @@ import { clearAttempts, isLimited, recordAttempt } from '@/lib/rate-limit';
 import { generateTotpSecret, otpauthQrDataUrl, otpauthURL, verifyTotp } from '@/lib/totp';
 import { queueEmail, sendEmail } from '@/lib/email';
 import { appBaseUrl, passwordResetEmail, resendOtpEmail, signupOtpEmail, twoFactorChangedEmail, welcomeEmail } from '@/lib/email-templates';
-import { pkTime, type RequestMeta } from '@/lib/request-meta';
+import { type RequestMeta } from '@/lib/request-meta';
+import { formatWithZone } from '@/lib/datetime';
+import { getViewerTimeZone } from '@/lib/viewer-timezone';
 import { unlinkUser } from '@/lib/telegram-link';
 import { formatPersonName } from '@/lib/format-name';
 
@@ -56,6 +58,13 @@ interface UserAuthRow {
   totp_enabled: boolean;
   totp_secret: string | null;
   totp_pending_secret: string | null;
+  /** IANA zone from the latest geo lookup (null before migration 0011 data exists). */
+  timezone?: string | null;
+}
+
+/** Customer-facing time for security emails: browser zone, else last known zone, else UTC. */
+async function customerWhen(row: UserAuthRow): Promise<string> {
+  return formatWithZone(new Date(), (await getViewerTimeZone()) || row.timezone || 'UTC');
 }
 
 async function authRowByEmail(email: string): Promise<UserAuthRow | null> {
@@ -409,7 +418,7 @@ export async function enableTotp(userId: string, code: string, meta: RequestMeta
     `UPDATE users SET totp_enabled = true, totp_secret = totp_pending_secret, totp_pending_secret = NULL, updated_at = now() WHERE id = $1`,
     [userId],
   );
-  queueEmail(row.email, twoFactorChangedEmail({ name: row.name, enabled: true, when: pkTime(), device: meta.device }), 'two_factor');
+  queueEmail(row.email, twoFactorChangedEmail({ name: row.name, enabled: true, when: await customerWhen(row), device: meta.device }), 'two_factor');
 }
 
 /** Turning 2FA off needs the password and a current code. */
@@ -422,7 +431,7 @@ export async function disableTotp(userId: string, password: string, code: string
     `UPDATE users SET totp_enabled = false, totp_secret = NULL, totp_pending_secret = NULL, updated_at = now() WHERE id = $1`,
     [userId],
   );
-  queueEmail(row.email, twoFactorChangedEmail({ name: row.name, enabled: false, when: pkTime(), device: meta.device }), 'two_factor');
+  queueEmail(row.email, twoFactorChangedEmail({ name: row.name, enabled: false, when: await customerWhen(row), device: meta.device }), 'two_factor');
 }
 
 /** Admin action: customer lost their phone. */

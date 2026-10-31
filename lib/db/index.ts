@@ -3,6 +3,7 @@ import { getPool, query, queryOne, tx } from './pool';
 import { mergeSettings } from './defaults';
 import { newId, newOrderNumber, newTicketNumber } from '@/lib/ids';
 import { pruneIfDue } from '@/lib/maintenance';
+import { DEFAULT_STORE_TIMEZONE, safeTimeZone } from '@/lib/datetime';
 import type {
   ActivityEntry,
   AdminUser,
@@ -140,6 +141,7 @@ export function mapUser(r: Row): User {
     twoFactorEnabled: Boolean(r.totp_enabled),
     lastLoginAt: optIso(r.last_login_at),
     lastSeenAt: optIso(r.last_seen_at),
+    timezone: opt(r.timezone),
     createdAt: iso(r.created_at),
     updatedAt: iso(r.updated_at),
   };
@@ -1957,7 +1959,9 @@ export const db = {
   },
 
   /* ---------------- Analytics (real figures only) ---------------- */
-  getAnalyticsSummary: async () => {
+  /** Monthly figures are bucketed by calendar month in the store time zone (default Asia/Karachi). */
+  getAnalyticsSummary: async (storeTimezone: string = DEFAULT_STORE_TIMEZONE) => {
+    const tz = safeTimeZone(storeTimezone, DEFAULT_STORE_TIMEZONE);
     const [totals, monthly, recentOrders, counts] = await Promise.all([
       queryOne<Row>(
         `SELECT
@@ -1973,13 +1977,14 @@ export const db = {
          FROM orders`,
       ),
       query<Row>(
-        `SELECT to_char(date_trunc('month', created_at), 'Mon') AS month,
-                date_trunc('month', created_at) AS m,
+        `SELECT to_char(date_trunc('month', created_at AT TIME ZONE $1), 'Mon') AS month,
+                date_trunc('month', created_at AT TIME ZONE $1) AS m,
                 COALESCE(sum(total_pkr) FILTER (WHERE order_status = 'completed'), 0) AS revenue,
                 count(*)::int AS orders
            FROM orders
-          WHERE created_at >= date_trunc('month', now()) - interval '5 months'
+          WHERE created_at >= (date_trunc('month', now() AT TIME ZONE $1) - interval '5 months') AT TIME ZONE $1
           GROUP BY 1, 2 ORDER BY 2 ASC`,
+        [tz],
       ),
       db.getOrders({ limit: 5 }),
       db.getOrderCounts(),

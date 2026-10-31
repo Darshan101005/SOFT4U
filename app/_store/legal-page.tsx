@@ -1,4 +1,5 @@
 import React from 'react';
+import { LocalTime } from '@/components/local-time';
 import Link from 'next/link';
 import { Mail, MessageCircle, Phone } from 'lucide-react';
 import { Header } from '@/components/header';
@@ -65,7 +66,7 @@ export async function LegalPage({ path, slug, fallbackTitle }: { path: string; s
             <h1 className="text-2xl sm:text-4xl font-extrabold text-charcoal">{heading}</h1>
             {updated && (
               <p className="mt-2 text-xs text-charcoal-subtle">
-                Last updated: {new Date(updated).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                Last updated: <LocalTime iso={updated} format="date" />
               </p>
             )}
           </div>
