@@ -32,7 +32,9 @@ export default async function TrackOrderPage({ searchParams }: Props) {
   let needEmail = false;
   if (orderNumber) {
     const found = await safe(() => loadOrderForViewer(orderNumber), null);
-    if (found && (found.isOwner || (email && normalizeEmail(found.order.customerEmail) === email))) {
+    // The email must always match the order, even for the signed-in owner, so
+    // what the visitor types is never ignored.
+    if (found && email && normalizeEmail(found.order.customerEmail) === email) {
       order = await toPublicOrder(found.order, found.canSeeDelivery);
     } else if (found && !email) {
       needEmail = true;
@@ -80,7 +82,7 @@ export default async function TrackOrderPage({ searchParams }: Props) {
           )}
         </div>
 
-        {order && <OrderView initial={order} whatsappHref={store.whatsappHref} storeName={store.name} signInHref={`/login?next=${encodeURIComponent(`/account/orders/${order.orderNumber}`)}`} />}
+        {order && <OrderView initial={order} trackEmail={email} whatsappHref={store.whatsappHref} storeName={store.name} signInHref={`/login?next=${encodeURIComponent(`/account/orders/${order.orderNumber}`)}`} />}
 
         <p className="text-center text-xs text-charcoal-subtle">
           Signed in? See every order in{' '}

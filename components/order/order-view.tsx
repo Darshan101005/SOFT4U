@@ -77,12 +77,15 @@ export function OrderView({
   storeName,
   notice,
   signInHref = '/login',
+  trackEmail,
 }: {
   initial: PublicOrder;
   whatsappHref: string;
   storeName: string;
   notice?: string;
   signInHref?: string;
+  /** Email entered on Track Order; sent with refreshes so the API can check it. */
+  trackEmail?: string;
 }) {
   const [order, setOrder] = useState<PublicOrder>(initial);
   const [proof, setProof] = useState<ProofValue>(EMPTY_PROOF);
@@ -105,7 +108,8 @@ export function OrderView({
   const refresh = async () => {
     setRefreshing(true);
     try {
-      const res = await fetch(`/api/orders/${n}`, { cache: 'no-store' });
+      const q = trackEmail ? `?email=${encodeURIComponent(trackEmail)}` : '';
+      const res = await fetch(`/api/orders/${n}${q}`, { cache: 'no-store' });
       const data = await res.json();
       if (res.ok && data.order) setOrder(data.order);
     } finally {
