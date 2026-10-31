@@ -1,10 +1,9 @@
 /**
- * Soft4u product catalogue — mock data until integration.
- * Shapes match `Product` / `ProductVariant` in lib/db/types.ts and the Prisma
- * `Product` / `ProductVariant` models, so the Neon switch is drop-in.
+ * Soft4u starting catalogue: the source for `bun run db:seed` (lib/db/seed-data.ts).
+ * Live pages read products from Postgres through `db`; edit products in the admin panel.
  *
  * Prices are in PKR. Brand logos are self-hosted copies of the official logos
- * from Wikimedia Commons (public/brands/*), moving to Cloudinary at integration.
+ * from Wikimedia Commons (public/brands/*); `bun run db:seed --images` moves them to Cloudinary.
  */
 import type { Product, ProductVariant, InventoryType } from '@/lib/db/types';
 import { siteConfig } from '@/lib/site-config';
@@ -67,7 +66,10 @@ function makeProduct(input: ProductInput): Product {
       price: plan.price,
       compareAtPrice: plan.compareAtPrice,
       sku: `${input.sku}-${meta.sku}`,
-      stock: plan.stock,
+      // Seed rows start as pre-order / manual delivery; real stock comes from the admin vault.
+      stock: 0,
+      stockMode: 'preorder',
+      usdPricingMode: 'auto',
       description: `${input.brand} access for ${meta.name.toLowerCase()} (${meta.days} days).`,
       deliveryMethod: DELIVERY_METHOD,
       deliveryTime,
@@ -84,6 +86,7 @@ function makeProduct(input: ProductInput): Product {
   return {
     id: input.id,
     name: input.name,
+    brand: input.brand,
     slug: input.slug,
     sku: input.sku,
     shortDescription: input.shortDescription,
@@ -113,8 +116,8 @@ function makeProduct(input: ProductInput): Product {
     usageInstructions: `After payment you receive your ${input.brand} access details by email and WhatsApp. Follow the activation steps in the message, or contact ${siteConfig.name} support for help.`,
     refundInfo:
       'If your access does not work and we cannot fix or replace it, you are eligible for a refund as per our Refund Policy.',
-    seoTitle: `Buy ${input.name} in Pakistan | ${siteConfig.name}`,
-    seoDescription: `${input.name} in PKR with instant delivery on email and WhatsApp. ${input.shortDescription}`,
+    seoTitle: `Buy ${input.name} | ${siteConfig.name}`,
+    seoDescription: `${input.name} with private delivery by email, WhatsApp or Telegram. ${input.shortDescription}`,
     relatedProductIds: input.relatedProductIds ?? [],
     variants,
     createdAt: CREATED,
@@ -553,7 +556,7 @@ export const products: Product[] = [
   }),
 ];
 
-/** Format a PKR amount, e.g. `Rs 1,899`. */
+/** Format a PKR amount, e.g. `PKR 1,899`. */
 export function formatPKR(amount: number): string {
   return `${siteConfig.currencySymbol} ${Math.round(amount).toLocaleString('en-US')}`;
 }

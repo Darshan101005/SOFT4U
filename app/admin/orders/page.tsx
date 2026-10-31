@@ -1,18 +1,16 @@
 import React from 'react';
-import Link from 'next/link';
 import { AdminLayout } from '@/components/admin-layout';
-import { db } from '@/lib/db';
-import { Package, Search, ExternalLink, ShieldCheck, Zap } from 'lucide-react';
 import { AdminOrdersClient } from './admin-orders-client';
+import { requireAdminPage } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminOrdersPage() {
-  const orders = await db.getOrders();
-
+export default async function AdminOrdersPage({ searchParams }: { searchParams: Promise<{ status?: string; search?: string }> }) {
+  await requireAdminPage();
+  const sp = await searchParams;
   return (
     <AdminLayout>
-      <AdminOrdersClient initialOrders={orders} />
+      <AdminOrdersClient initialStatus={sp.status || 'all'} initialSearch={sp.search || ''} />
     </AdminLayout>
   );
 }

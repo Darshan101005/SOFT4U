@@ -1,241 +1,262 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Coupon } from '@/lib/db/types';
-import { Tag, Plus, Trash2, Check, X, Percent, DollarSign } from 'lucide-react';
+import { Pencil, Plus, Tag, Trash2, X } from 'lucide-react';
+import type { Coupon } from '@/lib/db/types';
+import { formatMoney } from '@/lib/money';
+import { Badge, Button, Card, CopyButton, EmptyState, Field, Input, Modal, PageHeader, Select, Table, Textarea, Toggle, api, errMsg, toast, useDialog } from '../_components/ui';
+import { fmtDate } from '../_components/format';
 
-export function CouponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
-  const [coupons, setCoupons] = useState<Coupon[]>(initialCoupons);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [code, setCode] = useState('');
-  const [description, setDescription] = useState('');
-  const [type, setType] = useState<'percentage' | 'fixed'>('percentage');
-  const [value, setValue] = useState(15);
-  const [minSpend, setMinSpend] = useState(10);
-  const [notice, setNotice] = useState('');
+type Opt = { id: string; name: string };
 
-  const showNotice = (msg: string) => {
-    setNotice(msg);
-    setTimeout(() => setNotice(''), 3000);
-  };
+type Form = {
+  id?: string;
+  code: string;
+  description: string;
+  type: 'percentage' | 'fixed';
+  value: string;
+  minOrderAmount: string;
+  maxDiscount: string;
+  usageLimit: string;
+  perUserLimit: string;
+  startDate: string;
+  expiryDate: string;
+  enabled: boolean;
+  productIds: string[];
+  categoryIds: string[];
+};
 
-  const handleToggle = async (coupon: Coupon) => {
-    const updated = await dbUpdateCoupon(coupon.id, { enabled: !coupon.enabled });
-    if (updated) {
-      setCoupons(prev => prev.map(c => (c.id === coupon.id ? updated : c)));
-      showNotice(`Coupon ${coupon.code} ${!coupon.enabled ? 'activated' : 'disabled'}!`);
+const blank: Form = {
+  code: '',
+  description: '',
+  type: 'percentage',
+  value: '',
+  minOrderAmount: '',
+  maxDiscount: '',
+  usageLimit: '',
+  perUserLimit: '1',
+  startDate: '',
+  expiryDate: '',
+  enabled: true,
+  productIds: [],
+  categoryIds: [],
+};
+
+const toLocal = (iso?: string) => (iso ? new Date(iso).toISOString().slice(0, 10) : '');
+
+function MultiPick({ label, all, value, onChange }: { label: string; all: Opt[]; value: string[]; onChange: (v: string[]) => void }) {
+  const remaining = all.filter(o => !value.includes(o.id));
+  return (
+    <Field label={label} hint="Empty means every item">
+      <Select value="" onChange={v => v && onChange([...value, v])} options={remaining.map(o => ({ value: o.id, label: o.name }))} placeholder="Add…" searchable />
+      {value.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-2">
+          {value.map(id => (
+            <span key={id} className="inline-flex items-center gap-1 pl-2.5 pr-1 py-1 rounded-full bg-pista-lighter text-pista-darker text-xs font-bold">
+              {all.find(o => o.id === id)?.name || id}
+              <button type="button" onClick={() => onChange(value.filter(x => x !== id))} className="p-0.5 rounded-full hover:bg-white" aria-label="Remove">
+                <X className="w-3 h-3" />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+    </Field>
+  );
+}
+
+function couponState(c: Coupon): { label: string; tone: 'green' | 'gray' | 'amber' | 'rose' } {
+  if (!c.enabled) return { label: 'Off', tone: 'gray' };
+  const now = new Date().toISOString();
+  if (c.startDate && c.startDate > now) return { label: 'Scheduled', tone: 'amber' };
+  if (c.expiryDate && c.expiryDate < now) return { label: 'Expired', tone: 'rose' };
+  if (c.usageLimit && c.usageCount >= c.usageLimit) return { label: 'Used up', tone: 'rose' };
+  return { label: 'Live', tone: 'green' };
+}
+
+export function CouponsClient({ initialCoupons, products, categories }: { initialCoupons: Coupon[]; products: Opt[]; categories: Opt[] }) {
+  const [coupons, setCoupons] = useState(initialCoupons);
+  const [form, setForm] = useState<Form | null>(null);
+  const [saving, setSaving] = useState(false);
+  const { confirm, dialog } = useDialog();
+
+  const edit = (c: Coupon) =>
+    setForm({
+      id: c.id,
+      code: c.code,
+      description: c.description || '',
+      type: c.type,
+      value: String(c.value),
+      minOrderAmount: c.minOrderAmount ? String(c.minOrderAmount) : '',
+      maxDiscount: c.maxDiscount ? String(c.maxDiscount) : '',
+      usageLimit: c.usageLimit ? String(c.usageLimit) : '',
+      perUserLimit: c.perUserLimit ? String(c.perUserLimit) : '',
+      startDate: toLocal(c.startDate),
+      expiryDate: toLocal(c.expiryDate),
+      enabled: c.enabled,
+      productIds: c.productIds || [],
+      categoryIds: c.categoryIds || [],
+    });
+
+  const save = async () => {
+    if (!form) return;
+    setSaving(true);
+    try {
+      const coupon = { ...form, expiryDate: form.expiryDate ? `${form.expiryDate}T23:59:59` : '', startDate: form.startDate ? `${form.startDate}T00:00:00` : '' };
+      const res = await api<{ coupon: Coupon }>('/api/admin/coupons', { body: { action: form.id ? 'update' : 'create', id: form.id, coupon } });
+      setCoupons(prev => (form.id ? prev.map(c => (c.id === form.id ? res.coupon : c)) : [res.coupon, ...prev]));
+      setForm(null);
+      toast.success(form.id ? 'Coupon saved' : 'Coupon created');
+    } catch (err) {
+      toast.error(errMsg(err));
+    } finally {
+      setSaving(false);
     }
   };
 
-  const dbUpdateCoupon = async (id: string, updates: Partial<Coupon>) => {
-    // In our simplified API we can handle this locally or through api
-    return { ...coupons.find(c => c.id === id)!, ...updates };
+  const toggle = async (c: Coupon) => {
+    try {
+      const res = await api<{ coupon: Coupon }>('/api/admin/coupons', { body: { action: 'toggle', id: c.id, enabled: !c.enabled } });
+      setCoupons(prev => prev.map(x => (x.id === c.id ? res.coupon : x)));
+    } catch (err) {
+      toast.error(errMsg(err));
+    }
   };
 
-  const handleCreate = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!code) return;
-
-    const newCoupon: Coupon = {
-      id: `coup_${Date.now()}`,
-      code: code.trim().toUpperCase(),
-      description,
-      type,
-      value: Number(value),
-      minOrderAmount: Number(minSpend) || 0,
-      usageCount: 0,
-      enabled: true,
-      createdAt: new Date().toISOString()
-    };
-
-    setCoupons([newCoupon, ...coupons]);
-    setModalOpen(false);
-    setCode('');
-    setDescription('');
-    showNotice(`Created coupon ${newCoupon.code}!`);
-  };
-
-  const handleDelete = (id: string) => {
-    setCoupons(prev => prev.filter(c => c.id !== id));
-    showNotice('Coupon removed.');
+  const remove = async (c: Coupon) => {
+    if (!(await confirm({ title: `Delete coupon ${c.code}?`, message: 'Orders that already used it are not affected.', confirmLabel: 'Delete', danger: true }))) return;
+    try {
+      await api('/api/admin/coupons', { body: { action: 'delete', id: c.id } });
+      setCoupons(prev => prev.filter(x => x.id !== c.id));
+      toast.success('Coupon deleted');
+    } catch (err) {
+      toast.error(errMsg(err));
+    }
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="text-xs font-bold text-pista-dark uppercase tracking-wider mb-1">
-            PROMOTIONAL ENGINE
-          </div>
-          <h1 className="text-3xl font-extrabold text-charcoal">Discount Coupons & Vouchers</h1>
-          <p className="text-xs text-charcoal-subtle mt-0.5">
-            Configure promotional percentage codes, flat cash discounts, and minimum order rules.
-          </p>
-        </div>
+    <div>
+      <PageHeader
+        kicker="Commerce"
+        title="Coupons"
+        description="Percentage or fixed discounts. Fixed amounts and minimum order are in PKR and are converted for USD orders."
+        actions={
+          <Button icon={Plus} onClick={() => setForm({ ...blank })}>
+            New coupon
+          </Button>
+        }
+      />
+      <Card bodyClassName="p-0">
+        {coupons.length === 0 ? (
+          <EmptyState icon={Tag} title="No coupons yet" description="Create a code customers can enter at checkout." />
+        ) : (
+          <Table head={['Code', 'Discount', 'Rules', 'Used', 'Valid', 'Status', '']}>
+            {coupons.map(c => {
+              const st = couponState(c);
+              return (
+                <tr key={c.id} className="hover:bg-surface-bg/60">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-1">
+                      <code className="font-mono font-extrabold">{c.code}</code>
+                      <CopyButton value={c.code} label="Code" />
+                    </div>
+                    {c.description && <div className="text-xs text-charcoal-subtle">{c.description}</div>}
+                  </td>
+                  <td className="px-4 py-3 font-bold whitespace-nowrap">{c.type === 'percentage' ? `${c.value}% off` : `${formatMoney(c.value, 'PKR')} off`}</td>
+                  <td className="px-4 py-3 text-xs text-charcoal-muted">
+                    {c.minOrderAmount ? <div>Min {formatMoney(c.minOrderAmount, 'PKR')}</div> : null}
+                    {c.maxDiscount ? <div>Max {formatMoney(c.maxDiscount, 'PKR')}</div> : null}
+                    {c.perUserLimit ? <div>{c.perUserLimit} per customer</div> : null}
+                    {c.productIds?.length || c.categoryIds?.length ? <div>Limited to {(c.productIds?.length || 0) + (c.categoryIds?.length || 0)} item(s)</div> : null}
+                  </td>
+                  <td className="px-4 py-3 text-sm whitespace-nowrap">
+                    {c.usageCount}
+                    {c.usageLimit ? ` / ${c.usageLimit}` : ''}
+                  </td>
+                  <td className="px-4 py-3 text-xs text-charcoal-subtle whitespace-nowrap">
+                    {c.startDate ? fmtDate(c.startDate) : 'Now'} → {c.expiryDate ? fmtDate(c.expiryDate) : 'No end'}
+                  </td>
+                  <td className="px-4 py-3">
+                    <button type="button" onClick={() => void toggle(c)} title="Turn on or off">
+                      <Badge tone={st.tone}>{st.label}</Badge>
+                    </button>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex justify-end gap-1">
+                      <button type="button" onClick={() => edit(c)} className="p-2 rounded-lg text-charcoal-muted hover:bg-pista-lighter" title="Edit">
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button type="button" onClick={() => void remove(c)} className="p-2 rounded-lg text-charcoal-subtle hover:text-accent-rose hover:bg-accent-rose/5" title="Delete">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </Table>
+        )}
+      </Card>
 
-        <button
-          onClick={() => setModalOpen(true)}
-          className="px-4 py-2.5 bg-pista text-charcoal hover:bg-pista-hover text-xs font-bold rounded-lg shadow-sm flex items-center justify-center gap-1.5 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Create Coupon</span>
-        </button>
-      </div>
-
-      {notice && (
-        <div className="p-3 bg-pista-lighter border border-pista text-xs font-semibold text-pista-dark rounded-lg flex items-center gap-2">
-          <Check className="w-4 h-4" />
-          <span>{notice}</span>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {coupons.map(coupon => (
-          <div
-            key={coupon.id}
-            className="bg-white border border-charcoal-border rounded-2xl p-6 flex flex-col justify-between shadow-xs hover:border-pista-hover transition-colors"
-          >
-            <div>
-              <div className="flex items-center justify-between pb-3 border-b border-surface-muted">
-                <span className="font-mono text-base font-extrabold text-charcoal tracking-wider">
-                  {coupon.code}
-                </span>
-                <button
-                  onClick={() => handleToggle(coupon)}
-                  className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono uppercase ${
-                    coupon.enabled ? 'bg-pista-lighter text-pista-dark' : 'bg-surface-muted text-charcoal-subtle'
-                  }`}
-                >
-                  {coupon.enabled ? 'Active' : 'Disabled'}
-                </button>
-              </div>
-
-              <div className="mt-3 flex items-baseline gap-1 text-2xl font-black font-mono text-charcoal">
-                {coupon.type === 'percentage' ? (
-                  <>
-                    <span>{coupon.value}%</span>
-                    <span className="text-xs font-normal text-charcoal-subtle font-sans">OFF</span>
-                  </>
-                ) : (
-                  <>
-                    <span>${coupon.value}</span>
-                    <span className="text-xs font-normal text-charcoal-subtle font-sans">FLAT OFF</span>
-                  </>
-                )}
-              </div>
-
-              <p className="text-xs text-charcoal-muted mt-1.5 leading-relaxed">
-                {coupon.description || 'Promotional checkout discount code.'}
-              </p>
-
-              <div className="mt-4 pt-3 border-t border-surface-muted space-y-1 text-xs text-charcoal-subtle">
-                <div>Min Order: <span className="font-mono font-semibold text-charcoal">${coupon.minOrderAmount || 0}</span></div>
-                <div>Times Used: <span className="font-mono font-semibold text-charcoal">{coupon.usageCount} times</span></div>
-              </div>
+      <Modal
+        open={Boolean(form)}
+        onClose={() => setForm(null)}
+        title={form?.id ? `Edit ${form.code}` : 'New coupon'}
+        size="lg"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setForm(null)}>Cancel</Button>
+            <Button onClick={save} loading={saving}>{form?.id ? 'Save coupon' : 'Create coupon'}</Button>
+          </>
+        }
+      >
+        {form && (
+          <div className="space-y-4">
+            <div className="grid gap-3 sm:grid-cols-3">
+              <Field label="Code" required>
+                <Input value={form.code} onChange={e => setForm({ ...form, code: e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, '') })} className="font-mono" placeholder="WELCOME10" />
+              </Field>
+              <Field label="Type">
+                <Select value={form.type} onChange={v => setForm({ ...form, type: v as Form['type'] })} options={[{ value: 'percentage', label: 'Percentage off' }, { value: 'fixed', label: 'Fixed amount off (PKR)' }]} />
+              </Field>
+              <Field label={form.type === 'percentage' ? 'Percent' : 'Amount (PKR)'} required>
+                <Input type="number" min={0} value={form.value} onChange={e => setForm({ ...form, value: e.target.value })} />
+              </Field>
             </div>
-
-            <div className="mt-6 pt-3 border-t border-surface-muted flex justify-end">
-              <button
-                onClick={() => handleDelete(coupon.id)}
-                className="p-1.5 text-charcoal-subtle hover:text-charcoal hover:bg-surface-muted rounded"
-                title="Delete coupon"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+            <Field label="Description (internal)">
+              <Textarea rows={2} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
+            </Field>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <Field label="Minimum order (PKR)">
+                <Input type="number" min={0} value={form.minOrderAmount} onChange={e => setForm({ ...form, minOrderAmount: e.target.value })} />
+              </Field>
+              <Field label="Max discount (PKR)">
+                <Input type="number" min={0} value={form.maxDiscount} onChange={e => setForm({ ...form, maxDiscount: e.target.value })} />
+              </Field>
+              <Field label="Total uses">
+                <Input type="number" min={0} value={form.usageLimit} onChange={e => setForm({ ...form, usageLimit: e.target.value })} placeholder="Unlimited" />
+              </Field>
+              <Field label="Uses per customer">
+                <Input type="number" min={0} value={form.perUserLimit} onChange={e => setForm({ ...form, perUserLimit: e.target.value })} placeholder="Unlimited" />
+              </Field>
             </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Modal */}
-      {modalOpen && (
-        <div className="fixed inset-0 z-50 bg-charcoal/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white border border-charcoal-border rounded-2xl shadow-2xl p-6 space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-surface-muted">
-              <h2 className="text-base font-bold text-charcoal">Create Promo Coupon</h2>
-              <button onClick={() => setModalOpen(false)} className="text-charcoal-subtle hover:text-charcoal">
-                <X className="w-5 h-5" />
-              </button>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label="Starts">
+                <Input type="date" value={form.startDate} onChange={e => setForm({ ...form, startDate: e.target.value })} />
+              </Field>
+              <Field label="Ends">
+                <Input type="date" value={form.expiryDate} onChange={e => setForm({ ...form, expiryDate: e.target.value })} />
+              </Field>
             </div>
-
-            <form onSubmit={handleCreate} className="space-y-4 text-xs">
-              <div>
-                <label className="font-semibold text-charcoal block mb-1">Coupon Code *</label>
-                <input
-                  type="text"
-                  required
-                  value={code}
-                  onChange={e => setCode(e.target.value.toUpperCase())}
-                  placeholder="e.g. FLASH30"
-                  className="w-full px-3 py-2 border border-charcoal-border rounded-lg bg-surface-bg font-mono uppercase"
-                />
-              </div>
-
-              <div>
-                <label className="font-semibold text-charcoal block mb-1">Description</label>
-                <input
-                  type="text"
-                  value={description}
-                  onChange={e => setDescription(e.target.value)}
-                  placeholder="e.g. 30% discount on all subscriptions"
-                  className="w-full px-3 py-2 border border-charcoal-border rounded-lg bg-surface-bg"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-semibold text-charcoal block mb-1">Discount Type</label>
-                  <select
-                    value={type}
-                    onChange={e => setType(e.target.value as any)}
-                    className="w-full px-3 py-2 border border-charcoal-border rounded-lg bg-surface-bg"
-                  >
-                    <option value="percentage">Percentage (%)</option>
-                    <option value="fixed">Fixed Cash ($)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="font-semibold text-charcoal block mb-1">Discount Value</label>
-                  <input
-                    type="number"
-                    required
-                    value={value}
-                    onChange={e => setValue(Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-charcoal-border rounded-lg bg-surface-bg font-mono"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="font-semibold text-charcoal block mb-1">Minimum Order Amount ($)</label>
-                <input
-                  type="number"
-                  value={minSpend}
-                  onChange={e => setMinSpend(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-charcoal-border rounded-lg bg-surface-bg font-mono"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2 border-t border-surface-muted">
-                <button
-                  type="button"
-                  onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 border border-charcoal-border rounded-lg font-semibold text-charcoal-muted"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 bg-pista text-charcoal hover:bg-pista-hover font-bold rounded-lg shadow-sm"
-                >
-                  Save Coupon
-                </button>
-              </div>
-            </form>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <MultiPick label="Only these products" all={products} value={form.productIds} onChange={v => setForm({ ...form, productIds: v })} />
+              <MultiPick label="Only these categories" all={categories} value={form.categoryIds} onChange={v => setForm({ ...form, categoryIds: v })} />
+            </div>
+            <Toggle checked={form.enabled} onChange={v => setForm({ ...form, enabled: v })} label="Enabled" />
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
+      {dialog}
     </div>
   );
 }

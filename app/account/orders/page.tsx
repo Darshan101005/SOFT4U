@@ -1,66 +1,59 @@
 import React from 'react';
 import Link from 'next/link';
-import { AccountLayout } from '@/components/account-layout';
+import { ChevronRight, Package } from 'lucide-react';
 import { db } from '@/lib/db';
-import { Package, Zap, ArrowRight, ExternalLink } from 'lucide-react';
+import type { Order } from '@/lib/db/types';
+import { formatMoney } from '@/lib/money';
+import { StatusBadge } from '@/components/order/order-view';
+import { safe } from '@/app/_store/storefront';
+import { requireAccountUser } from '../require-user';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AccountOrdersPage() {
-  const orders = await db.getOrders();
+  const user = await requireAccountUser('/account/orders');
+  const orders = await safe(() => db.getOrders({ customerId: user.id, limit: 200 }), [] as Order[]);
 
   return (
-    <AccountLayout>
-      <div className="space-y-6">
-        <div>
-          <div className="text-xs font-bold text-pista-dark uppercase tracking-wider mb-1">
-            PURCHASE HISTORY
-          </div>
-          <h1 className="text-2xl font-extrabold text-charcoal">Your Orders & Invoices</h1>
-          <p className="text-xs text-charcoal-subtle mt-0.5">
-            Click into any order to reveal login credentials, private PINs, license keys, and warranty information.
-          </p>
-        </div>
-
-        <div className="bg-white border border-charcoal-border rounded-2xl p-6 shadow-xs space-y-4">
-          {orders.map(order => (
-            <div
-              key={order.id}
-              className="p-5 bg-surface-bg border border-charcoal-border rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-            >
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono font-bold text-xs text-charcoal">{order.orderNumber}</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-pista-lighter text-pista-dark font-bold font-mono uppercase">
-                    {order.paymentStatus}
-                  </span>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-pista-light text-pista-darker font-bold font-mono uppercase">
-                    {order.fulfillmentStatus}
-                  </span>
-                </div>
-
-                <div className="text-xs font-bold text-charcoal">
-                  {order.items.map(i => `${i.productName} (${i.variantName})`).join(' · ')}
-                </div>
-
-                <div className="text-[11px] text-charcoal-subtle">
-                  Purchased {new Date(order.createdAt).toLocaleDateString()} · Paid via {order.paymentMethod} · Total: ${order.total.toFixed(2)}
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Link
-                  href={`/account/orders/${order.orderNumber}`}
-                  className="px-3.5 py-2 bg-pista-dark text-white hover:bg-pista-darker text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5"
-                >
-                  <Zap className="w-3.5 h-3.5 text-pista-dark" />
-                  <span>Reveal Vault Details</span>
-                </Link>
-              </div>
-            </div>
-          ))}
-        </div>
+    <div className="space-y-6">
+      <div>
+        <div className="text-xs font-bold text-pista-dark uppercase tracking-wider mb-1">Orders</div>
+        <h1 className="text-2xl font-extrabold text-charcoal">My orders</h1>
+        <p className="text-sm text-charcoal-subtle mt-0.5">Open an order to pay, upload proof, or see your delivered access.</p>
       </div>
-    </AccountLayout>
+
+      {orders.length === 0 ? (
+        <div className="p-10 text-center bg-white border border-charcoal-border rounded-2xl space-y-3">
+          <Package className="w-10 h-10 text-pista-dark mx-auto" aria-hidden="true" />
+          <p className="text-sm text-charcoal-subtle">You have not placed any orders yet.</p>
+          <Link href="/shop" className="inline-flex items-center min-h-11 px-5 rounded-xl bg-pista text-charcoal text-sm font-bold">
+            Browse products
+          </Link>
+        </div>
+      ) : (
+        <ul className="bg-white border border-charcoal-border rounded-2xl divide-y divide-surface-muted overflow-hidden">
+          {orders.map(o => (
+            <li key={o.id}>
+              <Link href={`/account/orders/${o.orderNumber}`} className="p-4 sm:p-5 flex items-center justify-between gap-3 hover:bg-pista-50">
+                <div className="min-w-0 space-y-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-mono font-bold text-sm text-charcoal">{o.orderNumber}</span>
+                    <StatusBadge status={o.orderStatus} />
+                  </div>
+                  <div className="text-sm text-charcoal truncate">{o.items.map(i => `${i.productName} (${i.variantName}) × ${i.quantity}`).join(', ')}</div>
+                  <div className="text-xs text-charcoal-subtle">
+                    {new Date(o.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} · {o.paymentMethodName || o.paymentMethod}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-sm sm:text-base font-extrabold text-charcoal whitespace-nowrap">{formatMoney(o.total, o.currency)}</span>
+                  <ChevronRight className="w-4 h-4 text-charcoal-subtle" aria-hidden="true" />
+                </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }

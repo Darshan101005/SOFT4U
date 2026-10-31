@@ -83,15 +83,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         i => i.product.id === product.id && i.variant.id === variant.id
       );
       if (existingIndex > -1) {
-        const next = [...prev];
-        next[existingIndex].quantity += quantity;
-        return next;
+        // Checkout accepts at most 10 of one plan per order.
+        return prev.map((item, idx) =>
+          idx === existingIndex ? { ...item, product, variant, quantity: Math.min(10, item.quantity + quantity) } : item
+        );
       }
       const newItem: CartItem = {
         id: `cart_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
         product,
         variant,
-        quantity,
+        quantity: Math.min(10, Math.max(1, quantity)),
       };
       return [...prev, newItem];
     });
@@ -106,7 +107,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       prev
         .map(i => {
           if (i.id === itemId) {
-            const nextQty = i.quantity + delta;
+            const nextQty = Math.min(10, i.quantity + delta);
             return nextQty > 0 ? { ...i, quantity: nextQty } : null;
           }
           return i;

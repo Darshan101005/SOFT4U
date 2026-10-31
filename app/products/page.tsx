@@ -1,2 +1,13 @@
-// /products shows the same catalogue as /shop; the canonical URL stays /shop.
-export { metadata, default } from '@/app/shop/page';
+import { permanentRedirect } from 'next/navigation';
+
+// /products is an alias of the catalogue; the canonical URL is /shop.
+export default async function ProductsIndex({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const sp = await searchParams;
+  const qs = new URLSearchParams();
+  for (const [k, v] of Object.entries(sp)) {
+    if (typeof v === 'string') qs.set(k, v);
+    else if (Array.isArray(v) && v[0]) qs.set(k, v[0]);
+  }
+  const query = qs.toString();
+  permanentRedirect(query ? `/shop?${query}` : '/shop');
+}

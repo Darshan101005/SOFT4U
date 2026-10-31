@@ -1,460 +1,321 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
-import { HomepageSection } from '@/lib/db/types';
-import {
-  Compass,
-  Eye,
-  EyeOff,
-  ArrowUp,
-  ArrowDown,
-  Pencil,
-  Trash2,
-  Plus,
-  ExternalLink,
-  Check,
-  X,
-  Sparkles
-} from 'lucide-react';
+import { ArrowDown, ArrowUp, Home, Pencil, Plus, Trash2, X } from 'lucide-react';
+import type { HomepageSection } from '@/lib/db/types';
+import { Badge, Button, Card, EmptyState, Field, Input, Modal, PageHeader, Select, Textarea, Toggle, api, errMsg, toast, useDialog } from '../_components/ui';
+import { ImagePicker } from '../_components/image-picker';
+
+const TYPE_LABELS: Record<HomepageSection['type'], string> = {
+  hero: 'Hero (top of page)',
+  trust_bar: 'Trust bar',
+  categories: 'Categories',
+  featured_products: 'Featured products',
+  bestsellers: 'Best sellers',
+  new_arrivals: 'New arrivals',
+  all_products: 'All products',
+  banner: 'Banner',
+  benefits: 'Why choose us',
+  how_it_works: 'How it works',
+  testimonials: 'Testimonials',
+  reviews: 'Customer reviews',
+  faq: 'FAQ',
+  cta: 'Call to action',
+  newsletter: 'Newsletter',
+};
+
+const TEMPLATES: Record<HomepageSection['type'], Record<string, unknown>> = {
+  hero: { kicker: '', headline: '', subheadline: '', primaryCtaText: 'Browse products', primaryCtaUrl: '/shop', secondaryCtaText: '', secondaryCtaUrl: '', highlights: [] },
+  trust_bar: { items: [{ icon: 'BadgeCheck', title: '', desc: '' }] },
+  categories: { title: 'Shop by category', subtitle: '' },
+  featured_products: { title: 'Featured', subtitle: '', limit: 8 },
+  bestsellers: { title: 'Best sellers', subtitle: '', limit: 8 },
+  new_arrivals: { title: 'Newly added', subtitle: '', limit: 8 },
+  all_products: { title: 'All products', subtitle: '' },
+  banner: { title: '', subtitle: '', image: '', ctaText: '', ctaUrl: '' },
+  benefits: { title: '', subtitle: '', items: [{ icon: 'BadgeCheck', title: '', desc: '' }] },
+  how_it_works: { title: 'How ordering works', subtitle: '', steps: [{ step: '01', title: '', desc: '' }] },
+  testimonials: { title: 'What customers say', subtitle: '', hideWhenEmpty: true },
+  reviews: { title: 'What customers say', subtitle: '', limit: 6, hideWhenEmpty: true },
+  faq: { title: 'Frequently asked questions', subtitle: '', limit: 6 },
+  cta: { title: '', subtitle: '', ctaText: 'Browse products', ctaUrl: '/shop' },
+  newsletter: { title: '', subtitle: '' },
+};
+
+const KEY_LABELS: Record<string, string> = {
+  kicker: 'Small label above the headline',
+  headline: 'Headline',
+  subheadline: 'Text under the headline',
+  primaryCtaText: 'Main button text',
+  primaryCtaUrl: 'Main button link',
+  secondaryCtaText: 'Second button text',
+  secondaryCtaUrl: 'Second button link',
+  highlights: 'Highlight chips',
+  ctaText: 'Button text',
+  ctaUrl: 'Button link',
+  limit: 'How many products to show',
+  hideWhenEmpty: 'Hide when there is nothing to show',
+  desc: 'Description',
+  icon: 'Icon name (lucide)',
+  step: 'Step',
+};
+
+function labelFor(key: string): string {
+  if (KEY_LABELS[key]) return KEY_LABELS[key];
+  const s = key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').toLowerCase();
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+const isLong = (key: string, v: string) => /sub|desc|text$|body|content/i.test(key) && !/cta|button/i.test(key) ? true : v.length > 90;
+
+function ValueEditor({ name, value, onChange }: { name: string; value: unknown; onChange: (v: unknown) => void }) {
+  if (typeof value === 'boolean') return <Toggle checked={value} onChange={onChange} label={labelFor(name)} />;
+  if (typeof value === 'number')
+    return (
+      <Field label={labelFor(name)}>
+        <Input type="number" value={value} onChange={e => onChange(Number(e.target.value) || 0)} />
+      </Field>
+    );
+  if (typeof value === 'string') {
+    if (/image|logo|photo/i.test(name)) return <ImagePicker value={value} onChange={onChange} kind="banners" label={labelFor(name)} wide />;
+    return (
+      <Field label={labelFor(name)}>
+        {isLong(name, value) ? <Textarea rows={3} value={value} onChange={e => onChange(e.target.value)} /> : <Input value={value} onChange={e => onChange(e.target.value)} />}
+      </Field>
+    );
+  }
+  if (Array.isArray(value)) {
+    const objects = value.length > 0 && typeof value[0] === 'object' && value[0] !== null;
+    if (!objects) {
+      const list = value as string[];
+      return (
+        <Field label={labelFor(name)}>
+          <div className="space-y-2">
+            {list.map((item, i) => (
+              <div key={i} className="flex gap-2">
+                <Input value={String(item)} onChange={e => onChange(list.map((x, j) => (j === i ? e.target.value : x)))} />
+                <button type="button" onClick={() => onChange(list.filter((_, j) => j !== i))} className="p-2 text-charcoal-subtle hover:text-accent-rose" aria-label="Remove">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+            <Button size="sm" variant="secondary" icon={Plus} onClick={() => onChange([...list, ''])}>
+              Add
+            </Button>
+          </div>
+        </Field>
+      );
+    }
+    const list = value as Array<Record<string, unknown>>;
+    const keys = Object.keys(list[0] || {});
+    return (
+      <div className="space-y-2">
+        <div className="text-xs font-bold text-charcoal">{labelFor(name)}</div>
+        {list.map((obj, i) => (
+          <div key={i} className="rounded-xl border border-charcoal-border p-3 bg-surface-bg space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-charcoal-subtle">Item {i + 1}</span>
+              <div className="flex gap-1">
+                <button type="button" disabled={i === 0} onClick={() => { const n = [...list]; [n[i - 1], n[i]] = [n[i], n[i - 1]]; onChange(n); }} className="p-1 text-charcoal-subtle disabled:opacity-30" aria-label="Move up">
+                  <ArrowUp className="w-3.5 h-3.5" />
+                </button>
+                <button type="button" disabled={i === list.length - 1} onClick={() => { const n = [...list]; [n[i + 1], n[i]] = [n[i], n[i + 1]]; onChange(n); }} className="p-1 text-charcoal-subtle disabled:opacity-30" aria-label="Move down">
+                  <ArrowDown className="w-3.5 h-3.5" />
+                </button>
+                <button type="button" onClick={() => onChange(list.filter((_, j) => j !== i))} className="p-1 text-charcoal-subtle hover:text-accent-rose" aria-label="Remove">
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {keys.map(k => (
+                <div key={k} className={typeof obj[k] === 'string' && isLong(k, String(obj[k])) ? 'sm:col-span-2' : ''}>
+                  <ValueEditor name={k} value={obj[k] ?? ''} onChange={v => onChange(list.map((x, j) => (j === i ? { ...x, [k]: v } : x)))} />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+        <Button size="sm" variant="secondary" icon={Plus} onClick={() => onChange([...list, Object.fromEntries(keys.map(k => [k, typeof list[0]?.[k] === 'number' ? 0 : '']))])}>
+          Add item
+        </Button>
+      </div>
+    );
+  }
+  return null;
+}
 
 export function HomepageCmsClient({ initialSections }: { initialSections: HomepageSection[] }) {
-  const [sections, setSections] = useState<HomepageSection[]>(initialSections);
-  const [editingSection, setEditingSection] = useState<HomepageSection | null>(null);
-  const [headline, setHeadline] = useState('');
-  const [subheadline, setSubheadline] = useState('');
-  const [kicker, setKicker] = useState('');
-  const [primaryCtaText, setPrimaryCtaText] = useState('');
-  const [primaryCtaUrl, setPrimaryCtaUrl] = useState('');
-  const [notice, setNotice] = useState('');
+  const [sections, setSections] = useState([...initialSections].sort((a, b) => a.order - b.order));
+  const [editing, setEditing] = useState<HomepageSection | null>(null);
+  const [adding, setAdding] = useState<HomepageSection['type'] | null>(null);
+  const [saving, setSaving] = useState(false);
+  const { confirm, dialog } = useDialog();
 
-  // Add section modal
-  const [addModalOpen, setAddModalOpen] = useState(false);
-  const [newType, setNewType] = useState<HomepageSection['type']>('cta');
-  const [newName, setNewName] = useState('Promotional Callout');
+  const post = (body: Record<string, unknown>) => api<{ section?: HomepageSection; sections?: HomepageSection[] }>('/api/cms/homepage', { body });
 
-  const showNotice = (msg: string) => {
-    setNotice(msg);
-    setTimeout(() => setNotice(''), 3000);
+  const toggle = async (s: HomepageSection) => {
+    try {
+      const res = await post({ action: 'toggle_enabled', sectionId: s.id });
+      if (res.section) setSections(prev => prev.map(x => (x.id === s.id ? res.section! : x)));
+    } catch (err) {
+      toast.error(errMsg(err));
+    }
   };
 
-  const handleToggle = async (sectionId: string) => {
+  const move = async (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    if (j < 0 || j >= sections.length) return;
+    const next = [...sections];
+    [next[i], next[j]] = [next[j], next[i]];
+    setSections(next);
     try {
-      const res = await fetch('/api/cms/homepage', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'toggle_enabled', sectionId })
-      });
-      const data = await res.json();
-      if (data.section) {
-        setSections(prev => prev.map(s => (s.id === sectionId ? data.section : s)));
-        showNotice(`Section "${data.section.name}" visibility updated!`);
+      await post({ action: 'reorder', orderedIds: next.map(s => s.id) });
+    } catch (err) {
+      toast.error(errMsg(err));
+    }
+  };
+
+  const save = async () => {
+    if (!editing) return;
+    setSaving(true);
+    try {
+      const res = await post({ action: 'update', sectionId: editing.id, updates: { name: editing.name, settings: editing.settings } });
+      if (res.section) setSections(prev => prev.map(x => (x.id === editing.id ? res.section! : x)));
+      setEditing(null);
+      toast.success('Section saved. The homepage updates within a minute.');
+    } catch (err) {
+      toast.error(errMsg(err));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const add = async () => {
+    if (!adding) return;
+    setSaving(true);
+    try {
+      const res = await post({ action: 'add', newSection: { type: adding, name: TYPE_LABELS[adding].replace(/ \(.*\)$/, ''), enabled: false, order: sections.length + 1, settings: TEMPLATES[adding] } });
+      if (res.section) {
+        setSections(prev => [...prev, res.section!]);
+        setEditing(res.section);
       }
-    } catch (e) {
-      console.error(e);
+      setAdding(null);
+      toast.success('Section added (switched off). Fill it in, then switch it on.');
+    } catch (err) {
+      toast.error(errMsg(err));
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleMove = async (index: number, direction: 'up' | 'down') => {
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= sections.length) return;
-
-    const newSections = [...sections];
-    const temp = newSections[index];
-    newSections[index] = newSections[targetIndex];
-    newSections[targetIndex] = temp;
-
-    setSections(newSections);
-
+  const remove = async (s: HomepageSection) => {
+    if (!(await confirm({ title: `Delete the "${s.name}" section?`, message: 'To hide it for now, switch it off instead.', confirmLabel: 'Delete', danger: true }))) return;
     try {
-      const orderedIds = newSections.map(s => s.id);
-      await fetch('/api/cms/homepage', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'reorder', orderedIds })
-      });
-      showNotice('Homepage sections reordered successfully!');
-    } catch (e) {
-      console.error(e);
+      await post({ action: 'delete', sectionId: s.id });
+      setSections(prev => prev.filter(x => x.id !== s.id));
+      toast.success('Section deleted');
+    } catch (err) {
+      toast.error(errMsg(err));
     }
   };
 
-  const openEditor = (sec: HomepageSection) => {
-    setEditingSection(sec);
-    setHeadline(sec.settings?.headline || sec.settings?.title || '');
-    setSubheadline(sec.settings?.subheadline || sec.settings?.subtitle || sec.settings?.description || '');
-    setKicker(sec.settings?.kicker || '');
-    setPrimaryCtaText(sec.settings?.primaryCtaText || sec.settings?.ctaText || '');
-    setPrimaryCtaUrl(sec.settings?.primaryCtaUrl || sec.settings?.ctaUrl || '');
-  };
-
-  const handleSaveEdit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingSection) return;
-
-    const updatedSettings = {
-      ...editingSection.settings,
-      headline: headline || undefined,
-      title: headline || undefined,
-      subheadline: subheadline || undefined,
-      subtitle: subheadline || undefined,
-      description: subheadline || undefined,
-      kicker: kicker || undefined,
-      primaryCtaText: primaryCtaText || undefined,
-      ctaText: primaryCtaText || undefined,
-      primaryCtaUrl: primaryCtaUrl || undefined,
-      ctaUrl: primaryCtaUrl || undefined,
-    };
-
-    try {
-      const res = await fetch('/api/cms/homepage', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'update',
-          sectionId: editingSection.id,
-          updates: { settings: updatedSettings }
-        })
-      });
-      const data = await res.json();
-      if (data.section) {
-        setSections(prev => prev.map(s => (s.id === data.section.id ? data.section : s)));
-        setEditingSection(null);
-        showNotice(`Section "${data.section.name}" published to homepage!`);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const handleDelete = async (sectionId: string) => {
-    if (!confirm('Are you sure you want to delete this section from homepage?')) return;
-    try {
-      await fetch('/api/cms/homepage', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'delete', sectionId })
-      });
-      setSections(prev => prev.filter(s => s.id !== sectionId));
-      showNotice('Section removed from homepage.');
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const handleAddSection = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const res = await fetch('/api/cms/homepage', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'add',
-          newSection: {
-            type: newType,
-            name: newName,
-            enabled: true,
-            order: sections.length + 1,
-            settings: {
-              title: newName,
-              subtitle: 'Customized content block configured from Soft4u admin panel.',
-              ctaText: 'Learn More',
-              ctaUrl: '/shop'
-            }
-          }
-        })
-      });
-      const data = await res.json();
-      if (data.section) {
-        setSections([...sections, data.section]);
-        setAddModalOpen(false);
-        showNotice(`Added new section "${data.section.name}"!`);
-      }
-    } catch (e) {
-      console.error(e);
-    }
+  const summary = (s: HomepageSection) => {
+    const st = s.settings || {};
+    return String(st.headline || st.title || st.subheadline || st.subtitle || (Array.isArray(st.items) ? `${st.items.length} items` : Array.isArray(st.steps) ? `${st.steps.length} steps` : ''));
   };
 
   return (
-    <div className="space-y-6">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="text-xs font-bold text-pista-dark uppercase tracking-wider mb-1">
-            HEADLESS CMS ENGINE
-          </div>
-          <h1 className="text-3xl font-extrabold text-charcoal">Homepage Section Management</h1>
-          <p className="text-xs text-charcoal-subtle mt-0.5">
-            Full zero-code administrative control over all homepage components, titles, buttons, and display sequence.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Link
-            href="/"
-            target="_blank"
-            className="px-4 py-2 bg-white border border-charcoal-border hover:border-pista-hover text-charcoal text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors"
-          >
-            <span>Live Preview</span>
-            <ExternalLink className="w-3.5 h-3.5 text-pista-dark" />
-          </Link>
-          <button
-            onClick={() => setAddModalOpen(true)}
-            className="px-4 py-2 bg-pista text-charcoal hover:bg-pista-hover text-xs font-bold rounded-lg flex items-center gap-1.5 transition-colors"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Add Section</span>
-          </button>
-        </div>
-      </div>
-
-      {notice && (
-        <div className="p-3 bg-pista-lighter border border-pista text-xs font-semibold text-pista-dark rounded-lg flex items-center gap-2">
-          <Check className="w-4 h-4" />
-          <span>{notice}</span>
-        </div>
-      )}
-
-      {/* Sections Table & Reorder Controls */}
-      <div className="bg-white border border-charcoal-border rounded-2xl shadow-xs overflow-hidden">
-        <div className="p-4 bg-surface-bg border-b border-charcoal-border flex items-center justify-between text-xs font-bold text-charcoal-subtle uppercase tracking-wider">
-          <span>Homepage Content Order ({sections.length} Sections)</span>
-          <span>Status & Reorder</span>
-        </div>
-
-        <div className="divide-y divide-surface-muted">
-          {sections.map((sec, idx) => (
-            <div
-              key={sec.id}
-              className={`p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors ${
-                sec.enabled ? 'bg-white' : 'bg-surface-bg/60 opacity-60'
-              }`}
-            >
-              <div className="flex items-center gap-4">
-                <span className="w-6 h-6 rounded bg-surface-muted text-charcoal flex items-center justify-center font-mono font-bold text-xs">
-                  {idx + 1}
-                </span>
-
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-charcoal">{sec.name}</span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-muted text-charcoal-muted">
-                      type: {sec.type}
-                    </span>
-                    {!sec.enabled && (
-                      <span className="text-[10px] font-semibold text-charcoal-subtle">
-                        (Hidden from storefront)
-                      </span>
-                    )}
+    <div>
+      <PageHeader
+        kicker="Content & CMS"
+        title="Homepage"
+        description="Every block on the homepage, top to bottom. Edit the text, reorder with the arrows, or switch a block off. Product, category, review and FAQ blocks fill themselves from your catalogue."
+        actions={
+          <Button icon={Plus} onClick={() => setAdding('banner')}>
+            Add section
+          </Button>
+        }
+      />
+      <Card bodyClassName="p-0">
+        {sections.length === 0 ? (
+          <EmptyState icon={Home} title="No homepage sections" />
+        ) : (
+          <div className="divide-y divide-surface-muted">
+            {sections.map((s, i) => (
+              <div key={s.id} className={`flex flex-col sm:flex-row sm:items-center gap-3 px-4 py-3 ${s.enabled ? '' : 'opacity-60'}`}>
+                <div className="flex sm:flex-col gap-1 shrink-0">
+                  <button type="button" disabled={i === 0} onClick={() => void move(i, -1)} className="p-1 rounded text-charcoal-subtle hover:bg-surface-muted disabled:opacity-30" aria-label="Move up">
+                    <ArrowUp className="w-3.5 h-3.5" />
+                  </button>
+                  <button type="button" disabled={i === sections.length - 1} onClick={() => void move(i, 1)} className="p-1 rounded text-charcoal-subtle hover:bg-surface-muted disabled:opacity-30" aria-label="Move down">
+                    <ArrowDown className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-bold text-sm">{s.name}</span>
+                    <Badge tone="gray">{TYPE_LABELS[s.type] || s.type}</Badge>
                   </div>
-
-                  <div className="text-xs text-charcoal-subtle mt-1 line-clamp-1 max-w-xl">
-                    {sec.settings?.headline || sec.settings?.title || sec.settings?.description || 'Active CMS Block'}
-                  </div>
+                  <div className="text-xs text-charcoal-subtle truncate mt-0.5">{summary(s)}</div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Toggle checked={s.enabled} onChange={() => void toggle(s)} />
+                  <Button size="sm" variant="secondary" icon={Pencil} onClick={() => setEditing(JSON.parse(JSON.stringify(s)))}>
+                    Edit
+                  </Button>
+                  <button type="button" onClick={() => void remove(s)} className="p-2 rounded-lg text-charcoal-subtle hover:text-accent-rose hover:bg-accent-rose/5" title="Delete">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
-
-              {/* Action Buttons */}
-              <div className="flex items-center gap-1.5 self-end sm:self-center">
-                {/* Reorder Up/Down */}
-                <button
-                  disabled={idx === 0}
-                  onClick={() => handleMove(idx, 'up')}
-                  className="p-1.5 text-charcoal-muted hover:text-charcoal hover:bg-surface-muted rounded disabled:opacity-30"
-                  title="Move Up"
-                >
-                  <ArrowUp className="w-4 h-4" />
-                </button>
-                <button
-                  disabled={idx === sections.length - 1}
-                  onClick={() => handleMove(idx, 'down')}
-                  className="p-1.5 text-charcoal-muted hover:text-charcoal hover:bg-surface-muted rounded disabled:opacity-30"
-                  title="Move Down"
-                >
-                  <ArrowDown className="w-4 h-4" />
-                </button>
-
-                {/* Edit Section Content */}
-                <button
-                  onClick={() => openEditor(sec)}
-                  className="p-1.5 text-charcoal-muted hover:text-charcoal hover:bg-surface-muted rounded"
-                  title="Edit Text & Buttons"
-                >
-                  <Pencil className="w-4 h-4" />
-                </button>
-
-                {/* Toggle Visibility */}
-                <button
-                  onClick={() => handleToggle(sec.id)}
-                  className="p-1.5 text-charcoal-muted hover:text-charcoal hover:bg-surface-muted rounded"
-                  title={sec.enabled ? 'Hide Section' : 'Show Section'}
-                >
-                  {sec.enabled ? <Eye className="w-4 h-4 text-pista-dark" /> : <EyeOff className="w-4 h-4 text-charcoal-subtle" />}
-                </button>
-
-                {/* Delete */}
-                <button
-                  onClick={() => handleDelete(sec.id)}
-                  className="p-1.5 text-charcoal-subtle hover:text-charcoal hover:bg-surface-muted rounded"
-                  title="Delete Section"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Edit Section Modal */}
-      {editingSection && (
-        <div className="fixed inset-0 z-50 bg-charcoal/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-lg bg-white border border-charcoal-border rounded-2xl shadow-2xl p-6 space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-surface-muted">
-              <div>
-                <h2 className="text-base font-bold text-charcoal">Edit Section: {editingSection.name}</h2>
-                <p className="text-[11px] text-charcoal-subtle">Modifications will immediately reflect on the customer storefront.</p>
-              </div>
-              <button onClick={() => setEditingSection(null)} className="text-charcoal-subtle hover:text-charcoal">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveEdit} className="space-y-4 text-xs">
-              {editingSection.settings?.kicker !== undefined && (
-                <div>
-                  <label className="font-semibold text-charcoal block mb-1">Kicker / Top Subtitle</label>
-                  <input
-                    type="text"
-                    value={kicker}
-                    onChange={e => setKicker(e.target.value)}
-                    className="w-full px-3 py-2 border border-charcoal-border rounded-lg bg-surface-bg focus:bg-white"
-                  />
-                </div>
-              )}
-
-              <div>
-                <label className="font-semibold text-charcoal block mb-1">Headline / Main Title</label>
-                <input
-                  type="text"
-                  required
-                  value={headline}
-                  onChange={e => setHeadline(e.target.value)}
-                  className="w-full px-3 py-2 border border-charcoal-border rounded-lg bg-surface-bg focus:bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="font-semibold text-charcoal block mb-1">Subheadline / Description Body</label>
-                <textarea
-                  rows={3}
-                  value={subheadline}
-                  onChange={e => setSubheadline(e.target.value)}
-                  className="w-full px-3 py-2 border border-charcoal-border rounded-lg bg-surface-bg focus:bg-white"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-semibold text-charcoal block mb-1">CTA Button Text</label>
-                  <input
-                    type="text"
-                    value={primaryCtaText}
-                    onChange={e => setPrimaryCtaText(e.target.value)}
-                    placeholder="e.g. Browse Catalog"
-                    className="w-full px-3 py-2 border border-charcoal-border rounded-lg bg-surface-bg"
-                  />
-                </div>
-                <div>
-                  <label className="font-semibold text-charcoal block mb-1">CTA URL</label>
-                  <input
-                    type="text"
-                    value={primaryCtaUrl}
-                    onChange={e => setPrimaryCtaUrl(e.target.value)}
-                    placeholder="e.g. /shop"
-                    className="w-full px-3 py-2 border border-charcoal-border rounded-lg bg-surface-bg"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-3 border-t border-surface-muted">
-                <button
-                  type="button"
-                  onClick={() => setEditingSection(null)}
-                  className="px-4 py-2 border border-charcoal-border rounded-lg font-semibold text-charcoal-muted hover:bg-surface-muted"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 bg-pista text-charcoal hover:bg-pista-hover font-bold rounded-lg shadow-sm"
-                >
-                  Publish Changes
-                </button>
-              </div>
-            </form>
+            ))}
           </div>
-        </div>
-      )}
+        )}
+      </Card>
 
-      {/* Add Section Modal */}
-      {addModalOpen && (
-        <div className="fixed inset-0 z-50 bg-charcoal/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white border border-charcoal-border rounded-2xl shadow-2xl p-6 space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-surface-muted">
-              <h2 className="text-base font-bold text-charcoal">Add New Homepage Section</h2>
-              <button onClick={() => setAddModalOpen(false)} className="text-charcoal-subtle hover:text-charcoal">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleAddSection} className="space-y-4 text-xs">
-              <div>
-                <label className="font-semibold text-charcoal block mb-1">Section Display Name</label>
-                <input
-                  type="text"
-                  required
-                  value={newName}
-                  onChange={e => setNewName(e.target.value)}
-                  placeholder="e.g. Seasonal Holiday Banner"
-                  className="w-full px-3 py-2 border border-charcoal-border rounded-lg bg-surface-bg"
-                />
-              </div>
-
-              <div>
-                <label className="font-semibold text-charcoal block mb-1">Block Type</label>
-                <select
-                  value={newType}
-                  onChange={e => setNewType(e.target.value as any)}
-                  className="w-full px-3 py-2 border border-charcoal-border rounded-lg bg-surface-bg"
-                >
-                  <option value="cta">Conversion Call To Action</option>
-                  <option value="banner">Promotional Banner</option>
-                  <option value="benefits">Benefits / Why Choose Us Grid</option>
-                  <option value="testimonials">Customer Testimonials</option>
-                  <option value="faq">FAQ Accordion</option>
-                </select>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2 border-t border-surface-muted">
-                <button
-                  type="button"
-                  onClick={() => setAddModalOpen(false)}
-                  className="px-4 py-2 border border-charcoal-border rounded-lg font-semibold text-charcoal-muted"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-pista text-charcoal hover:bg-pista-hover font-bold rounded-lg"
-                >
-                  Add To Homepage
-                </button>
-              </div>
-            </form>
+      <Modal
+        open={Boolean(editing)}
+        onClose={() => setEditing(null)}
+        title={editing ? `Edit: ${editing.name}` : ''}
+        description={editing ? TYPE_LABELS[editing.type] : ''}
+        size="xl"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setEditing(null)}>Cancel</Button>
+            <Button onClick={save} loading={saving}>Save section</Button>
+          </>
+        }
+      >
+        {editing && (
+          <div className="space-y-4">
+            <Field label="Section name (admin only)">
+              <Input value={editing.name} onChange={e => setEditing({ ...editing, name: e.target.value })} />
+            </Field>
+            {Object.keys(editing.settings || {}).length === 0 && <p className="text-sm text-charcoal-subtle">This block has no text settings. It fills itself from your catalogue.</p>}
+            {Object.entries(editing.settings || {}).map(([k, v]) => (
+              <ValueEditor key={k} name={k} value={v} onChange={nv => setEditing(e => (e ? { ...e, settings: { ...e.settings, [k]: nv } } : e))} />
+            ))}
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
+
+      <Modal
+        open={Boolean(adding)}
+        onClose={() => setAdding(null)}
+        title="Add a homepage section"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setAdding(null)}>Cancel</Button>
+            <Button onClick={add} loading={saving}>Add section</Button>
+          </>
+        }
+      >
+        <Field label="Section type">
+          <Select value={adding || 'banner'} onChange={v => setAdding(v as HomepageSection['type'])} options={Object.entries(TYPE_LABELS).map(([value, label]) => ({ value, label }))} />
+        </Field>
+      </Modal>
+      {dialog}
     </div>
   );
 }

@@ -1,26 +1,17 @@
 import { MetadataRoute } from 'next';
-import { SITE_URL } from '@/lib/site-config';
+import { NOINDEX_PATHS, siteUrl } from '@/lib/seo';
 
 export default function robots(): MetadataRoute.Robots {
+  const base = siteUrl();
   return {
     rules: [
       {
         userAgent: '*',
         allow: '/',
-        disallow: [
-          '/admin',
-          '/account',
-          '/api/',
-          '/checkout',
-          '/cart',
-          '/login',
-          '/register',
-          '/forgot-password',
-          '/order-success',
-        ],
+        disallow: NOINDEX_PATHS,
       },
     ],
-    sitemap: `${SITE_URL}/sitemap.xml`,
-    host: SITE_URL,
+    sitemap: `${base}/sitemap.xml`,
+    host: base,
   };
 }

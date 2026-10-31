@@ -14,7 +14,7 @@ export const siteConfig = {
   domain: "soft4u.top",
   tagline: "Premium digital subscriptions and software, delivered instantly.",
   description:
-    "Buy OTT subscriptions, streaming accounts and genuine software licences in Pakistan at the best prices. Instant digital delivery via email and WhatsApp.",
+    "Premium digital subscriptions and software, delivered instantly. OTT and streaming plans, AI tools, VPNs and genuine software licences with private delivery.",
 
   email: "support@soft4u.top",
   phone: "+92 323 9539487",
@@ -28,7 +28,8 @@ export const siteConfig = {
   hours: "Mon – Sat, 10:00 AM – 10:00 PM (PKT)",
 
   currency: "PKR",
-  currencySymbol: "Rs",
+  // Always written as a code before the amount: "PKR 399", "USD 10.00".
+  currencySymbol: "PKR",
 } as const;
 
 export type SiteConfig = typeof siteConfig;

@@ -1,16 +1,6 @@
-import React from 'react';
-import { AdminLayout } from '@/components/admin-layout';
-import { db } from '@/lib/db';
-import { PaymentGatewaysClient } from './payment-gateways-client';
+import { redirect } from 'next/navigation';
 
-export const dynamic = 'force-dynamic';
-
-export default async function AdminPaymentGatewaysPage() {
-  const gateways = await db.getPaymentGateways();
-
-  return (
-    <AdminLayout>
-      <PaymentGatewaysClient initialGateways={gateways} />
-    </AdminLayout>
-  );
+/** Old URL: payment accounts now live in Settings → Payment methods. */
+export default function AdminPaymentGatewaysPage() {
+  redirect('/admin/payment-methods');
 }

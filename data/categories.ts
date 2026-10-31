@@ -1,7 +1,6 @@
 /**
- * Soft4u category catalogue — mock data until integration.
- * Shape matches `Category` in lib/db/types.ts and the Prisma `Category` model,
- * so this can be seeded straight into Neon later.
+ * Soft4u starter categories, used only by `bun run db:seed`.
+ * Shape matches `Category` in lib/db/types.ts. The live site reads categories from Postgres.
  */
 import type { Category } from '@/lib/db/types';
 
@@ -18,8 +17,8 @@ export const categories: Category[] = [
     status: 'active',
     displayOrder: 1,
     featured: true,
-    seoTitle: 'Buy Netflix, Prime Video & Streaming Subscriptions in Pakistan',
-    seoDescription: 'Streaming subscriptions in PKR with instant delivery on email and WhatsApp.',
+    seoTitle: 'Buy Netflix, Prime Video & Streaming Subscriptions',
+    seoDescription: 'Streaming subscriptions with instant delivery on email and WhatsApp.',
     createdAt: CREATED,
     updatedAt: CREATED,
   },
@@ -33,8 +32,8 @@ export const categories: Category[] = [
     status: 'active',
     displayOrder: 2,
     featured: true,
-    seoTitle: 'Spotify Premium & YouTube Premium in Pakistan',
-    seoDescription: 'Ad-free music and video plans in PKR with instant digital delivery.',
+    seoTitle: 'Spotify Premium & YouTube Premium',
+    seoDescription: 'Ad-free music and video plans with instant digital delivery.',
     createdAt: CREATED,
     updatedAt: CREATED,
   },
@@ -48,8 +47,8 @@ export const categories: Category[] = [
     status: 'active',
     displayOrder: 3,
     featured: true,
-    seoTitle: 'Buy ChatGPT Plus & AI Tools in Pakistan',
-    seoDescription: 'AI subscriptions in PKR with protected checkout and private delivery.',
+    seoTitle: 'Buy ChatGPT Plus & AI Tools',
+    seoDescription: 'AI subscriptions with protected checkout and private delivery.',
     createdAt: CREATED,
     updatedAt: CREATED,
   },
@@ -63,8 +62,8 @@ export const categories: Category[] = [
     status: 'active',
     displayOrder: 4,
     featured: true,
-    seoTitle: 'Buy NordVPN, ExpressVPN & Surfshark in Pakistan',
-    seoDescription: 'VPN accounts in PKR with instant delivery and replacement support.',
+    seoTitle: 'Buy NordVPN, ExpressVPN & Surfshark',
+    seoDescription: 'VPN accounts with instant delivery and replacement support.',
     createdAt: CREATED,
     updatedAt: CREATED,
   },
@@ -78,8 +77,8 @@ export const categories: Category[] = [
     status: 'active',
     displayOrder: 5,
     featured: true,
-    seoTitle: 'Buy Kaspersky & Norton Antivirus in Pakistan',
-    seoDescription: 'Genuine antivirus licences in PKR delivered by email and WhatsApp.',
+    seoTitle: 'Buy Kaspersky & Norton Antivirus',
+    seoDescription: 'Genuine antivirus licences delivered by email and WhatsApp.',
     createdAt: CREATED,
     updatedAt: CREATED,
   },
@@ -93,8 +92,8 @@ export const categories: Category[] = [
     status: 'active',
     displayOrder: 6,
     featured: true,
-    seoTitle: 'Buy Canva Pro, Microsoft 365 & Creative Software in Pakistan',
-    seoDescription: 'Creative and office software plans in PKR with instant delivery.',
+    seoTitle: 'Buy Canva Pro, Microsoft 365 & Creative Software',
+    seoDescription: 'Creative and office software plans with instant delivery.',
     createdAt: CREATED,
     updatedAt: CREATED,
   },

@@ -1,134 +1,135 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Order } from '@/lib/db/types';
-import { Search, Filter, ExternalLink, Package, Check, Zap } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ChevronRight, Package } from 'lucide-react';
+import type { Order } from '@/lib/db/types';
+import { formatMoney } from '@/lib/money';
+import { Card, EmptyState, LoadingBlock, OrderStatusBadge, PageHeader, Pager, SearchInput, SegmentChips, Table, api, errMsg, toast } from '../_components/ui';
+import { fmtDateTime } from '../_components/format';
 
-export function AdminOrdersClient({ initialOrders }: { initialOrders: Order[] }) {
-  const [orders, setOrders] = useState<Order[]>(initialOrders);
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+type StatusKey = 'all' | Order['orderStatus'];
 
-  const filteredOrders = orders.filter(o => {
-    if (statusFilter !== 'all' && o.orderStatus !== statusFilter) return false;
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      return (
-        o.orderNumber.toLowerCase().includes(q) ||
-        o.customerEmail.toLowerCase().includes(q) ||
-        o.customerName.toLowerCase().includes(q)
-      );
-    }
-    return true;
-  });
+const SEGMENTS: Array<{ key: StatusKey; label: string }> = [
+  { key: 'all', label: 'All' },
+  { key: 'pending', label: 'Awaiting payment' },
+  { key: 'under_review', label: 'Under review' },
+  { key: 'processing', label: 'To deliver' },
+  { key: 'completed', label: 'Delivered' },
+  { key: 'rejected', label: 'Rejected' },
+  { key: 'cancelled', label: 'Cancelled' },
+  { key: 'refunded', label: 'Refunded' },
+];
+
+export function AdminOrdersClient({ initialStatus, initialSearch }: { initialStatus: string; initialSearch: string }) {
+  const router = useRouter();
+  const [status, setStatus] = useState<StatusKey>((SEGMENTS.find(s => s.key === initialStatus)?.key || 'all') as StatusKey);
+  const [search, setSearch] = useState(initialSearch);
+  const [debounced, setDebounced] = useState(initialSearch);
+  const [page, setPage] = useState(1);
+  const [data, setData] = useState<{ orders: Order[]; total: number; limit: number; counts: Record<string, number> } | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(search.trim()), 350);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  useEffect(() => {
+    let alive = true;
+    const params = new URLSearchParams({ status, page: String(page), limit: '25' });
+    if (debounced) params.set('search', debounced);
+    api<{ orders: Order[]; total: number; limit: number; counts: Record<string, number> }>(`/api/admin/orders?${params}`)
+      .then(d => {
+        if (alive) setData(d);
+      })
+      .catch(err => toast.error(errMsg(err)))
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [status, page, debounced]);
+
+  const counts = data?.counts || {};
+  const total = Object.values(counts).reduce((a, b) => a + b, 0);
+  const pages = data ? Math.max(1, Math.ceil(data.total / data.limit)) : 1;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="text-xs font-bold text-pista-dark uppercase tracking-wider mb-1">
-            COMMERCE OPERATIONS
-          </div>
-          <h1 className="text-3xl font-extrabold text-charcoal">Orders & Digital Delivery</h1>
-          <p className="text-xs text-charcoal-subtle mt-0.5">
-            Monitor real-time customer purchases, automated fulfillment status, and credentials dispatched.
-          </p>
-        </div>
+    <div>
+      <PageHeader kicker="Commerce" title="Orders" description="Every order with its payment and delivery state. Open an order to verify payment, deliver access or refund." />
+
+      <div className="flex flex-col gap-3 mb-4">
+        <SearchInput
+          value={search}
+          onChange={v => {
+            setSearch(v);
+            setPage(1);
+            setLoading(true);
+          }}
+          placeholder="Search order ID, customer name, email or WhatsApp"
+          className="max-w-md"
+        />
+        <SegmentChips
+          options={SEGMENTS.map(s => ({ ...s, count: s.key === 'all' ? total : counts[s.key] ?? 0 }))}
+          value={status}
+          onChange={k => {
+            setStatus(k);
+            setPage(1);
+            setLoading(true);
+          }}
+        />
       </div>
 
-      {/* Filter Bar */}
-      <div className="bg-white border border-charcoal-border rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
-        <div className="flex-1 max-w-sm relative">
-          <input
-            type="text"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search by Order #, customer email or name..."
-            className="w-full text-xs px-3 py-2 pl-8 border border-charcoal-border rounded-lg bg-surface-bg focus:bg-white focus:outline-none focus:border-pista-hover"
-          />
-          <Search className="w-3.5 h-3.5 text-charcoal-subtle absolute left-2.5 top-2.5" />
-        </div>
-
-        <div className="flex items-center gap-3 text-xs">
-          <select
-            value={statusFilter}
-            onChange={e => setStatusFilter(e.target.value)}
-            className="px-3 py-2 border border-charcoal-border rounded-lg bg-surface-bg"
-          >
-            <option value="all">All Order Statuses</option>
-            <option value="completed">Completed</option>
-            <option value="pending">Pending</option>
-            <option value="refunded">Refunded</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Table */}
-      <div className="bg-white border border-charcoal-border rounded-2xl shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-surface-bg text-charcoal-subtle uppercase font-bold text-[10px]">
-              <tr>
-                <th className="p-3.5">Order Number</th>
-                <th className="p-3.5">Customer</th>
-                <th className="p-3.5">Items</th>
-                <th className="p-3.5">Total</th>
-                <th className="p-3.5">Payment</th>
-                <th className="p-3.5">Fulfillment</th>
-                <th className="p-3.5">Date</th>
-                <th className="p-3.5 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-surface-muted">
-              {filteredOrders.map(order => (
-                <tr key={order.id} className="hover:bg-surface-bg/60 transition-colors">
-                  <td className="p-3.5 font-mono font-bold text-charcoal">{order.orderNumber}</td>
-
-                  <td className="p-3.5">
-                    <div className="font-bold text-charcoal">{order.customerName}</div>
-                    <div className="text-[10px] text-charcoal-subtle">{order.customerEmail}</div>
-                  </td>
-
-                  <td className="p-3.5 text-charcoal-muted truncate max-w-xs">
-                    {order.items.map(i => `${i.productName} (${i.variantName})`).join(', ')}
-                  </td>
-
-                  <td className="p-3.5 font-mono font-bold text-charcoal">
-                    ${order.total.toFixed(2)}
-                  </td>
-
-                  <td className="p-3.5">
-                    <span className="px-2 py-0.5 rounded bg-pista-lighter text-pista-dark font-bold font-mono text-[10px] uppercase">
-                      {order.paymentStatus}
-                    </span>
-                  </td>
-
-                  <td className="p-3.5">
-                    <span className="px-2 py-0.5 rounded bg-pista-light text-pista-darker font-bold font-mono text-[10px] uppercase">
-                      {order.fulfillmentStatus}
-                    </span>
-                  </td>
-
-                  <td className="p-3.5 text-charcoal-subtle font-mono text-[11px]">
-                    {new Date(order.createdAt).toLocaleDateString()}
-                  </td>
-
-                  <td className="p-3.5 text-right">
-                    <Link
-                      href={`/admin/orders/${order.orderNumber}`}
-                      className="px-3 py-1 bg-surface-muted text-charcoal hover:bg-surface-subtle rounded font-semibold text-[11px] inline-flex items-center gap-1"
-                    >
-                      <span>Manage</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <Card bodyClassName="p-0">
+        {loading && !data ? (
+          <LoadingBlock />
+        ) : !data || data.orders.length === 0 ? (
+          <EmptyState icon={Package} title="No orders here" description={debounced ? 'Try another search.' : 'Orders appear here as soon as customers check out.'} />
+        ) : (
+          <>
+            <div className={loading ? 'opacity-60 transition-opacity' : ''}>
+              <Table head={['Order', 'Customer', 'Items', 'Total', 'Method', 'Status', 'Placed', '']}>
+                {data.orders.map(o => (
+                  <tr key={o.id} onClick={() => router.push(`/admin/orders/${o.orderNumber}`)} className="hover:bg-surface-bg/60 cursor-pointer">
+                    <td className="px-4 py-3 font-mono font-bold whitespace-nowrap">{o.orderNumber}</td>
+                    <td className="px-4 py-3">
+                      <div className="font-semibold text-charcoal">{o.customerName}</div>
+                      <div className="text-xs text-charcoal-subtle">{o.customerEmail}</div>
+                    </td>
+                    <td className="px-4 py-3 text-charcoal-muted max-w-[240px]">
+                      <div className="truncate">{o.items.map(i => `${i.productName} (${i.variantName})${i.quantity > 1 ? ` ×${i.quantity}` : ''}`).join(', ')}</div>
+                    </td>
+                    <td className="px-4 py-3 font-bold whitespace-nowrap">{formatMoney(o.total, o.currency)}</td>
+                    <td className="px-4 py-3 text-xs text-charcoal-muted whitespace-nowrap">{o.paymentMethodName || o.paymentMethod}</td>
+                    <td className="px-4 py-3">
+                      <OrderStatusBadge status={o.orderStatus} />
+                    </td>
+                    <td className="px-4 py-3 text-xs text-charcoal-subtle whitespace-nowrap">{fmtDateTime(o.createdAt)}</td>
+                    <td className="px-4 py-3 text-right">
+                      <Link href={`/admin/orders/${o.orderNumber}`} className="inline-flex text-charcoal-subtle hover:text-pista-dark" aria-label="Open order">
+                        <ChevronRight className="w-4 h-4" />
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </Table>
+            </div>
+            <Pager
+              page={page}
+              pages={pages}
+              total={data.total}
+              noun="orders"
+              onPage={p => {
+                setPage(p);
+                setLoading(true);
+              }}
+            />
+          </>
+        )}
+      </Card>
     </div>
   );
 }

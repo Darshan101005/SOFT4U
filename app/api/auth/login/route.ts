@@ -1,27 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { verifyUserCredentials } from '@/lib/services/auth';
+import { AuthError, login } from '@/lib/auth';
+import { errorResponse, readJson } from '@/lib/api';
+import { requestMeta } from '@/lib/request-meta';
+import { logActivity } from '@/lib/activity';
 
+/**
+ * POST { email, password } ->
+ *   { status: 'ok', user }                                  signed in
+ *   { status: 'two_factor_required' }                       POST /api/auth/login/2fa next
+ *   { status: 'verification_required', email, resendInSeconds }  code sent, verify via /api/auth/verify-email
+ */
 export async function POST(req: NextRequest) {
+  const body = await readJson(req);
+  const email = String(body.email || '');
   try {
-    const { email, password } = await req.json();
-    if (!email || !password) {
-      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
+    const result = await login(email, String(body.password || ''), requestMeta(req));
+    if (result.status === 'ok') {
+      logActivity({ headers: req.headers, eventType: 'login', userId: result.user.id, email: result.user.email });
     }
-
-    const user = await verifyUserCredentials(email, password);
-    if (!user) {
-      return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
+    return NextResponse.json({ ok: true, ...result });
+  } catch (err) {
+    if (err instanceof AuthError && err.code === 'INVALID_CREDENTIALS') {
+      logActivity({ headers: req.headers, eventType: 'login_failed', email, actorType: 'guest' });
     }
-
-    if (user.status === 'suspended') {
-      return NextResponse.json({ error: 'Account is suspended. Please contact support.' }, { status: 403 });
-    }
-
-    // Return safe user profile (strip password hash)
-    const { passwordHash, ...safeUser } = user;
-    return NextResponse.json({ user: safeUser });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Server error' }, { status: 500 });
+    return errorResponse(err);
   }
 }

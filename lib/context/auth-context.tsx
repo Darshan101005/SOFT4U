@@ -1,99 +1,155 @@
 'use client';
 
-import React, { createContext, useContext, useState } from 'react';
-import { User } from '@/lib/db/types';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import type { User } from '@/lib/db/types';
+
+/**
+ * Client auth state backed by the httpOnly session cookie (see lib/session.ts).
+ * The user is loaded from GET /api/auth/session; nothing sensitive is kept in
+ * localStorage. Each method returns { success, error?, ... } for forms.
+ */
+
+export interface AuthResult {
+  success: boolean;
+  error?: string;
+  code?: string;
+  /** login: 'ok' | 'two_factor_required' | 'verification_required' */
+  status?: 'ok' | 'two_factor_required' | 'verification_required';
+  email?: string;
+  resendInSeconds?: number;
+  retryAfterSeconds?: number;
+  attemptsLeft?: number;
+}
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, pass: string) => Promise<{ success: boolean; error?: string }>;
-  register: (name: string, email: string, pass: string, phone?: string) => Promise<{ success: boolean; error?: string }>;
-  logout: () => void;
+  refresh: () => Promise<User | null>;
+  login: (email: string, password: string) => Promise<AuthResult>;
+  verifyLogin2fa: (code: string) => Promise<AuthResult>;
+  register: (name: string, email: string, password: string, confirmPassword: string) => Promise<AuthResult>;
+  verifyEmail: (email: string, code: string) => Promise<AuthResult>;
+  resendCode: (email: string, purpose?: 'signup' | 'password_reset') => Promise<AuthResult>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const defaultCustomer: User = {
-  id: 'usr_customer_demo',
-  name: 'Demo Customer',
-  email: 'customer@example.com',
-  passwordHash: 'customer123',
-  role: 'CUSTOMER',
-  phone: '+92 300 0000000',
-  whatsapp: '+923000000000',
-  status: 'active',
-  createdAt: '2026-02-01T14:30:00Z',
-  updatedAt: '2026-02-01T14:30:00Z',
-};
+const ACTIVITY_FLAG = 'soft4u:session-logged-for';
+
+async function post(url: string, body?: unknown): Promise<{ ok: boolean; data: any }> {
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+    const data = await res.json().catch(() => ({}));
+    return { ok: res.ok, data };
+  } catch {
+    return { ok: false, data: { error: 'Network error. Check your connection and try again.' } };
+  }
+}
+
+function toResult(ok: boolean, data: any): AuthResult {
+  return {
+    success: ok,
+    error: ok ? undefined : data?.error || 'Something went wrong',
+    code: data?.code,
+    status: data?.status,
+    email: data?.email,
+    resendInSeconds: data?.resendInSeconds,
+    retryAfterSeconds: data?.retryAfterSeconds,
+    attemptsLeft: data?.attemptsLeft,
+  };
+}
+
+/** One "session" activity row (IP / device) per signed-in user per browser tab. */
+function logSessionActivity(user: User) {
+  try {
+    if (sessionStorage.getItem(ACTIVITY_FLAG) === user.id) return;
+    sessionStorage.setItem(ACTIVITY_FLAG, user.id);
+  } catch {
+    // sessionStorage unavailable: log anyway
+  }
+  fetch('/api/auth/activity', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }).catch(() => {});
+}
+
+async function loadSessionUser(): Promise<User | null> {
+  try {
+    const res = await fetch('/api/auth/session', { cache: 'no-store' });
+    const data = await res.json();
+    const next: User | null = data?.user ?? null;
+    if (next) logSessionActivity(next);
+    return next;
+  } catch {
+    return null;
+  }
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const stored = localStorage.getItem('soft4u_auth_user');
-        if (stored) return JSON.parse(stored);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return defaultCustomer;
-  });
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [isLoading] = useState(false);
+  const refresh = useCallback(async () => {
+    const next = await loadSessionUser();
+    setUser(next);
+    setIsLoading(false);
+    return next;
+  }, []);
 
-  const login = async (email: string, pass: string) => {
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password: pass }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        return { success: false, error: data.error || 'Invalid credentials' };
-      }
-      setUser(data.user);
-      localStorage.setItem('soft4u_auth_user', JSON.stringify(data.user));
-      return { success: true };
-    } catch (err: any) {
-      return { success: false, error: err.message || 'Login failed' };
-    }
+  useEffect(() => {
+    let active = true;
+    loadSessionUser().then(next => {
+      if (!active) return;
+      setUser(next);
+      setIsLoading(false);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const login = async (email: string, password: string) => {
+    const { ok, data } = await post('/api/auth/login', { email, password });
+    if (ok && data.status === 'ok') await refresh();
+    return toResult(ok, data);
   };
 
-  const register = async (name: string, email: string, pass: string, phone?: string) => {
-    try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password: pass, phone }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        return { success: false, error: data.error || 'Registration failed' };
-      }
-      setUser(data.user);
-      localStorage.setItem('soft4u_auth_user', JSON.stringify(data.user));
-      return { success: true };
-    } catch (err: any) {
-      return { success: false, error: err.message || 'Registration failed' };
-    }
+  const verifyLogin2fa = async (code: string) => {
+    const { ok, data } = await post('/api/auth/login/2fa', { code });
+    if (ok) await refresh();
+    return toResult(ok, data);
   };
 
-  const logout = () => {
+  const register = async (name: string, email: string, password: string, confirmPassword: string) => {
+    const { ok, data } = await post('/api/auth/signup', { name, email, password, confirmPassword });
+    return toResult(ok, data);
+  };
+
+  const verifyEmail = async (email: string, code: string) => {
+    const { ok, data } = await post('/api/auth/verify-email', { email, code });
+    if (ok) await refresh();
+    return toResult(ok, data);
+  };
+
+  const resendCode = async (email: string, purpose: 'signup' | 'password_reset' = 'signup') => {
+    const { ok, data } = await post('/api/auth/resend-code', { email, purpose });
+    return toResult(ok, data);
+  };
+
+  const logout = async () => {
+    await post('/api/auth/logout');
+    try {
+      sessionStorage.removeItem(ACTIVITY_FLAG);
+    } catch {
+      // ignore
+    }
     setUser(null);
-    localStorage.removeItem('soft4u_auth_user');
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isLoading,
-        login,
-        register,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={{ user, isLoading, refresh, login, verifyLogin2fa, register, verifyEmail, resendCode, logout }}>
       {children}
     </AuthContext.Provider>
   );
@@ -101,8 +157,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
 }

@@ -1,6 +1,6 @@
 {
   "name": "Soft4u – Premium Digital Subscriptions & Software",
-  "description": "Soft4u online store for OTT subscriptions, streaming accounts and genuine software licences in Pakistan, with instant digital delivery.",
+  "description": "Soft4u online store for OTT subscriptions, streaming accounts and genuine software licences, with instant digital delivery.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

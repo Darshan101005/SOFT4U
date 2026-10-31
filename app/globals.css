@@ -84,6 +84,14 @@
 html {
   color-scheme: light;
   -webkit-text-size-adjust: 100%;
+  /* Native controls (date pickers, range, progress) and text selection use the palette, not OS blue */
+  accent-color: var(--color-pista-700);
+  -webkit-tap-highlight-color: rgba(147, 197, 114, 0.25);
+}
+
+::selection {
+  background: var(--color-pista-200);
+  color: var(--color-charcoal);
 }
 
 /* `clip` (not `hidden`) prevents sideways scroll without breaking the sticky header */

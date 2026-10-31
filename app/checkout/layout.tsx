@@ -3,7 +3,7 @@ import { siteConfig } from '@/lib/site-config';
 
 export const metadata: Metadata = {
   title: { absolute: `Checkout | ${siteConfig.name}` },
-  description: `Secure checkout for digital subscriptions and software at ${siteConfig.name}. Prices in ${siteConfig.currency} with instant digital delivery.`,
+  description: `Checkout at ${siteConfig.name}: pay by bank transfer, Easypaisa or JazzCash and upload your payment proof for manual verification.`,
   alternates: { canonical: '/checkout' },
   robots: { index: false, follow: true },
 };

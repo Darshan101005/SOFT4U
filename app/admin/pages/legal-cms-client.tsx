@@ -2,296 +2,146 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { LegalPage, LegalPageRevision } from '@/lib/db/types';
-import {
-  FileText,
-  Clock,
-  ExternalLink,
-  Check,
-  RotateCcw,
-  Sparkles,
-  Save,
-  Send
-} from 'lucide-react';
+import { Clock, ExternalLink, FileText, RotateCcw, Save, Send } from 'lucide-react';
+import type { LegalPage } from '@/lib/db/types';
+import { Badge, Button, Card, EmptyState, Field, Input, PageHeader, SegmentChips, Textarea, api, errMsg, toast, useDialog } from '../_components/ui';
+import { fmtDateTime } from '../_components/format';
 
 export function LegalCmsClient({ initialPages }: { initialPages: LegalPage[] }) {
-  const [pages, setPages] = useState<LegalPage[]>(initialPages);
-  const [selectedSlug, setSelectedSlug] = useState<string>('terms');
+  const [pages, setPages] = useState(initialPages);
+  const [slug, setSlug] = useState<string>(initialPages.find(p => p.slug === 'terms')?.slug || initialPages[0]?.slug || '');
+  const current = pages.find(p => p.slug === slug);
+  const [content, setContent] = useState(current?.draftContent || current?.content || '');
+  const [title, setTitle] = useState(current?.title || '');
+  const [note, setNote] = useState('');
+  const [preview, setPreview] = useState(false);
+  const [busy, setBusy] = useState<string | null>(null);
+  const { confirm, dialog } = useDialog();
 
-  const currentPage = pages.find(p => p.slug === selectedSlug) || pages[0];
+  if (!current) {
+    return (
+      <div>
+        <PageHeader kicker="Content & CMS" title="Legal pages" />
+        <Card>
+          <EmptyState icon={FileText} title="No legal pages found" description="Run the database seed to create Terms, Privacy, Refund, Cookie and Delivery policies." />
+        </Card>
+      </div>
+    );
+  }
 
-  const [content, setContent] = useState(currentPage?.content || '');
-  const [publishNote, setPublishNote] = useState('');
-  const [notice, setNotice] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [previewOpen, setPreviewOpen] = useState(false);
-
-  const showNotice = (msg: string) => {
-    setNotice(msg);
-    setTimeout(() => setNotice(''), 4000);
+  const choose = (s: string) => {
+    const p = pages.find(x => x.slug === s);
+    setSlug(s);
+    setContent(p?.draftContent || p?.content || '');
+    setTitle(p?.title || '');
+    setNote('');
+    setPreview(false);
   };
 
-  const handleSelectPage = (slug: string) => {
-    setSelectedSlug(slug);
-    const target = pages.find(p => p.slug === slug);
-    if (target) {
-      setContent(target.draftContent || target.content);
-    }
-  };
-
-  const handleSaveDraft = async () => {
-    setIsSubmitting(true);
+  const call = async (action: string, extra: Record<string, unknown>, ok: string) => {
+    setBusy(action);
     try {
-      const res = await fetch('/api/cms/legal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          slug: currentPage.slug,
-          action: 'save_draft',
-          content
-        })
-      });
-      const data = await res.json();
-      if (data.page) {
-        setPages(prev => prev.map(p => (p.slug === data.page.slug ? data.page : p)));
-        showNotice(`Draft saved for "${currentPage.title}". (Not published yet)`);
-      }
-    } catch (e) {
-      console.error(e);
+      const res = await api<{ page: LegalPage }>('/api/cms/legal', { body: { slug: current.slug, action, ...extra } });
+      setPages(prev => prev.map(p => (p.slug === res.page.slug ? res.page : p)));
+      if (action === 'restore_version') setContent(res.page.content);
+      toast.success(ok);
+    } catch (err) {
+      toast.error(errMsg(err));
     } finally {
-      setIsSubmitting(false);
+      setBusy(null);
     }
   };
 
-  const handlePublish = async () => {
-    setIsSubmitting(true);
-    try {
-      const res = await fetch('/api/cms/legal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          slug: currentPage.slug,
-          action: 'publish',
-          content,
-          note: publishNote || 'Admin update'
-        })
-      });
-      const data = await res.json();
-      if (data.page) {
-        setPages(prev => prev.map(p => (p.slug === data.page.slug ? data.page : p)));
-        setPublishNote('');
-        showNotice(`Published v${data.page.revisions.length} of "${currentPage.title}"! Changes are live at /${currentPage.slug}`);
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsSubmitting(false);
+  const publish = async () => {
+    if (title.trim() && title.trim() !== current.title) await call('rename', { title: title.trim(), content: current.content }, 'Title saved');
+    await call('publish', { content, note: note.trim() || 'Updated by admin' }, `Published. Live at /${current.slug}`);
+    setNote('');
+  };
+
+  const restore = async (version: number) => {
+    if (await confirm({ title: `Restore version ${version}?`, message: 'It is published as a new version straight away.', confirmLabel: 'Restore and publish' })) {
+      await call('restore_version', { version }, `Version ${version} restored`);
     }
   };
 
-  const handleRestoreVersion = async (version: number) => {
-    if (!confirm(`Restore and publish revision version v${version}?`)) return;
-    setIsSubmitting(true);
-    try {
-      const res = await fetch('/api/cms/legal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          slug: currentPage.slug,
-          action: 'restore_version',
-          version
-        })
-      });
-      const data = await res.json();
-      if (data.page) {
-        setPages(prev => prev.map(p => (p.slug === data.page.slug ? data.page : p)));
-        setContent(data.page.content);
-        showNotice(`Successfully restored and published revision v${version}!`);
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const hasDraft = Boolean(current.draftContent && current.draftContent !== current.content);
 
   return (
-    <div className="space-y-6">
-      {/* Top Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="text-xs font-bold text-pista-dark uppercase tracking-wider mb-1">
-            VERSIONED LEGAL CMS
-          </div>
-          <h1 className="text-3xl font-extrabold text-charcoal">Legal Policies & Terms Management</h1>
-          <p className="text-xs text-charcoal-subtle mt-0.5">
-            Save drafts, inspect live previews, publish official revisions, and restore previous legal versions.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Link
-            href={`/${currentPage.slug}`}
-            target="_blank"
-            className="px-4 py-2 bg-white border border-charcoal-border hover:border-pista-hover text-charcoal text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors"
-          >
-            <span>View Live Page</span>
-            <ExternalLink className="w-3.5 h-3.5 text-pista-dark" />
+    <div>
+      <PageHeader
+        kicker="Content & CMS"
+        title="Legal pages"
+        description="Terms, privacy, refund, cookie and delivery policies. Write in Markdown (# Heading, **bold**, - list). Save a draft or publish; every published version is kept."
+        actions={
+          <Link href={`/${current.slug}`} target="_blank" className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-charcoal-border bg-white text-sm font-bold hover:border-pista">
+            View live page <ExternalLink className="w-3.5 h-3.5" />
           </Link>
-        </div>
+        }
+      />
+      <div className="mb-4">
+        <SegmentChips options={pages.map(p => ({ key: p.slug, label: p.title }))} value={slug} onChange={choose} />
       </div>
-
-      {notice && (
-        <div className="p-3 bg-pista-lighter border border-pista text-xs font-semibold text-pista-dark rounded-lg flex items-center gap-2">
-          <Check className="w-4 h-4" />
-          <span>{notice}</span>
-        </div>
-      )}
-
-      {/* Page Tabs */}
-      <div className="flex gap-2 border-b border-charcoal-border pb-2 overflow-x-auto no-scrollbar">
-        {pages.map(page => (
-          <button
-            key={page.slug}
-            onClick={() => handleSelectPage(page.slug)}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-colors whitespace-nowrap flex items-center gap-2 ${
-              selectedSlug === page.slug
-                ? 'bg-pista-light text-pista-darker'
-                : 'bg-white border border-charcoal-border text-charcoal-muted hover:text-charcoal'
-            }`}
-          >
-            <FileText className="w-3.5 h-3.5" />
-            <span>{page.title}</span>
-            <span className="text-[10px] font-mono opacity-80">v{page.revisions.length}</span>
-          </button>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Editor Main Canvas */}
-        <div className="lg:col-span-8 bg-white border border-charcoal-border rounded-2xl p-6 space-y-4 shadow-xs">
-          <div className="flex items-center justify-between pb-3 border-b border-surface-muted">
-            <div>
-              <div className="text-sm font-bold text-charcoal">
-                Editing: {currentPage.title}
+      <div className="grid gap-6 lg:grid-cols-12">
+        <Card
+          className="lg:col-span-8"
+          title={
+            <span className="flex items-center gap-2">
+              {current.title} {hasDraft && <Badge tone="amber">Unpublished draft</Badge>}
+            </span>
+          }
+          description={`/${current.slug} · last published ${fmtDateTime(current.lastPublishedAt)}`}
+          actions={
+            <Button size="sm" variant="secondary" onClick={() => setPreview(v => !v)}>
+              {preview ? 'Edit' : 'Preview'}
+            </Button>
+          }
+        >
+          <div className="space-y-4">
+            <Field label="Page title">
+              <Input value={title} onChange={e => setTitle(e.target.value)} />
+            </Field>
+            {preview ? (
+              <div className="p-5 bg-surface-bg border border-charcoal-border rounded-xl min-h-[420px] whitespace-pre-wrap text-sm leading-relaxed">{content}</div>
+            ) : (
+              <Textarea rows={20} value={content} onChange={e => setContent(e.target.value)} className="font-mono text-xs" />
+            )}
+            <div className="flex flex-col sm:flex-row gap-3 sm:items-center pt-3 border-t border-surface-muted">
+              <Input value={note} onChange={e => setNote(e.target.value)} placeholder="What changed? e.g. Updated refund window" className="sm:flex-1" />
+              <div className="flex gap-2">
+                <Button variant="secondary" icon={Save} loading={busy === 'save_draft'} onClick={() => call('save_draft', { content }, 'Draft saved (not live yet)')}>
+                  Save draft
+                </Button>
+                <Button icon={Send} loading={busy === 'publish'} onClick={() => void publish()}>
+                  Publish
+                </Button>
               </div>
-              <div className="text-[11px] text-charcoal-subtle">
-                Slug: <span className="font-mono">/{currentPage.slug}</span> · Last Published:{' '}
-                {new Date(currentPage.lastPublishedAt).toLocaleString()}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setPreviewOpen(!previewOpen)}
-                className="px-3 py-1.5 bg-surface-muted text-charcoal hover:bg-surface-subtle rounded text-xs font-semibold transition-colors"
-              >
-                {previewOpen ? 'Edit Raw' : 'Preview Formatted'}
-              </button>
             </div>
           </div>
-
-          {previewOpen ? (
-            <div className="p-6 bg-surface-bg border border-charcoal-border rounded-xl prose prose-sm max-w-none min-h-[420px] whitespace-pre-wrap font-sans text-xs">
-              {content}
-            </div>
+        </Card>
+        <Card className="lg:col-span-4" title={<span className="flex items-center gap-2"><Clock className="w-4 h-4 text-pista-dark" />Version history</span>}>
+          {current.revisions.length === 0 ? (
+            <p className="text-xs text-charcoal-subtle">No earlier versions yet.</p>
           ) : (
-            <textarea
-              rows={18}
-              value={content}
-              onChange={e => setContent(e.target.value)}
-              className="w-full p-4 font-mono text-xs border border-charcoal-border rounded-xl bg-surface-bg focus:bg-white focus:outline-none focus:border-pista-hover leading-relaxed"
-            />
+            <div className="space-y-2 max-h-[520px] overflow-y-auto">
+              {[...current.revisions].sort((a, b) => b.version - a.version).map((rev, i) => (
+                <div key={rev.version} className="p-3 rounded-xl border border-charcoal-border bg-surface-bg text-xs space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold">Version {rev.version}</span>
+                    {i === 0 ? <Badge tone="green">Live</Badge> : <span className="text-charcoal-subtle">{fmtDateTime(rev.publishedAt)}</span>}
+                  </div>
+                  {rev.note && <div className="text-charcoal-muted italic">{rev.note}</div>}
+                  {i > 0 && (
+                    <Button size="sm" variant="secondary" icon={RotateCcw} loading={busy === 'restore_version'} onClick={() => void restore(rev.version)}>
+                      Restore
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
           )}
-
-          {/* Action Row */}
-          <div className="pt-4 border-t border-surface-muted flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex-1 max-w-sm">
-              <input
-                type="text"
-                value={publishNote}
-                onChange={e => setPublishNote(e.target.value)}
-                placeholder="Change summary / revision note (e.g. Updated Section 4 warranty terms)"
-                className="w-full text-xs px-3 py-2 border border-charcoal-border rounded-lg bg-surface-bg"
-              />
-            </div>
-
-            <div className="flex items-center gap-2 self-end sm:self-center">
-              <button
-                type="button"
-                disabled={isSubmitting}
-                onClick={handleSaveDraft}
-                className="px-4 py-2 border border-charcoal-border bg-white hover:bg-surface-muted text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors"
-              >
-                <Save className="w-3.5 h-3.5 text-charcoal-subtle" />
-                <span>Save Draft</span>
-              </button>
-
-              <button
-                type="button"
-                disabled={isSubmitting}
-                onClick={handlePublish}
-                className="px-5 py-2 bg-pista text-charcoal hover:bg-pista-hover text-xs font-bold rounded-lg shadow-sm flex items-center gap-1.5 transition-colors disabled:opacity-50"
-              >
-                <Send className="w-3.5 h-3.5" />
-                <span>{isSubmitting ? 'Publishing...' : 'Publish to Live Store'}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Revision History Sidebar */}
-        <div className="lg:col-span-4 bg-white border border-charcoal-border rounded-2xl p-6 space-y-4 shadow-xs">
-          <div className="flex items-center gap-2 pb-3 border-b border-surface-muted">
-            <Clock className="w-4 h-4 text-pista-dark" />
-            <h2 className="text-sm font-bold text-charcoal">Version Revision History</h2>
-          </div>
-
-          <p className="text-[11px] text-charcoal-subtle">
-            Every published change is versioned. You can revert to any prior state with one click.
-          </p>
-
-          <div className="space-y-3 max-h-[460px] overflow-y-auto pr-1">
-            {/* Current version */}
-            <div className="p-3 bg-pista-lighter border border-pista rounded-xl text-xs space-y-1">
-              <div className="flex items-center justify-between font-bold text-pista-dark">
-                <span>Version v{currentPage.revisions.length || 1} (LIVE CURRENT)</span>
-                <span className="text-[10px] font-mono">Active</span>
-              </div>
-              <div className="text-[11px] text-charcoal-muted">
-                Published {new Date(currentPage.lastPublishedAt).toLocaleDateString()}
-              </div>
-            </div>
-
-            {/* Past revisions */}
-            {currentPage.revisions.map((rev, rIdx) => (
-              <div
-                key={rIdx}
-                className="p-3 bg-surface-bg border border-charcoal-border rounded-xl text-xs space-y-2"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-charcoal">Revision v{rev.version}</span>
-                  <span className="text-[10px] text-charcoal-subtle font-mono">
-                    {new Date(rev.publishedAt).toLocaleDateString()}
-                  </span>
-                </div>
-                <div className="text-[11px] text-charcoal-muted italic line-clamp-2">
-                  &ldquo;{rev.note || 'Prior revision snapshot'}&rdquo;
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleRestoreVersion(rev.version)}
-                  className="w-full py-1.5 px-2 bg-white hover:bg-pista-lighter border border-charcoal-border text-charcoal text-[11px] font-semibold rounded flex items-center justify-center gap-1 transition-colors"
-                >
-                  <RotateCcw className="w-3 h-3 text-pista-dark" />
-                  <span>Restore Version v{rev.version}</span>
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
+        </Card>
       </div>
+      {dialog}
     </div>
   );
 }

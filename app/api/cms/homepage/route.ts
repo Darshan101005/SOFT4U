@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { requireAdmin } from '@/lib/admin-auth';
 
 export async function GET() {
   const sections = await db.getHomepageSections();
@@ -7,6 +8,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const admin = await requireAdmin();
+  if (admin instanceof NextResponse) return admin;
   try {
     const body = await req.json();
     const { action, sectionId, updates, orderedIds, newSection } = body;

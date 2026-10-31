@@ -2,76 +2,95 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { ChevronRight } from 'lucide-react';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
-import { ProductCard } from '@/components/product-card';
-import { siteConfig } from '@/lib/site-config';
-import { getCategoryBySlug } from '@/data/categories';
-import { getProductsByCategory } from '@/data/products';
-import { ChevronRight, ArrowLeft } from 'lucide-react';
+import { CatalogBrowser } from '@/components/catalog/catalog-browser';
+import { CategoryIcon } from '@/components/category-tile';
+import { db } from '@/lib/db';
+import { siteConfig, SITE_URL } from '@/lib/site-config';
+import { jsonLd, safe } from '@/app/_store/storefront';
+import { loadCatalogPage } from '@/app/_store/catalog-page';
 
-type Params = { params: Promise<{ slug: string }> };
+export const dynamic = 'force-dynamic';
 
-export async function generateMetadata({ params }: Params): Promise<Metadata> {
+type Props = { params: Promise<{ slug: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> };
+
+async function loadCategory(slug: string) {
+  const c = await safe(() => db.getCategoryBySlug(slug), null);
+  return c && c.status === 'active' ? c : null;
+}
+
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const category = getCategoryBySlug(slug);
-  if (!category) {
-    return { title: { absolute: `Category not found | ${siteConfig.name}` }, robots: { index: false } };
-  }
+  const sp = await searchParams;
+  const category = await loadCategory(slug);
+  if (!category) return { title: { absolute: `Category not found | ${siteConfig.name}` }, robots: { index: false } };
+  const title = category.seoTitle ? (category.seoTitle.includes(siteConfig.name) ? category.seoTitle : `${category.seoTitle} | ${siteConfig.name}`) : `${category.name} | ${siteConfig.name}`;
+  const description = category.seoDescription || category.description || `Shop ${category.name} at ${siteConfig.name}.`;
+  const url = `/categories/${category.slug}`;
   return {
-    title: { absolute: `${category.seoTitle || category.name} | ${siteConfig.name}` },
-    description: category.seoDescription || category.description,
-    alternates: { canonical: `/categories/${category.slug}` },
+    title: { absolute: title },
+    description,
+    alternates: { canonical: url },
+    robots: Object.keys(sp).length ? { index: false, follow: true } : undefined,
+    openGraph: { title, description, url, type: 'website', images: category.image ? [{ url: category.image, alt: category.name }] : undefined },
+    twitter: { card: 'summary_large_image', title, description },
   };
 }
 
-export default async function CategoryDetailPage({ params }: Params) {
+export default async function CategoryDetailPage({ params, searchParams }: Props) {
   const { slug } = await params;
-  const category = getCategoryBySlug(slug);
-  if (!category) {
-    notFound();
-  }
+  const category = await loadCategory(slug);
+  if (!category) notFound();
 
-  const products = getProductsByCategory(category.id);
+  const { pricing, filters, result, ratings, categoryNames, popular } = await loadCatalogPage(await searchParams, category.slug);
+  const breadcrumbs = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}/` },
+      { '@type': 'ListItem', position: 2, name: 'Categories', item: `${SITE_URL}/categories` },
+      { '@type': 'ListItem', position: 3, name: category.name, item: `${SITE_URL}/categories/${category.slug}` },
+    ],
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-surface-bg">
       <Header />
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10">
-        <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-charcoal-subtle mb-6">
-          <Link href="/" className="hover:text-pista-dark">Home</Link>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(breadcrumbs) }} />
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-charcoal-subtle mb-5 flex-wrap">
+          <Link href="/" className="hover:text-pista-dark">
+            Home
+          </Link>
           <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
-          <Link href="/categories" className="hover:text-pista-dark">Categories</Link>
+          <Link href="/categories" className="hover:text-pista-dark">
+            Categories
+          </Link>
           <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
           <span className="text-charcoal-muted font-semibold">{category.name}</span>
         </nav>
 
-        <div className="bg-pista-lighter border border-pista-light rounded-2xl p-6 sm:p-8 mb-8">
-          <h1 className="text-3xl font-extrabold text-charcoal">{category.name}</h1>
-          <p className="text-sm text-charcoal-muted mt-2 max-w-3xl leading-relaxed">{category.description}</p>
+        <div className="bg-gradient-to-br from-pista-50 to-pista-100 border border-pista-light rounded-2xl p-5 sm:p-8 mb-6 sm:mb-8 flex items-center gap-4 sm:gap-6">
+          <CategoryIcon category={category} className="w-16 h-16 sm:w-24 sm:h-24 shrink-0" />
+          <div className="min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-charcoal">{category.name}</h1>
+            {category.description && <p className="text-sm text-charcoal-muted mt-1.5 max-w-3xl leading-relaxed">{category.description}</p>}
+          </div>
         </div>
 
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-base font-bold text-charcoal">
-            {products.length} product{products.length === 1 ? '' : 's'} available
-          </h2>
-          <Link href="/categories" className="text-sm font-semibold text-pista-darker hover:underline inline-flex items-center gap-1">
-            <ArrowLeft className="w-4 h-4" aria-hidden="true" />
-            All categories
-          </Link>
-        </div>
-
-        {products.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {products.map(p => (
-              <ProductCard key={p.id} product={p} />
-            ))}
-          </div>
-        ) : (
-          <div className="p-12 text-center bg-surface-card border border-charcoal-border rounded-2xl text-sm text-charcoal-subtle">
-            New products in this category are coming soon.
-          </div>
-        )}
+        <CatalogBrowser
+          key={pricing.currency}
+          initial={result}
+          initialFilters={filters}
+          pricing={pricing}
+          basePath={`/categories/${category.slug}`}
+          lockedCategory={category.slug}
+          ratings={ratings}
+          categoryNames={categoryNames}
+          popular={popular}
+        />
       </main>
       <Footer />
     </div>

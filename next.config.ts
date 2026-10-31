@@ -22,13 +22,9 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'res.cloudinary.com',
         port: '',
-        pathname: '/**',
+        pathname: '/qvjuu1ao/**',
       },
     ],
-  },
-  // The mock data store is read from disk at runtime; make sure it ships with every route.
-  outputFileTracingIncludes: {
-    '/**': ['./data/store.json'],
   },
   output: 'standalone',
   transpilePackages: ['motion'],
