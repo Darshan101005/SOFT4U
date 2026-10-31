@@ -1,6 +1,6 @@
 import { db } from '@/lib/db';
 import type { Category, LegalSlug, Order, Product, SiteSettings } from '@/lib/db/types';
-import { getUsdPkrRate } from '@/lib/fx';
+import { formatPayAmount, getUsdPkrRate, payAmountFor } from '@/lib/fx';
 import { formatMoney } from '@/lib/money';
 import { usdPriceFor } from '@/lib/pricing';
 import { siteConfig } from '@/lib/site-config';
@@ -318,9 +318,12 @@ const TOOLS: ToolDef[] = [
           name: m.name,
           account_title: m.accountTitle,
           account_number: m.accountNumber,
+          sort_code: m.sortCode || undefined,
           iban: m.iban || undefined,
           bank: m.bankName || undefined,
           currencies: m.currencies,
+          receives: m.payCurrency,
+          note: m.payCurrency === 'GBP' ? 'UK bank transfer: send the order total converted to GBP; the exact GBP amount is shown at checkout and on the order page.' : undefined,
         })),
         track_order_url: `${baseUrl()}/track-order`,
         contact_url: `${baseUrl()}/contact`,
@@ -385,6 +388,7 @@ const TOOLS: ToolDef[] = [
       if (!order || order.customerId !== ctx.userId) return { found: false };
       const unpaid = ['pending', 'rejected'].includes(order.orderStatus);
       const method = unpaid ? await db.getPaymentMethodByKey(order.paymentMethod) : null;
+      const send = method ? await payAmountFor(method, order) : null;
       return {
         found: true,
         order_id: order.orderNumber,
@@ -403,7 +407,15 @@ const TOOLS: ToolDef[] = [
         how_to_pay: method
           ? {
               amount_to_transfer: formatMoney(order.total, order.currency),
-              account: { name: method.name, account_title: method.accountTitle, account_number: method.accountNumber, iban: method.iban || undefined, bank: method.bankName || undefined },
+              amount_to_send: send ? formatPayAmount(send) : undefined,
+              account: {
+                name: method.name,
+                account_title: method.accountTitle,
+                account_number: method.accountNumber,
+                sort_code: method.sortCode || undefined,
+                iban: method.iban || undefined,
+                bank: method.bankName || undefined,
+              },
               then: 'Upload the payment screenshot and enter the transaction ID on the order page.',
             }
           : undefined,
@@ -643,7 +655,7 @@ async function fallbackReply(message: string, ctx: AssistantContext): Promise<st
   }
   if (aboutPaying || /\bpayment\b/.test(text)) {
     const methods = await db.getPaymentMethods(true).catch(() => []);
-    const list = methods.map(m => `- ${m.name}: ${m.accountTitle}, ${m.accountNumber}`).join('\n');
+    const list = methods.map(m => `- ${m.name}: ${m.accountTitle}, ${m.accountNumber}${m.sortCode ? `, sort code ${m.sortCode}` : ''}${m.payCurrency === 'GBP' ? ' (send the GBP amount shown at checkout)' : ''}`).join('\n');
     return `Payments are checked by hand:\n1. Place your order. The total is shown in your currency (PKR or USD).\n2. Transfer exactly that amount to one of these accounts:\n${list || '- shown at checkout'}\n3. Upload the payment screenshot and enter the transaction ID at checkout or on your order page.\n\nOur team approves it and delivers your access. Questions? ${contact}`;
   }
   if (/refund|replace|warranty|return/.test(text)) {

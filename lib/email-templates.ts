@@ -1,5 +1,5 @@
 import type { Currency, DeliveryField, Order, PaymentMethod } from '@/lib/db/types';
-import { formatMoney } from '@/lib/money';
+import { formatGbp, formatMoney } from '@/lib/money';
 import { siteConfig } from '@/lib/site-config';
 
 /**
@@ -246,15 +246,17 @@ ${p("If this wasn't you, reset your password straight away and contact us.", `fo
 /* Order emails                                                        */
 /* ------------------------------------------------------------------ */
 
-function paymentDetails(method: PaymentMethod | null, order: Order): string {
+function paymentDetails(method: PaymentMethod | null, order: Order, sendAmount?: number): string {
   if (!method) return '';
   const pairs: Array<[string, string]> = [['Method', esc(method.name)]];
   if (method.bankName) pairs.push(['Bank', esc(method.bankName)]);
   if (method.accountTitle) pairs.push(['Account title', esc(method.accountTitle)]);
   if (method.accountNumber) pairs.push(['Account number', `<span style="font-family:monospace;">${esc(method.accountNumber)}</span>`]);
+  if (method.sortCode) pairs.push(['Sort code', `<span style="font-family:monospace;">${esc(method.sortCode)}</span>`]);
   if (method.iban) pairs.push(['IBAN', `<span style="font-family:monospace;">${esc(method.iban)}</span>`]);
   if (method.branch) pairs.push(['Branch', esc(method.branch)]);
   pairs.push(['Amount to transfer', `<span style="color:${C.pistaDarker};">${esc(formatMoney(order.total, order.currency))}</span>`]);
+  if (sendAmount) pairs.push(['Amount to send', `<span style="color:${C.pistaDarker};">${esc(formatGbp(sendAmount))}</span>`]);
   return panel(
     `${label('Payment details')}<table role="presentation" cellpadding="0" cellspacing="0" width="100%">${rows(pairs)}</table>${
       method.instructions ? `<div style="height:8px;"></div>${p(esc(method.instructions), 'margin:0;font-size:13px;')}` : ''
@@ -263,13 +265,13 @@ function paymentDetails(method: PaymentMethod | null, order: Order): string {
   );
 }
 
-export function orderPlacedEmail(d: { order: Order; method: PaymentMethod | null }): EmailContent {
+export function orderPlacedEmail(d: { order: Order; method: PaymentMethod | null; sendAmount?: number }): EmailContent {
   const { order } = d;
   const subject = `Order ${order.orderNumber} received - complete your payment`;
   const body = `${heading('We received your order')}
 ${hello(order.customerName)}
 ${p('Transfer the exact total to the account below, then upload a screenshot of the payment and enter the transaction ID on your order page. We verify every payment and deliver as soon as it is approved.')}
-${paymentDetails(d.method, order)}
+${paymentDetails(d.method, order, d.sendAmount)}
 <div style="height:14px;"></div>
 ${orderSummary(order)}
 <div style="height:18px;"></div>
@@ -279,7 +281,7 @@ ${p('Keep your Order ID private. It is also your tracking ID.', `font-size:13px;
   return {
     subject,
     html: layout({ title: subject, preheader: `Transfer ${formatMoney(order.total, order.currency)} and upload your payment proof.`, body }),
-    text: `Hi ${order.customerName},\n\nWe received order ${order.orderNumber}. Total: ${formatMoney(order.total, order.currency)}.\nTransfer the exact total via ${d.method?.name || order.paymentMethodName || order.paymentMethod}, then upload a screenshot of the payment and the transaction ID: ${trackUrl(order)}${TEXT_FOOTER}`,
+    text: `Hi ${order.customerName},\n\nWe received order ${order.orderNumber}. Total: ${formatMoney(order.total, order.currency)}.${d.sendAmount ? ` Amount to send: ${formatGbp(d.sendAmount)}.` : ''}\nTransfer the exact total via ${d.method?.name || order.paymentMethodName || order.paymentMethod}, then upload a screenshot of the payment and the transaction ID: ${trackUrl(order)}${TEXT_FOOTER}`,
   };
 }
 

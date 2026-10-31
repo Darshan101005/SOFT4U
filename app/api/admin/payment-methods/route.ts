@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import type { Currency, PaymentMethod } from '@/lib/db/types';
+import type { Currency, PayCurrency, PaymentMethod } from '@/lib/db/types';
 import { requireAdmin } from '@/lib/admin-auth';
 import { errorResponse, readJson } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
 const TYPES: PaymentMethod['type'][] = ['bank', 'easypaisa', 'jazzcash', 'other'];
+const PAY_CURRENCIES: PayCurrency[] = ['PKR', 'USD', 'GBP'];
 
 function clean(b: Record<string, any>, creating: boolean): Omit<PaymentMethod, 'id' | 'createdAt' | 'updatedAt'> | string {
   const s = (v: unknown, max = 300) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
@@ -29,6 +30,8 @@ function clean(b: Record<string, any>, creating: boolean): Omit<PaymentMethod, '
     iban: s(b.iban, 60).toUpperCase().replace(/\s+/g, ''),
     bankName: s(b.bankName, 120),
     branch: s(b.branch, 200),
+    sortCode: s(b.sortCode, 20),
+    payCurrency: PAY_CURRENCIES.includes(b.payCurrency) ? b.payCurrency : 'PKR',
     instructions: s(b.instructions, 1000),
     logo: logo || undefined,
     currencies,

@@ -15,6 +15,7 @@ import {
 } from '@/lib/email-templates';
 import { notifyAdminsTelegram, notifyCustomerTelegram, sendDeliveryToTelegram, telegramEnabled, esc } from '@/lib/telegram';
 import { formatMoney } from '@/lib/money';
+import { payAmountFor } from '@/lib/fx';
 
 
 /**
@@ -70,7 +71,8 @@ async function adminAlertEmails(): Promise<string[]> {
 /** Customer "complete your payment" email + admin alert (email + Telegram). Call after db.createOrder. */
 export async function notifyOrderPlaced(order: Order): Promise<void> {
   const method = await db.getPaymentMethodByKey(order.paymentMethod);
-  queueEmail(order.customerEmail, orderPlacedEmail({ order, method }), 'order_placed');
+  const send = await payAmountFor(method, order);
+  queueEmail(order.customerEmail, orderPlacedEmail({ order, method, sendAmount: send?.amount }), 'order_placed');
   const admins = await adminAlertEmails();
   if (admins.length) queueEmail(admins, adminNewOrderEmail({ order, stage: 'placed' }), 'admin_new_order');
   await notifyAdminsTelegram(order, 'placed');
@@ -122,14 +124,16 @@ export async function submitPaymentProof(orderId: string, input: PaymentProofInp
   const images: Array<{ publicId: string; format: string }> = [];
   for (const shot of shots) images.push(await uploadPaymentProof(shot, order.orderNumber));
   const image = images[0];
+  // GBP account: lock the amount to send and the rate used (null for PKR / USD accounts).
+  const send = await payAmountFor(await db.getPaymentMethodByKey(methodKey), { total: order.total, currency: order.currency });
 
   try {
     await tx(async client => {
       const claim = await client.query(
         `UPDATE orders SET order_status = 'under_review', payment_status = 'submitted', status_reason = NULL, updated_at = now(),
-           timeline = timeline || $2::jsonb
+           timeline = timeline || $2::jsonb, pay_currency = $3, pay_amount = $4, pay_fx_rate = $5
          WHERE id = $1 AND order_status IN ('pending', 'rejected') RETURNING id`,
-        [order.id, event('Payment proof submitted', `Transaction ID ${txn}`)],
+        [order.id, event('Payment proof submitted', `Transaction ID ${txn}`), send?.currency ?? null, send?.amount ?? null, send?.rate ?? null],
       );
       if (!claim.rowCount) throw new OrderError('INVALID_STATE', 'This order can no longer accept a payment proof.', 409);
       await client.query(

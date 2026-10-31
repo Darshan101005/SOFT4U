@@ -107,17 +107,19 @@ async function main() {
       m.displayOrder,
       m.branch,
       m.logo ?? null,
+      m.sortCode,
+      m.payCurrency,
     ];
     const r = await pool.query(
-      `INSERT INTO payment_methods (id, key, name, type, description, account_title, account_number, iban, bank_name, instructions, currencies, enabled, display_order, branch, logo)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12,$13,$14,$15) ON CONFLICT (key) DO NOTHING`,
+      `INSERT INTO payment_methods (id, key, name, type, description, account_title, account_number, iban, bank_name, instructions, currencies, enabled, display_order, branch, logo, sort_code, pay_currency)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12,$13,$14,$15,$16,$17) ON CONFLICT (key) DO NOTHING`,
       values,
     );
     if (r.rowCount) bump('payment_methods');
     // Fill rows that were seeded earlier without account details (never overwrites admin edits).
     const filled = await pool.query(
       `UPDATE payment_methods SET name = $3, description = $5, account_title = $6, account_number = $7, iban = $8, bank_name = $9,
-         instructions = $10, currencies = $11::jsonb, enabled = $12, display_order = $13, branch = $14, logo = COALESCE(logo, $15), updated_at = now()
+         instructions = $10, currencies = $11::jsonb, enabled = $12, display_order = $13, branch = $14, logo = COALESCE(logo, $15), sort_code = $16, pay_currency = $17, updated_at = now()
        WHERE key = $2 AND account_number = '' AND $1::text IS NOT NULL AND $4::text IS NOT NULL`,
       values,
     );

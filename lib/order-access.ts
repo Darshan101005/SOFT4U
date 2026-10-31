@@ -2,6 +2,7 @@ import { db } from '@/lib/db';
 import type { Order, PaymentMethod, User } from '@/lib/db/types';
 import { getSessionUser } from '@/lib/session';
 import { formatMoney } from '@/lib/money';
+import { payAmountFor } from '@/lib/fx';
 
 /**
  * Who may see what on the customer side:
@@ -12,10 +13,15 @@ import { formatMoney } from '@/lib/money';
  * Internal fields (IP, user agent, admin note, FX rate, proof image ids) never leave the server.
  */
 
-export interface PublicOrder extends Omit<Order, 'ip' | 'userAgent' | 'adminNote' | 'approvedBy' | 'deliveredBy' | 'fxRate' | 'totalPkr'> {
+export interface PublicOrder extends Omit<Order, 'ip' | 'userAgent' | 'adminNote' | 'approvedBy' | 'deliveredBy' | 'fxRate' | 'totalPkr' | 'payFxRate'> {
   canSeeDelivery: boolean;
   requiresSignIn: boolean;
-  paymentDetails?: Pick<PaymentMethod, 'key' | 'name' | 'type' | 'accountTitle' | 'accountNumber' | 'iban' | 'bankName' | 'branch' | 'instructions' | 'logo'> | null;
+  paymentDetails?:
+    | (Pick<PaymentMethod, 'key' | 'name' | 'type' | 'accountTitle' | 'accountNumber' | 'iban' | 'bankName' | 'branch' | 'sortCode' | 'payCurrency' | 'instructions' | 'logo'> & {
+        /** Amount to send in the account currency (GBP accounts only). */
+        sendAmount?: number;
+      })
+    | null;
   /** 'Total: USD 10.00' or 'Total: PKR 2,499' (exactly what the customer pays). */
   totalLabel: string;
 }
@@ -32,8 +38,9 @@ export async function loadOrderForViewer(orderNumberOrId: string): Promise<{ ord
 }
 
 export async function toPublicOrder(order: Order, canSeeDelivery: boolean): Promise<PublicOrder> {
-  const { ip, userAgent, adminNote, approvedBy, deliveredBy, fxRate, totalPkr, ...rest } = order;
+  const { ip, userAgent, adminNote, approvedBy, deliveredBy, fxRate, totalPkr, payFxRate, ...rest } = order;
   void fxRate;
+  void payFxRate;
   void totalPkr;
   void ip;
   void userAgent;
@@ -44,6 +51,7 @@ export async function toPublicOrder(order: Order, canSeeDelivery: boolean): Prom
   if (['pending', 'rejected'].includes(order.orderStatus)) {
     const m = await db.getPaymentMethodByKey(order.paymentMethod);
     if (m) {
+      const send = canSeeDelivery ? await payAmountFor(m, order) : null;
       paymentDetails = {
         key: m.key,
         name: m.name,
@@ -53,8 +61,11 @@ export async function toPublicOrder(order: Order, canSeeDelivery: boolean): Prom
         iban: m.iban,
         bankName: m.bankName,
         branch: m.branch,
+        sortCode: m.sortCode,
+        payCurrency: m.payCurrency,
         instructions: m.instructions,
         logo: m.logo,
+        sendAmount: send?.amount,
       };
     }
   }

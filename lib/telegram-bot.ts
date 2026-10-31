@@ -2,7 +2,7 @@ import { db } from '@/lib/db';
 import type { Order } from '@/lib/db/types';
 import { verifyCredentials, verifyUserTotp } from '@/lib/auth';
 import { formatMoney } from '@/lib/money';
-import { getUsdPkrRate } from '@/lib/fx';
+import { formatPayAmount, getUsdPkrRate, payAmountFor } from '@/lib/fx';
 import { usdPriceFor } from '@/lib/pricing';
 import { clearAttempts, isLimited, recordAttempt } from '@/lib/rate-limit';
 import { siteConfig } from '@/lib/site-config';
@@ -171,8 +171,11 @@ async function showOrder(chatId: string, number: string) {
   if (['pending', 'rejected'].includes(order.orderStatus)) {
     const m = await db.getPaymentMethodByKey(order.paymentMethod);
     lines.push(`\n💳 <b>Amount to transfer: ${esc(formatMoney(order.total, order.currency))}</b>`);
+    const send = await payAmountFor(m, order);
+    if (send) lines.push(`<b>Amount to send: <code>${esc(formatPayAmount(send))}</code></b>`);
     if (m) {
       lines.push(`${esc(m.name)}`, `Account title: <code>${esc(m.accountTitle)}</code>`, `Account number: <code>${esc(m.accountNumber)}</code>`);
+      if (m.sortCode) lines.push(`Sort code: <code>${esc(m.sortCode)}</code>`);
       if (m.iban) lines.push(`IBAN: <code>${esc(m.iban)}</code>`);
     }
     lines.push('\nThen upload the payment screenshot and the transaction ID on the order page.');

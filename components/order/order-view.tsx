@@ -10,6 +10,7 @@ import { PaymentDetails, PaymentLogo } from '@/components/order/payment-details'
 import { DeliveryPanel } from '@/components/order/delivery-panel';
 import { EMPTY_PROOF, ProofFields, proofPayload, proofProblem, type ProofValue } from '@/components/order/proof-fields';
 import { formatPrice } from '@/app/_store/price';
+import { formatGbp } from '@/lib/money';
 
 export const STATUS_LABELS: Record<OrderStatus, string> = {
   pending: 'Awaiting payment',
@@ -250,7 +251,13 @@ export function OrderView({
             </h2>
             <PaymentLogo method={pd} className="h-6" />
           </div>
-          <PaymentDetails method={pd} amountLabel={formatPrice(order.total, order.currency)} amountValue={amountValue} />
+          <PaymentDetails
+            method={pd}
+            amountLabel={formatPrice(order.total, order.currency)}
+            amountValue={amountValue}
+            sendLabel={pd.sendAmount ? formatGbp(pd.sendAmount) : undefined}
+            sendValue={pd.sendAmount ? pd.sendAmount.toFixed(2) : undefined}
+          />
           {!canAct ? (
             <p className="text-sm text-charcoal-muted">
               <Link href={signInHref} className="font-bold text-pista-darker underline">

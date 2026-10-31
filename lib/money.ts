@@ -12,6 +12,16 @@ export function formatMoney(amount: number, currency: Currency = 'PKR'): string 
   return `PKR ${Math.round(n).toLocaleString('en-US')}`;
 }
 
+/** Order total converted to the account currency (GBP), rounded up to 2 decimals. */
+export function convertPayAmount(total: number, rate: number): number {
+  return Math.ceil(Math.round(total * rate * 1e6) / 1e4) / 100;
+}
+
+/** `GBP 7.90` */
+export function formatGbp(amount: number): string {
+  return `GBP ${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 export const CURRENCY_LABELS: Record<Currency, string> = { PKR: 'PKR', USD: 'USD' };
 /** @deprecated use CURRENCY_LABELS */
 export const CURRENCY_SYMBOLS = CURRENCY_LABELS;

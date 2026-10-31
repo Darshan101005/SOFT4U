@@ -4,7 +4,7 @@ import { db } from '@/lib/db';
 /**
  * GET ?currency=PKR|USD -> { methods } enabled payment accounts for checkout
  * (eSIM4U /api/bank-details equivalent; public because guest checkout exists).
- * Every account receives PKR; USD orders show the PKR equivalent to send.
+ * receiveCurrency is the currency the account receives (PKR, or GBP for the UK account).
  */
 export async function GET(req: NextRequest) {
   const currency = req.nextUrl.searchParams.get('currency') === 'USD' ? 'USD' : 'PKR';
@@ -20,9 +20,10 @@ export async function GET(req: NextRequest) {
       iban: m.iban,
       bankName: m.bankName,
       branch: m.branch,
+      sortCode: m.sortCode,
       instructions: m.instructions,
       logo: m.logo,
-      receiveCurrency: 'PKR' as const,
+      receiveCurrency: m.payCurrency,
     }));
   return NextResponse.json({ methods }, { headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' } });
 }

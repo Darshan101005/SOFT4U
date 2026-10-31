@@ -14,6 +14,9 @@ export interface PaymentAccount {
   iban: string;
   bankName: string;
   branch: string;
+  sortCode?: string;
+  /** Currency the account receives (GBP for UK bank accounts). */
+  payCurrency?: string;
   instructions: string;
   logo?: string;
 }
@@ -21,7 +24,20 @@ export interface PaymentAccount {
 const DEFAULT_INSTRUCTIONS = 'Transfer the exact total to the account above, then upload a screenshot of the payment and enter the transaction ID.';
 
 /** Amount to transfer + account details with copy buttons (checkout and the order page). */
-export function PaymentDetails({ method, amountLabel, amountValue }: { method: PaymentAccount; amountLabel: string; amountValue?: string }) {
+export function PaymentDetails({
+  method,
+  amountLabel,
+  amountValue,
+  sendLabel,
+  sendValue,
+}: {
+  method: PaymentAccount;
+  amountLabel: string;
+  amountValue?: string;
+  /** "GBP 7.90" when the account receives another currency than the order. */
+  sendLabel?: string;
+  sendValue?: string;
+}) {
   const isWallet = method.type === 'easypaisa' || method.type === 'jazzcash';
   return (
     <div className="rounded-2xl border border-charcoal-border bg-white p-4 space-y-4">
@@ -33,9 +49,20 @@ export function PaymentDetails({ method, amountLabel, amountValue }: { method: P
         {amountValue && <CopyButton value={amountValue} label="Copy amount" compact />}
       </div>
 
+      {sendLabel && (
+        <div className="rounded-xl border border-pista-light p-3 flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[11px] font-bold uppercase tracking-wide text-pista-darker">Amount to send</p>
+            <p className="text-lg sm:text-xl font-extrabold text-charcoal leading-tight whitespace-nowrap">{sendLabel}</p>
+          </div>
+          {sendValue && <CopyButton value={sendValue} label="Copy amount to send" compact />}
+        </div>
+      )}
+
       <div className="rounded-xl border border-surface-muted px-3">
         <CopyRow label="Account title" value={method.accountTitle} mono={false} />
         <CopyRow label={isWallet ? `${method.name} number` : 'Account number'} value={method.accountNumber} />
+        <CopyRow label="Sort code" value={method.sortCode || ''} />
         <CopyRow label="IBAN" value={method.iban} />
         {method.bankName && <CopyRow label="Bank" value={method.bankName} mono={false} />}
         {method.branch && <CopyRow label="Branch" value={method.branch} mono={false} />}

@@ -21,6 +21,7 @@ import type {
   Order,
   OrderItem,
   OrderTimelineEvent,
+  PayCurrency,
   PaymentMethod,
   PaymentProof,
   Product,
@@ -324,6 +325,9 @@ export function mapOrder(r: Row): Order {
     totalPkr: num(r.total_pkr),
     paymentMethod: r.payment_method || '',
     paymentMethodName: opt(r.payment_method_name),
+    payCurrency: opt(r.pay_currency) as PayCurrency | undefined,
+    payAmount: optNum(r.pay_amount),
+    payFxRate: optNum(r.pay_fx_rate),
     paymentStatus: r.payment_status,
     fulfillmentStatus: r.fulfillment_status,
     orderStatus: r.order_status,
@@ -530,6 +534,8 @@ export function mapPaymentMethod(r: Row): PaymentMethod {
     iban: r.iban || '',
     bankName: r.bank_name || '',
     branch: r.branch || '',
+    sortCode: r.sort_code || '',
+    payCurrency: (r.pay_currency || 'PKR') as PayCurrency,
     instructions: r.instructions || '',
     logo: opt(r.logo),
     currencies: arr<Currency>(r.currencies),
@@ -1822,8 +1828,8 @@ export const db = {
 
   createPaymentMethod: async (m: Omit<PaymentMethod, 'id' | 'createdAt' | 'updatedAt'>): Promise<PaymentMethod> => {
     const r = await queryOne(
-      `INSERT INTO payment_methods (id, key, name, type, description, account_title, account_number, iban, bank_name, instructions, logo, currencies, enabled, display_order, branch)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::jsonb,$13,$14,$15) RETURNING *`,
+      `INSERT INTO payment_methods (id, key, name, type, description, account_title, account_number, iban, bank_name, instructions, logo, currencies, enabled, display_order, branch, sort_code, pay_currency)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::jsonb,$13,$14,$15,$16,$17) RETURNING *`,
       [
         newId('pm'),
         m.key,
@@ -1840,6 +1846,8 @@ export const db = {
         Boolean(m.enabled),
         m.displayOrder ?? 0,
         m.branch || '',
+        m.sortCode || '',
+        m.payCurrency || 'PKR',
       ],
     );
     return mapPaymentMethod(r!);
@@ -1859,6 +1867,8 @@ export const db = {
         iban: 'iban',
         bankName: 'bank_name',
         branch: 'branch',
+        sortCode: 'sort_code',
+        payCurrency: 'pay_currency',
         instructions: 'instructions',
         logo: 'logo',
         currencies: 'currencies',

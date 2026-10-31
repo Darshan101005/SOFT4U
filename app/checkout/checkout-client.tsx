@@ -12,6 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { PaymentDetails, PaymentLogo, type PaymentAccount } from '@/components/order/payment-details';
 import { EMPTY_PROOF, ProofFields, proofPayload, proofProblem, type ProofValue } from '@/components/order/proof-fields';
 import { formatPrice } from '@/app/_store/price';
+import { convertPayAmount, formatGbp } from '@/lib/money';
 
 const PHONE_RE = /^\+?[0-9 ()-]{7,20}$/;
 const inputClass =
@@ -44,7 +45,8 @@ export function CheckoutClient({
   maintenance,
 }: {
   currency: Currency;
-  methods: PaymentAccount[];
+  /** payRate: account-currency units per 1 order-currency unit (only for GBP accounts). */
+  methods: Array<PaymentAccount & { payRate?: number }>;
   user: CheckoutUser;
   requireWhatsapp: boolean;
   requirePhone: boolean;
@@ -73,6 +75,7 @@ export function CheckoutClient({
   const total = quote?.total ?? 0;
   const totalLabel = quote ? formatPrice(total, currency) : '…';
   const amountValue = quote ? (currency === 'USD' ? total.toFixed(2) : String(Math.round(total))) : undefined;
+  const sendAmount = quote && method?.payRate ? convertPayAmount(total, method.payRate) : null;
 
   const place = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -275,7 +278,15 @@ export function CheckoutClient({
               </div>
             )}
 
-            {method && <PaymentDetails method={method} amountLabel={totalLabel} amountValue={amountValue} />}
+            {method && (
+              <PaymentDetails
+                method={method}
+                amountLabel={totalLabel}
+                amountValue={amountValue}
+                sendLabel={sendAmount !== null ? formatGbp(sendAmount) : undefined}
+                sendValue={sendAmount !== null ? sendAmount.toFixed(2) : undefined}
+              />
+            )}
           </section>
 
           {method && (

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { CreditCard, Pencil, Plus, Trash2 } from 'lucide-react';
-import type { Currency, PaymentMethod } from '@/lib/db/types';
+import type { Currency, PayCurrency, PaymentMethod } from '@/lib/db/types';
 import { Badge, Button, Card, Checkbox, CopyButton, EmptyState, Field, Input, Modal, PageHeader, Select, Textarea, Toggle, api, errMsg, toast, useDialog } from '../_components/ui';
 import { ImagePicker } from '../_components/image-picker';
 
@@ -18,6 +18,8 @@ const blank = (order: number): Form => ({
   iban: '',
   bankName: '',
   branch: '',
+  sortCode: '',
+  payCurrency: 'PKR',
   instructions: 'Transfer the exact total to the account above, then upload a screenshot of the payment and enter the transaction ID.',
   logo: '',
   currencies: ['PKR', 'USD'],
@@ -105,6 +107,7 @@ export function PaymentMethodsClient({ initialMethods }: { initialMethods: Payme
                     {m.currencies.map(c => (
                       <Badge key={c} tone="gray">{c} orders</Badge>
                     ))}
+                    <Badge tone="gray">Receives {m.payCurrency}</Badge>
                     {!m.enabled && <Badge tone="amber">Off</Badge>}
                   </div>
                 </div>
@@ -115,6 +118,7 @@ export function PaymentMethodsClient({ initialMethods }: { initialMethods: Payme
                   [
                     ['Account title', m.accountTitle],
                     ['Account number', m.accountNumber],
+                    ['Sort code', m.sortCode],
                     ['IBAN', m.iban],
                     ['Bank', m.bankName],
                     ['Branch', m.branch],
@@ -185,6 +189,11 @@ export function PaymentMethodsClient({ initialMethods }: { initialMethods: Payme
               <Field label="Account / mobile number" required>
                 <Input value={form.accountNumber} onChange={e => setForm({ ...form, accountNumber: e.target.value })} className="font-mono" />
               </Field>
+              {form.type === 'bank' && (
+                <Field label="Sort code" hint="UK bank accounts only, e.g. 04-00-03">
+                  <Input value={form.sortCode} onChange={e => setForm({ ...form, sortCode: e.target.value })} className="font-mono" />
+                </Field>
+              )}
               <Field label="IBAN">
                 <Input value={form.iban} onChange={e => setForm({ ...form, iban: e.target.value })} className="font-mono" />
               </Field>
@@ -209,6 +218,17 @@ export function PaymentMethodsClient({ initialMethods }: { initialMethods: Payme
                     <Checkbox checked={form.currencies.includes('PKR')} onChange={v => toggleCurrency('PKR', v)} label="PKR" />
                     <Checkbox checked={form.currencies.includes('USD')} onChange={v => toggleCurrency('USD', v)} label="USD" />
                   </div>
+                </Field>
+                <Field label="Account receives" hint="GBP shows customers the converted amount to send.">
+                  <Select
+                    value={form.payCurrency}
+                    onChange={v => setForm({ ...form, payCurrency: v as PayCurrency })}
+                    options={[
+                      { value: 'PKR', label: 'PKR' },
+                      { value: 'USD', label: 'USD' },
+                      { value: 'GBP', label: 'GBP' },
+                    ]}
+                  />
                 </Field>
                 <Field label="Display order">
                   <Input type="number" value={form.displayOrder} onChange={e => setForm({ ...form, displayOrder: e.target.value })} />

@@ -1,5 +1,8 @@
 import React from 'react';
 import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
+import { requestCountry } from '@/lib/currency-pref';
+import { needsPayConversion, payRateFor } from '@/lib/fx';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { db } from '@/lib/db';
@@ -18,9 +21,19 @@ export default async function CheckoutPage() {
   if (!user) redirect('/login?next=/checkout');
 
   const [pricing, settings, methods] = await Promise.all([getPricing(), getSettings(), safe(() => db.getPaymentMethods(true), [])]);
-  const available = methods
-    .filter(m => m.currencies.includes(pricing.currency))
-    .sort((a, b) => a.displayOrder - b.displayOrder)
+  const usable = methods.filter(m => m.currencies.includes(pricing.currency));
+  const ukMethods = usable.filter(m => m.payCurrency === 'GBP');
+  // UK visitors see the UK bank account first; everyone else sees it last.
+  const country = ukMethods.length ? await safe(async () => requestCountry(await headers()), null) : null;
+  const gbpFirst = country === 'GB';
+  const payRate = usable.some(m => needsPayConversion(m.payCurrency)) ? await safe(() => payRateFor(pricing.currency), 0) : 0;
+  const available = usable
+    .sort((a, b) => {
+      const ga = a.payCurrency === 'GBP' ? 1 : 0;
+      const gb = b.payCurrency === 'GBP' ? 1 : 0;
+      if (ga !== gb) return gbpFirst ? gb - ga : ga - gb;
+      return a.displayOrder - b.displayOrder;
+    })
     .map(m => ({
       key: m.key,
       name: m.name,
@@ -31,8 +44,11 @@ export default async function CheckoutPage() {
       iban: m.iban,
       bankName: m.bankName,
       branch: m.branch,
+      sortCode: m.sortCode,
+      payCurrency: m.payCurrency,
       instructions: m.instructions,
       logo: m.logo,
+      payRate: needsPayConversion(m.payCurrency) && payRate > 0 ? payRate : undefined,
     }));
 
   return (

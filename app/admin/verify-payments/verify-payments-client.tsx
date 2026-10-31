@@ -4,11 +4,14 @@ import React, { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { BadgeCheck, ExternalLink, Send, XCircle } from 'lucide-react';
 import type { Order } from '@/lib/db/types';
-import { formatMoney } from '@/lib/money';
+import { formatGbp, formatMoney } from '@/lib/money';
 import { Badge, Button, Card, CopyButton, EmptyState, LoadingBlock, Modal, OrderStatusBadge, PageHeader, SegmentChips, api, errMsg, toast, useDialog } from '../_components/ui';
 import { fmtDateTime, timeAgo } from '../_components/format';
 
 type Tab = 'under_review' | 'pending' | 'rejected';
+
+/** GBP amount locked on the order (UK bank account), else null. */
+const gbpOf = (o: Order): number | null => (o.payCurrency === 'GBP' && o.payAmount ? o.payAmount : null);
 
 export function VerifyPaymentsClient() {
   const [tab, setTab] = useState<Tab>('under_review');
@@ -55,7 +58,7 @@ export function VerifyPaymentsClient() {
   const approve = async (o: Order) => {
     const ok = await confirm({
       title: `Approve ${o.orderNumber}?`,
-      message: `Confirm that ${formatMoney(o.total, o.currency)} arrived in your ${o.paymentMethodName || o.paymentMethod} account.`,
+      message: `Confirm that ${gbpOf(o) ? formatGbp(gbpOf(o)!) : formatMoney(o.total, o.currency)} arrived in your ${o.paymentMethodName || o.paymentMethod} account.`,
       confirmLabel: 'Approve payment',
     });
     if (ok) await act(o, 'approve');
@@ -127,6 +130,12 @@ export function VerifyPaymentsClient() {
                         <div className="text-[11px] text-charcoal-subtle font-semibold uppercase">Amount to receive</div>
                         <div className="text-lg font-extrabold whitespace-nowrap">{formatMoney(o.total, o.currency)}</div>
                         <div className="text-xs text-charcoal-muted">{o.paymentMethodName || o.paymentMethod}</div>
+                        {o.payCurrency === 'GBP' && o.payAmount ? (
+                          <div className="text-xs mt-1">
+                            Amount to send: <strong className="whitespace-nowrap">{formatGbp(o.payAmount)}</strong>
+                            {o.payFxRate ? <div className="text-charcoal-subtle">Rate locked: 1 {o.currency} = {o.payFxRate} GBP</div> : null}
+                          </div>
+                        ) : null}
                       </div>
                       <div className="min-w-0">
                         <div className="text-[11px] text-charcoal-subtle font-semibold uppercase">Transaction ID</div>
@@ -141,8 +150,8 @@ export function VerifyPaymentsClient() {
                         {proof?.senderName && <div className="text-xs text-charcoal-muted">From {proof.senderName}{proof.senderAccount ? ` · ${proof.senderAccount}` : ''}</div>}
                         {proof?.amount !== undefined && proof?.amount !== null && proof && (
                           <div className="text-xs">
-                            Typed amount: <strong>{formatMoney(proof.amount, o.currency)}</strong>{' '}
-                            {Math.abs(proof.amount - o.total) > 0.009 && <Badge tone="rose">Does not match</Badge>}
+                            Typed amount: <strong>{gbpOf(o) ? formatGbp(proof.amount) : formatMoney(proof.amount, o.currency)}</strong>{' '}
+                            {Math.abs(proof.amount - (gbpOf(o) ?? o.total)) > 0.009 && <Badge tone="rose">Does not match</Badge>}
                           </div>
                         )}
                         {proof?.paymentDate && <div className="text-xs text-charcoal-muted">Paid on {proof.paymentDate}</div>}

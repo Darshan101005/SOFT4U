@@ -6,6 +6,9 @@ export type UserRole = 'ADMIN' | 'CUSTOMER';
 
 export type Currency = 'PKR' | 'USD';
 
+/** Currency a payment account receives (GBP for UK bank accounts). */
+export type PayCurrency = Currency | 'GBP';
+
 /** Public customer profile. Secrets (password hash, TOTP secret) never leave lib/auth. */
 export interface User {
   id: string;
@@ -262,6 +265,11 @@ export interface Order {
   /** payment_methods.key */
   paymentMethod: string;
   paymentMethodName?: string;
+  /** Set when the account currency differs from the order currency (GBP): locked when the proof is submitted. */
+  payCurrency?: PayCurrency;
+  payAmount?: number;
+  /** Units of payCurrency per 1 unit of the order currency. */
+  payFxRate?: number;
   paymentStatus: PaymentStatus;
   fulfillmentStatus: 'unfulfilled' | 'fulfilled' | 'partially_fulfilled';
   orderStatus: OrderStatus;
@@ -479,6 +487,10 @@ export interface PaymentMethod {
   iban: string;
   bankName: string;
   branch: string;
+  /** UK sort code, e.g. 04-00-03 (UK bank accounts only). */
+  sortCode: string;
+  /** Currency the account receives. PKR accounts take the order total as is. */
+  payCurrency: PayCurrency;
   instructions: string;
   /** Brand logo shown on the checkout radio card (admin-replaceable). */
   logo?: string;
