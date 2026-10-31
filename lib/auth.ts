@@ -1,10 +1,12 @@
 import bcrypt from 'bcryptjs';
+import { createHash, randomBytes } from 'crypto';
+import { cookies } from 'next/headers';
 import { getPool } from '@/lib/db/pool';
 import { db, mapUser } from '@/lib/db';
 import type { User } from '@/lib/db/types';
 import { newId } from '@/lib/ids';
 import { checkPassword, EMAIL_RE, normalizeEmail } from '@/lib/password-policy';
-import { consumeLinkToken, createOtp, getOtpStatus, hasActiveOtp, OTP_TTL_MINUTES, OtpError, otpErrorMessage, verifyOtp, type OtpPurpose } from '@/lib/otp';
+import { consumeLinkToken, createOtp, getOtpStatus, OTP_TTL_MINUTES, OtpError, otpErrorMessage, verifyOtp, type OtpPurpose } from '@/lib/otp';
 import { completePending2fa, createSession, destroyAllSessions } from '@/lib/session';
 import { clearAttempts, isLimited, recordAttempt } from '@/lib/rate-limit';
 import { generateTotpSecret, otpauthQrDataUrl, otpauthURL, verifyTotp } from '@/lib/totp';
@@ -121,12 +123,45 @@ export interface SignUpInput {
   confirmPassword: string;
 }
 
+/* ------------------------------------------------------------------ */
+/* Signup browser binding                                              */
+/* ------------------------------------------------------------------ */
+
+const SIGNUP_COOKIE = 's4u_signup';
+const SIGNUP_COOKIE_MAX_AGE = 24 * 60 * 60;
+
+const sha256 = (v: string) => createHash('sha256').update(v).digest('hex');
+
+/**
+ * Issues a fresh signup token for this browser and stores only its hash on the
+ * user. Each new signup (or password-proven login of an unverified account)
+ * replaces the token, so only the browser holding the latest one can verify.
+ */
+async function bindSignupToBrowser(userId: string): Promise<void> {
+  const token = randomBytes(32).toString('hex');
+  await getPool().query(`UPDATE users SET signup_token_hash = $2 WHERE id = $1`, [userId, sha256(token)]);
+  (await cookies()).set(SIGNUP_COOKIE, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: SIGNUP_COOKIE_MAX_AGE,
+  });
+}
+
+async function signupTokenMatches(storedHash: string | null | undefined): Promise<boolean> {
+  if (!storedHash) return false;
+  const token = (await cookies()).get(SIGNUP_COOKIE)?.value;
+  return Boolean(token) && sha256(token!) === storedHash;
+}
+
 /**
  * Creates an unverified account and emails a 6-digit code. Re-signing up with
- * an unverified email sends a new code. The name/password are replaced only
- * when no code from an earlier signup is still active, so nobody can swap the
- * password while the real owner is entering their code. (An abandoned signup
- * whose code expired can be taken over by a fresh signup.)
+ * an unverified email always replaces the name/password AND the browser
+ * binding, then sends a new code. The code goes only to the inbox owner, and it
+ * can only be redeemed in the browser that holds the latest signup token, so a
+ * stranger who signed up first with someone else's email can never end up
+ * owning that account with their password.
  */
 export async function signUp(input: SignUpInput, meta: RequestMeta): Promise<{ email: string; resendInSeconds: number }> {
   const name = (input.name || '').trim().replace(/\s+/g, ' ');
@@ -136,19 +171,21 @@ export async function signUp(input: SignUpInput, meta: RequestMeta): Promise<{ e
 
   const existing = await authRowByEmail(email);
   const hash = await hashPassword(input.password);
+  let userId: string;
   if (existing) {
     if (existing.email_verified_at) {
       throw new AuthError('EMAIL_TAKEN', 'An account with this email already exists. Sign in instead.', 409);
     }
-    if (!(await hasActiveOtp(email, 'signup'))) {
-      await getPool().query(`UPDATE users SET name = $2, password_hash = $3, updated_at = now() WHERE id = $1`, [existing.id, name, hash]);
-    }
+    userId = existing.id;
+    await getPool().query(`UPDATE users SET name = $2, password_hash = $3, updated_at = now() WHERE id = $1`, [userId, name, hash]);
   } else {
+    userId = newId('usr');
     await getPool().query(
       `INSERT INTO users (id, name, email, password_hash, signup_ip) VALUES ($1,$2,$3,$4,$5)`,
-      [newId('usr'), name, email, hash, meta.ip],
+      [userId, name, email, hash, meta.ip],
     );
   }
+  await bindSignupToBrowser(userId);
   const status = await getOtpStatus(email, 'signup');
   if (status.cooldownSeconds > 0) return { email, resendInSeconds: status.cooldownSeconds };
   const resendInSeconds = await sendCode(email, name, 'signup', false);
@@ -172,13 +209,25 @@ export async function verifySignup(emailInput: string, code: string, meta: Reque
   const row = await authRowByEmail(email);
   if (!row) throw new AuthError('NOT_FOUND', 'No account found for this email', 404);
   if (row.email_verified_at) throw new AuthError('ALREADY_VERIFIED', 'This email is already verified. Sign in instead.');
+  // Checked before the code so a wrong browser never burns the owner's attempts.
+  if (!(await signupTokenMatches((row as { signup_token_hash?: string | null }).signup_token_hash))) {
+    throw new AuthError(
+      'SIGNUP_SESSION_MISMATCH',
+      'This signup was started on another device or was restarted. Please sign up again on this device to get a new code.',
+      400,
+    );
+  }
   const result = await verifyOtp(email, 'signup', code);
   if (!result.ok) {
     throw new AuthError(`OTP_${result.reason.toUpperCase()}`, otpErrorMessage(result.reason, result.attemptsLeft), 400, {
       attemptsLeft: result.attemptsLeft,
     });
   }
-  await getPool().query(`UPDATE users SET email_verified_at = now(), last_login_at = now(), updated_at = now() WHERE id = $1`, [row.id]);
+  await getPool().query(
+    `UPDATE users SET email_verified_at = now(), signup_token_hash = NULL, last_login_at = now(), updated_at = now() WHERE id = $1`,
+    [row.id],
+  );
+  (await cookies()).delete(SIGNUP_COOKIE);
   await createSession(row.id, { ip: meta.ip, userAgent: meta.userAgent });
   queueEmail(email, welcomeEmail({ name: row.name }), 'welcome');
   return (await db.getUserById(row.id))!;
@@ -211,6 +260,8 @@ export async function login(emailInput: string, password: string, meta: RequestM
   await clearAttempts(key);
 
   if (!row.email_verified_at) {
+    // The password was just proven, so this browser may finish verification.
+    await bindSignupToBrowser(row.id);
     const status = await getOtpStatus(email, 'signup');
     let resendInSeconds = status.cooldownSeconds;
     if (resendInSeconds === 0 && status.remainingSends > 0) {
