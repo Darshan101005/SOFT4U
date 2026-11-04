@@ -336,40 +336,57 @@ export function HeaderClient({
       </header>
 
       {searchOpen && (
-        <div className="fixed inset-0 z-50 bg-charcoal/30 backdrop-blur-sm flex items-start justify-center pt-4 sm:pt-24 px-3 sm:px-4" onClick={closeSearch}>
+        <div className="fixed inset-0 z-50 bg-charcoal/40 backdrop-blur-md flex items-start justify-center pt-4 sm:pt-24 px-3 sm:px-4" onClick={closeSearch}>
           <div
             role="dialog"
             aria-modal="true"
             aria-label="Search products"
-            className="w-full max-w-2xl bg-white border border-charcoal-border rounded-2xl shadow-xl overflow-hidden animate-rise"
+            className="w-full max-w-2xl bg-white rounded-[28px] shadow-2xl ring-1 ring-charcoal/5 overflow-hidden animate-rise"
             onClick={e => e.stopPropagation()}
           >
-            <form action="/shop" method="get" className="p-3 sm:p-4 border-b border-charcoal-border flex items-center gap-2 sm:gap-3">
-              <Search className="w-5 h-5 text-charcoal-subtle shrink-0" aria-hidden="true" />
+            <form action="/shop" method="get" className="p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
               <label htmlFor="site-search" className="sr-only">
                 Search products
               </label>
-              <input
-                id="site-search"
-                name="q"
-                type="search"
-                autoFocus
-                autoComplete="off"
-                value={searchQuery}
-                onChange={e => {
-                  setSearchQuery(e.target.value);
-                  if (!e.target.value.trim()) setResults([]);
-                }}
-                placeholder="Search Netflix, Canva, NordVPN..."
-                className="flex-1 min-w-0 min-h-11 text-base bg-transparent outline-none text-charcoal placeholder:text-charcoal-subtle"
-              />
-              {searching && <Loader2 className="w-4 h-4 text-pista-dark animate-spin shrink-0" aria-hidden="true" />}
+              <div className="focus-ring-wrapper group flex-1 min-w-0 flex items-center gap-3 h-12 sm:h-14 pl-4 sm:pl-5 pr-2 rounded-full bg-surface-bg border border-charcoal-border transition-all focus-within:bg-white focus-within:border-pista-dark focus-within:shadow-[0_0_0_4px_rgba(79,122,51,0.15)]">
+                <Search className="w-5 h-5 text-charcoal-subtle group-focus-within:text-pista-darker shrink-0 transition-colors" aria-hidden="true" />
+                <input
+                  id="site-search"
+                  name="q"
+                  type="search"
+                  autoFocus
+                  autoComplete="off"
+                  value={searchQuery}
+                  onChange={e => {
+                    setSearchQuery(e.target.value);
+                    if (!e.target.value.trim()) setResults([]);
+                  }}
+                  placeholder="Search Netflix, Canva, NordVPN..."
+                  className="flex-1 min-w-0 h-full text-base bg-transparent border-0 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 text-charcoal placeholder:text-charcoal-subtle [&::-webkit-search-cancel-button]:appearance-none"
+                />
+                {searching && <Loader2 className="w-4 h-4 text-pista-dark animate-spin shrink-0" aria-hidden="true" />}
+                {searchQuery && !searching && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery('');
+                      setResults([]);
+                      document.getElementById('site-search')?.focus();
+                    }}
+                    aria-label="Clear search"
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-charcoal-subtle hover:bg-charcoal/5 hover:text-charcoal shrink-0"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
               <button
                 type="button"
                 onClick={closeSearch}
-                className="inline-flex items-center justify-center min-h-11 px-3 text-xs font-semibold bg-pista-lighter text-charcoal-muted rounded-lg hover:bg-pista-100"
+                aria-label="Close search"
+                className="flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-surface-bg text-charcoal-muted hover:bg-pista-100 hover:text-charcoal transition-colors shrink-0"
               >
-                Close
+                <X className="w-5 h-5" />
               </button>
             </form>
 

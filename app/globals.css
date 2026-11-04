@@ -129,6 +129,12 @@ body {
   outline-offset: 2px;
 }
 
+/* Inputs inside a pill wrapper show the wrapper's glow instead of a square outline. */
+.focus-ring-wrapper input:focus,
+.focus-ring-wrapper input:focus-visible {
+  outline: none;
+}
+
 /* Hide native disclosure marker on FAQ <details> */
 summary::-webkit-details-marker {
   display: none;
