@@ -1,0 +1,1 @@
+export const ANNOUNCEMENT_COOKIE = 's4u_ann_closed';

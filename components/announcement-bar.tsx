@@ -1,62 +1,57 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { Sparkles, ArrowRight, X } from 'lucide-react';
-import { Announcement } from '@/lib/db/types';
+import { ANNOUNCEMENT_COOKIE } from '@/lib/announcement';
 
-export function AnnouncementBar() {
-  const [announcement, setAnnouncement] = useState<Announcement | null>(null);
-  const [dismissed, setDismissed] = useState(false);
+export type AnnouncementBarData = {
+  /** Stable key for this announcement version (id + text), used for dismissal. */
+  key: string;
+  text: string;
+  link?: string;
+  ctaText?: string;
+};
 
-  useEffect(() => {
-    fetch('/api/announcements')
-      .then(res => res.json())
-      .then(data => {
-        if (data.announcements && data.announcements.length > 0) {
-          setAnnouncement(data.announcements[0]);
-        }
-      })
-      .catch(() => {
-        // Fallback default
-        setAnnouncement({
-          id: 'ann_01',
-          text: 'SPRING SALE: Use code SOFT20 for 20% OFF all AI & Streaming subscriptions',
-          link: '/shop',
-          ctaText: 'Claim Discount',
-          priority: 1,
-          enabled: true,
-          createdAt: ''
-        });
-      });
-  }, []);
+/**
+ * Thin promo bar above the storefront header. Rendered by <Header /> only, so it
+ * never appears in the admin panel. Closing it hides it until the browser is closed,
+ * or until the admin publishes a different announcement.
+ */
+export function AnnouncementBar({ announcement }: { announcement: AnnouncementBarData }) {
+  const [closed, setClosed] = useState(false);
+  if (closed) return null;
 
-  if (!announcement || !announcement.enabled || dismissed) {
-    return null;
-  }
+  const close = () => {
+    setClosed(true);
+    document.cookie = `${ANNOUNCEMENT_COOKIE}=${encodeURIComponent(announcement.key)}; path=/; SameSite=Lax`;
+  };
+
+  const external = announcement.link ? /^https?:\/\//i.test(announcement.link) : false;
 
   return (
-    <div className="bg-pista-light text-charcoal text-xs py-2 px-4 border-b border-pista-300 transition-all">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-        <div className="flex-1 text-center flex items-center justify-center gap-2">
-          <span className="text-pista-darker font-semibold flex items-center gap-1">
-            <Sparkles className="w-3.5 h-3.5" />
-          </span>
-          <span className="font-normal text-charcoal">{announcement.text}</span>
+    <div role="region" aria-label="Announcement" className="bg-pista-light text-charcoal text-xs sm:text-sm border-b border-pista-300">
+      <div className="max-w-7xl mx-auto flex items-center gap-2 px-3 sm:px-6 py-2">
+        <div className="flex-1 min-w-0 flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-center">
+          <Sparkles className="w-3.5 h-3.5 shrink-0 text-pista-darker" aria-hidden="true" />
+          <span className="font-medium">{announcement.text}</span>
           {announcement.link && (
             <Link
               href={announcement.link}
-              className="text-pista-darker hover:underline font-semibold inline-flex items-center gap-1 ml-1"
+              target={external ? '_blank' : undefined}
+              rel={external ? 'noopener noreferrer' : undefined}
+              className="inline-flex items-center gap-1 font-semibold text-pista-darker hover:underline"
             >
-              {announcement.ctaText || 'Shop Now'}
-              <ArrowRight className="w-3 h-3" />
+              {announcement.ctaText || 'Shop now'}
+              <ArrowRight className="w-3 h-3" aria-hidden="true" />
             </Link>
           )}
         </div>
         <button
-          onClick={() => setDismissed(true)}
-          className="text-charcoal-subtle hover:text-charcoal p-1 transition-colors"
-          aria-label="Dismiss announcement"
+          type="button"
+          onClick={close}
+          className="shrink-0 p-1 rounded text-charcoal-subtle hover:text-charcoal hover:bg-pista-200/60 transition-colors"
+          aria-label="Close announcement"
         >
           <X className="w-3.5 h-3.5" />
         </button>

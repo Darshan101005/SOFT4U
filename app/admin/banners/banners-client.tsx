@@ -9,6 +9,7 @@ import { fmtDate } from '../_components/format';
 
 const POSITIONS = [
   { value: 'home', label: 'Homepage' },
+  { value: 'all', label: 'Every page' },
   { value: 'shop', label: 'Shop page' },
   { value: 'category', label: 'Category pages' },
 ];
@@ -18,7 +19,7 @@ export function BannersClient({ initialItems }: { initialItems: Banner[] }) {
     <CrudList
       resource="banners"
       title="Banners"
-      description="Promotional banners with an optional button. Set dates to run a campaign; outside its dates a banner is hidden automatically."
+      description="Popup shown to visitors shortly after a page opens; they can close it. The first switched-on banner for the page (inside its dates) is shown, once per browser session. Set dates to run a campaign."
       noun="Banner"
       icon={ImageIcon}
       initialItems={initialItems as never}
@@ -49,8 +50,8 @@ export function BannersClient({ initialItems }: { initialItems: Banner[] }) {
         { key: 'position', label: 'Where', type: 'select', options: POSITIONS, default: 'home' },
         { key: 'startDate', label: 'Starts', type: 'date' },
         { key: 'endDate', label: 'Ends', type: 'date' },
-        { key: 'image', label: 'Banner image (desktop)', type: 'banner-image', required: true, hint: 'Wide image, about 1600×500. PNG, JPG, WebP or SVG up to 5 MB.' },
-        { key: 'mobileImage', label: 'Mobile image (optional)', type: 'banner-image', hint: 'Taller image for phones, about 800×800.' },
+        { key: 'image', label: 'Popup image (desktop)', type: 'banner-image', required: true, hint: 'Shown in the popup, about 1000×700 (landscape or square). PNG, JPG, WebP or SVG up to 5 MB.' },
+        { key: 'mobileImage', label: 'Mobile image (optional)', type: 'banner-image', hint: 'Used on phones instead, about 800×800.' },
       ]}
     />
   );
